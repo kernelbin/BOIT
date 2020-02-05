@@ -13,5 +13,43 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="CoolQ Lib">
+      <UniqueIdentifier>{b0e9c004-b23e-4e33-b8f5-145fed7a9f9e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DllMain.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CoolQ_API_Entry.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AppLifeRoutine.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CQLog.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.json">
+      <Filter>CoolQ Lib</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="CQP.lib">
+      <Filter>CoolQ Lib</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CoolQ_State.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoolQDef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

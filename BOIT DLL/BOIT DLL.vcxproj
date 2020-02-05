@@ -143,6 +143,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppLifeRoutine.c" />
+    <ClCompile Include="CoolQ_API_Entry.c" />
+    <ClCompile Include="CQLog.c" />
+    <ClCompile Include="DllMain.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="CQP.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CoolQDef.h" />
+    <ClInclude Include="CoolQ_State.h" />
+    <ClInclude Include="Global.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
