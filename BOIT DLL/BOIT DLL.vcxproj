@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="AppLifeRoutine.c" />
     <ClCompile Include="CoolQ_API_Entry.c" />
+    <ClCompile Include="CQAPITransfer.c" />
     <ClCompile Include="CQLog.c" />
     <ClCompile Include="DllMain.c" />
   </ItemGroup>
@@ -157,6 +158,7 @@
   <ItemGroup>
     <ClInclude Include="CoolQDef.h" />
     <ClInclude Include="CoolQ_State.h" />
+    <ClInclude Include="CQAPITransfer.h" />
     <ClInclude Include="Global.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

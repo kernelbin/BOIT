@@ -3,7 +3,7 @@
 #define CQAPIVER 9
 #define CQAPIVERTEXT "9"
 
-#define CQAPPID "com.kernelbin.awesomedorm" 
+#define CQAPPID "com.kernelbin.boit" 
 #define CQAPPINFO CQAPIVERTEXT "," CQAPPID
 
 #ifndef CQAPI

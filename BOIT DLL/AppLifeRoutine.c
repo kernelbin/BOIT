@@ -1,25 +1,25 @@
-#include<Windows.h>
+ï»¿#include<Windows.h>
 #include"Global.h"
+#include"CQAPITransfer.h"
 
+//ç”Ÿå‘½å‘¨æœŸ
 
-//ÉúÃüÖÜÆÚ
-
-int AppInitialize()//³õÊ¼»¯Ê±»á±»Ö´ĞĞ
+int AppInitialize()//åˆå§‹åŒ–æ—¶ä¼šè¢«æ‰§è¡Œ
 {
 	return 0;
 }
 
-int AppFinialize()//½áÊøÊ±»á±»Ö´ĞĞ
+int AppFinialize()//ç»“æŸæ—¶ä¼šè¢«æ‰§è¡Œ
 {
 	return 0;
 }
 
-int AppEnabled()//ÆôÓÃÊ±Ö´ĞĞ£¨Èç¹û³õÊ¼»¯Ê±ÊÇÆôÓÃµÄ£¬»áÔÚAppInitializeºóÖ´ĞĞÒ»´Î£©
+int AppEnabled()//å¯ç”¨æ—¶æ‰§è¡Œï¼ˆå¦‚æœåˆå§‹åŒ–æ—¶æ˜¯å¯ç”¨çš„ï¼Œä¼šåœ¨AppInitializeåæ‰§è¡Œä¸€æ¬¡ï¼‰
 {
 	return 0;
 }
 
-int AppDisabled()//½ûÓÃÊ±Ö´ĞĞ£¨Èç¹û½áÊøÊ±ÊÇÆôÓÃµÄ£¬»áÔÚAppFinializeÇ°Ö´ĞĞÒ»´Î£¬ÕâµãºÍcqÔ­Éúº¯Êı²»Ò»Ñù£©
+int AppDisabled()//ç¦ç”¨æ—¶æ‰§è¡Œï¼ˆå¦‚æœç»“æŸæ—¶æ˜¯å¯ç”¨çš„ï¼Œä¼šåœ¨AppFinializeå‰æ‰§è¡Œä¸€æ¬¡ï¼Œè¿™ç‚¹å’ŒcqåŸç”Ÿå‡½æ•°ä¸ä¸€æ ·ï¼‰
 {
 	return 0;
 }
@@ -34,5 +34,9 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 
 int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fromQQ, const char * fromAnonymous, const char * msg, int font)
 {
+	if (msg[0] == '#')
+	{
+		SendGroupMessage(fromGroup, "æ­£åœ¨æ–½å·¥ä¸­ğŸ”¨\nGithubåœ°å€:https://github.com/kernelbin/BOIT \nå¿«æ¥starï¼\næœ‰ä»€ä¹ˆå¥½çš„ideaä¹Ÿæ¬¢è¿æ¥æissueï¼qwqæˆ‘ä¼šè®¤çœŸçœ‹çš„");
+	}
 	return 0;
 }
