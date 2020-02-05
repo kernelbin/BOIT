@@ -7,7 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BOIT DLL", "BOIT DLL\BOIT D
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BOIT Server", "BOIT Server\BOIT Server.vcxproj", "{E971129E-1CA0-4C70-8208-304B32243F91}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BOIT Shared", "BOIT Shared\BOIT Shared.vcxitems", "{B17851FB-4678-46A9-AFBB-26EBA1A293CF}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		BOIT Shared\BOIT Shared.vcxitems*{b17851fb-4678-46a9-afbb-26eba1a293cf}*SharedItemsImports = 9
+		BOIT Shared\BOIT Shared.vcxitems*{cce394d1-964d-4b5f-beb2-7bb1f016b268}*SharedItemsImports = 4
+		BOIT Shared\BOIT Shared.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86

@@ -23,7 +23,7 @@
     <ProjectGuid>{CCE394D1-964D-4B5F-BEB2-7BB1F016B268}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>BOITDLL</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -56,6 +56,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\BOIT Shared\BOIT Shared.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -148,6 +149,7 @@
     <ClCompile Include="CQAPITransfer.c" />
     <ClCompile Include="CQLog.c" />
     <ClCompile Include="DllMain.c" />
+    <ClCompile Include="EventDispatch.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.json" />
@@ -159,6 +161,7 @@
     <ClInclude Include="CoolQDef.h" />
     <ClInclude Include="CoolQ_State.h" />
     <ClInclude Include="CQAPITransfer.h" />
+    <ClInclude Include="EventDispatch.h" />
     <ClInclude Include="Global.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

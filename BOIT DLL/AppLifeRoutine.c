@@ -1,16 +1,19 @@
 ﻿#include<Windows.h>
 #include"Global.h"
 #include"CQAPITransfer.h"
+#include"EventDispatch.h"
 
 //生命周期
 
 int AppInitialize()//初始化时会被执行
 {
+	InitializeEventDispatch();
 	return 0;
 }
 
 int AppFinialize()//结束时会被执行
 {
+	FinalizeEventDispatch();
 	return 0;
 }
 
@@ -36,7 +39,7 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 {
 	if (msg[0] == '#')
 	{
-		SendGroupMessage(fromGroup, "正在施工中🔨\nGithub地址:https://github.com/kernelbin/BOIT \n快来star！\n有什么好的idea也欢迎来提issue！qwq我会认真看的");
+		SendGroupMessage(fromGroup, "正在施工中\nGithub地址:https://github.com/kernelbin/BOIT \n快来star！\n有什么好的idea也欢迎来提issue！qwq我会认真看的");
 	}
 	return 0;
 }

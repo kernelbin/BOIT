@@ -33,6 +33,9 @@
     <ClCompile Include="CQAPITransfer.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="EventDispatch.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.json">
@@ -55,6 +58,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CQAPITransfer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="EventDispatch.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
