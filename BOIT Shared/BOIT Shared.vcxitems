@@ -16,6 +16,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)EstablishConn.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ObjectName.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SharedMemStruct.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EstablishConn.c" />

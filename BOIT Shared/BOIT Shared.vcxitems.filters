@@ -12,6 +12,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)EstablishConn.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SharedMemStruct.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EstablishConn.c">

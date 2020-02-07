@@ -17,6 +17,7 @@ int InitializeEventDispatch()
 	InitializeSRWLock(&SendLock);
 	InitializeSRWLock(&RecvLock);
 
+	InitEstablishConn();
 	_beginthreadex(0, 0, WaitForConnThread, 0, 0, 0);
 	return 0;
 }
@@ -28,7 +29,6 @@ int FinalizeEventDispatch()
 }
 
 unsigned __stdcall WaitForConnThread(void *Args)
-
 {
 	TryEstablishConn();
 	return 0;
