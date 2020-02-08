@@ -30,9 +30,9 @@ int AppDisabled();
 
 //访问接收发送信息内存映射文件等的锁
 
-SRWLOCK SendLock;
 SRWLOCK RecvLock;
 
+unsigned __stdcall WaitForConnThread(void* Args);
 
 
 int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* msg, int font);

@@ -1,7 +1,6 @@
 ﻿#include<Windows.h>
 #include"Global.h"
 #include"CQAPITransfer.h"
-#include"EventDispatch.h"
 #include"EstablishConn.h"
 #include"BOITEventType.h"
 
@@ -9,13 +8,16 @@
 
 int AppInitialize()//初始化时会被执行
 {
-	InitializeEventDispatch();
+	//InitializeEventDispatch();
+	InitializeSRWLock(&RecvLock);
+
+	_beginthreadex(0, 0, WaitForConnThread, 0, 0, 0);
 	return 0;
 }
 
 int AppFinialize()//结束时会被执行
 {
-	FinalizeEventDispatch();
+	CleanConn();
 	return 0;
 }
 
@@ -48,6 +50,8 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 		MultiByteToWideChar(CP_ACP, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen + 1] = 0;
+
+		pSharedMemRecv->u.PrivateMsg.QQID = fromQQ;
 
 		SetEvent(hEventRecvStart);//等待对方读取
 

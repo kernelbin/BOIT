@@ -18,5 +18,22 @@
     <ClCompile Include="ServerMain.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ServerState.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RecvEventHandler.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SendEventDispatch.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RecvEventHandler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

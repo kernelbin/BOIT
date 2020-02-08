@@ -145,7 +145,7 @@ int TryReConn()
 BOOL CleanConn()
 {
 	AcquireSRWLockExclusive(&ConnStateLock);
-	ConnState = 1;
+	ConnState = 0;
 	ReleaseSRWLockExclusive(&ConnStateLock);
 
 	SetEvent(hEventDeconn);

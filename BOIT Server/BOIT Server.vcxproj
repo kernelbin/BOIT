@@ -139,7 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="RecvEventHandler.c" />
+    <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
+    <ClCompile Include="ServerState.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RecvEventHandler.h" />
+    <ClInclude Include="Global.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

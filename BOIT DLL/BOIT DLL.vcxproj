@@ -144,12 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\BOIT Server\WaitForConnThread.c" />
     <ClCompile Include="AppLifeRoutine.c" />
     <ClCompile Include="CoolQ_API_Entry.c" />
     <ClCompile Include="CQAPITransfer.c" />
     <ClCompile Include="CQLog.c" />
     <ClCompile Include="DllMain.c" />
-    <ClCompile Include="EventDispatch.c" />
+    <ClCompile Include="SendEventHandler.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.json" />
@@ -161,7 +162,6 @@
     <ClInclude Include="CoolQDef.h" />
     <ClInclude Include="CoolQ_State.h" />
     <ClInclude Include="CQAPITransfer.h" />
-    <ClInclude Include="EventDispatch.h" />
     <ClInclude Include="Global.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

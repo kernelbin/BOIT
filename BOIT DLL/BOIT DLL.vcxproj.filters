@@ -33,7 +33,10 @@
     <ClCompile Include="CQAPITransfer.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EventDispatch.c">
+    <ClCompile Include="..\BOIT Server\WaitForConnThread.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SendEventHandler.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -58,9 +61,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CQAPITransfer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="EventDispatch.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
