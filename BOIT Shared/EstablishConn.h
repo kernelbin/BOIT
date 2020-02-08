@@ -1,8 +1,10 @@
+#pragma once
 #include<Windows.h>
 #include"SharedMemStruct.h"
 
 
 HANDLE hEventConnect;
+HANDLE hEventDeconn;
 
 HANDLE hEventRecvStart;//开始接收 消息/事件 。
 HANDLE hEventRecvEnd;//接收 消息/事件 结束。
@@ -21,9 +23,13 @@ pEVENT_RECV pSharedMemRecv;
 pEVENT_SEND pSharedMemSend;
 
 SRWLOCK ConnStateLock;
-BOOL ConnState;
+BOOL ConnState; //0表示没连接，1表示连接
 
 
 int InitEstablishConn();
 int TryEstablishConn();
 int GetConnState();
+BOOL CleanConn();
+BOOL InitConnVar();
+
+BOOL ConnWaitForObject(HANDLE hObject);

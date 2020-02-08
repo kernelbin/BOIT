@@ -43,6 +43,9 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 		hEventConnect = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_CONNECT));
 		JUDGE_OBJ(hEventConnect, iRet);
 
+		hEventDeconn = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_DECONN));
+		JUDGE_OBJ(hEventDeconn, iRet);
+
 		hEventRecvStart = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_RECVSTART));
 		JUDGE_OBJ(hEventRecvStart, iRet);
 
@@ -55,18 +58,20 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 		hEventSendEnd = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_SENDEND));
 		JUDGE_OBJ(hEventSendEnd, iRet);
 
-		hSharedMemProcess = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(SHARED_PROCESS_INFO), GET_OBJ_NAME(SHAREDMEM_RECV));
+		hSharedMemProcess = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(SHARED_PROCESS_INFO), GET_OBJ_NAME(SHAREDMEM_PROCESS_INFO));
 		JUDGE_OBJ(hSharedMemProcess, iRet);
 		pSharedMemProcess = MapViewOfFile(hSharedMemProcess, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SHARED_PROCESS_INFO));
+		if (!pSharedMemProcess) iRet = -1;
 
 		hSharedMemRecv = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(EVENT_RECV), GET_OBJ_NAME(SHAREDMEM_RECV));
 		JUDGE_OBJ(hSharedMemRecv, iRet);
 		pSharedMemRecv = MapViewOfFile(hSharedMemRecv, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(EVENT_RECV));
+		if (!pSharedMemRecv) iRet = -1;
 
-		hSharedMemSend = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(EVENT_SEND), GET_OBJ_NAME(SHAREDMEM_RECV));
+		hSharedMemSend = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(EVENT_SEND), GET_OBJ_NAME(SHAREDMEM_SEND));
 		JUDGE_OBJ(hSharedMemSend, iRet);
 		pSharedMemSend = MapViewOfFile(hSharedMemSend, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(EVENT_SEND));
-
+		if (!pSharedMemSend) iRet = -1;
 	}
 	__finally
 	{
@@ -95,6 +100,10 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 		
 	}
 	
+	if (iRet == -1)
+	{
+		return iRet;
+	}
 	if (pSharedMemProcess->pid[0] == GetCurrentProcessId())
 	{
 		hOtherSideProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pSharedMemProcess->pid[1]);
@@ -124,7 +133,6 @@ int TryReConn()
 	{
 		hOtherSideProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, pSharedMemProcess->pid[0]);
 	}
-	_beginthreadex(0, 0, ProcessWatchThread, 0, 0, 0);
 
 	AcquireSRWLockExclusive(&ConnStateLock);
 	ConnState = 1;
@@ -136,8 +144,16 @@ int TryReConn()
 
 BOOL CleanConn()
 {
+	AcquireSRWLockExclusive(&ConnStateLock);
+	ConnState = 1;
+	ReleaseSRWLockExclusive(&ConnStateLock);
+
+	SetEvent(hEventDeconn);
+
 	CloseHandleIf(hEventConnect);
 	
+	CloseHandleIf(hEventDeconn);
+
 	CloseHandleIf(hEventRecvStart);
 
 	CloseHandleIf(hEventRecvEnd);
@@ -199,8 +215,10 @@ unsigned __stdcall ProcessWatchThread(void* Args)
 	//¼àÊÓ¶Ô·½ËÀÍö
 	while (1)
 	{
-		WaitForSingleObject(hOtherSideProcess, INFINITE);
+		HANDLE WaitHandleList[2] = { hOtherSideProcess,hEventDeconn };
+		WaitForMultipleObjects(2, WaitHandleList, 0, INFINITE);
 		//²Á³ýÐÅÏ¢
+		
 		if (pSharedMemProcess->pid[0] == GetCurrentProcessId())
 		{
 			pSharedMemProcess->pid[1] = 0;
@@ -209,7 +227,8 @@ unsigned __stdcall ProcessWatchThread(void* Args)
 		{
 			pSharedMemProcess->pid[0] = 0;
 		}
-		hOtherSideProcess = 0;
+
+		CloseHandleIf(hOtherSideProcess);
 
 		AcquireSRWLockExclusive(&ConnStateLock);
 		ConnState = 0;
@@ -228,4 +247,22 @@ int GetConnState()
 	bRet = ConnState;
 	ReleaseSRWLockExclusive(&ConnStateLock);
 	return bRet;
+}
+
+
+
+BOOL ConnWaitForObject(HANDLE hObject)
+{
+	HANDLE WaitHandleList[3] = { hObject, hOtherSideProcess, hEventDeconn };
+	switch (WaitForMultipleObjects(3, WaitHandleList, 0, INFINITE))
+	{
+	case WAIT_OBJECT_0:
+		//µÈ´ýµ½ÁË
+		return TRUE;
+	case WAIT_OBJECT_0+1:
+	case WAIT_OBJECT_0+2:
+	default:
+		return FALSE;
+	}
+
 }

@@ -11,12 +11,12 @@ typedef struct __tagEventRecvStruct
 	{
 		struct
 		{
-			WCHAR Msg[BOIT_MAX_TEXTLEN];
+			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 		}GroupMsg;
 		 
 		struct
 		{
-			WCHAR Msg[BOIT_MAX_TEXTLEN];
+			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 		}PrivateMsg;
 	}u;
 }EVENT_RECV, *pEVENT_RECV;
@@ -30,12 +30,12 @@ typedef struct __tagEventSendStruct
 	{
 		struct
 		{
-			WCHAR Msg[BOIT_MAX_TEXTLEN];
+			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 		}GroupMsg;
 
 		struct
 		{
-			WCHAR Msg[BOIT_MAX_TEXTLEN];
+			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 		}PrivateMsg;
 	}u;
 }EVENT_SEND,*pEVENT_SEND;

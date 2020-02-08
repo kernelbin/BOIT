@@ -3,10 +3,10 @@
 #include"EstablishConn.h"
 #include<Process.h>
 #include "EventDispatch.h"
+#include"Global.h"
+
 //接受来自CQ的各种事件，并且转发
 
-SRWLOCK SendLock;
-SRWLOCK RecvLock;
 
 
 
@@ -24,7 +24,7 @@ int InitializeEventDispatch()
 
 int FinalizeEventDispatch()
 {
-
+	CleanConn();
 	return 0;
 }
 

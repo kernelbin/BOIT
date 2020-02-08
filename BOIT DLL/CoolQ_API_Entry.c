@@ -3,6 +3,7 @@
 #include<Windows.h>
 #include"CoolQDef.h"
 #include"CoolQ_State.h"
+#include"Global.h"
 
 
 CQEVENT(const char*, AppInfo, 0)() {

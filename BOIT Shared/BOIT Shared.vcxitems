@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)BOITEventType.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)EstablishConn.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ObjectName.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SharedMemStruct.h" />

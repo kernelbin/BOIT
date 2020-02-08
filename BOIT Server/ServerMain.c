@@ -8,6 +8,15 @@ int main()
 	InitEstablishConn();
 	TryEstablishConn();
 
-	Sleep(100000);
+	while (1)
+	{
+		ConnWaitForObject(hEventRecvStart);
+
+		MessageBoxW(0, pSharedMemRecv->u.PrivateMsg.Msg, L"qwq", 0);
+
+		SetEvent(hEventRecvEnd);
+	}
+
+
 	return 0;
 }

@@ -28,5 +28,12 @@ int AppEnabled();
 int AppDisabled();
 
 
+//访问接收发送信息内存映射文件等的锁
+
+SRWLOCK SendLock;
+SRWLOCK RecvLock;
+
+
+
 int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* msg, int font);
 int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fromQQ, const char* fromAnonymous, const char* msg, int font);

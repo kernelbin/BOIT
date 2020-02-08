@@ -2,6 +2,8 @@
 #include"Global.h"
 #include"CQAPITransfer.h"
 #include"EventDispatch.h"
+#include"EstablishConn.h"
+#include"BOITEventType.h"
 
 //生命周期
 
@@ -31,12 +33,48 @@ int AppDisabled()//禁用时执行（如果结束时是启用的，会在AppFini
 
 int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* msg, int font)
 {
+	if (GetConnState() == 0)
+	{
+		AddLog(CQLOG_INFO, "BOIT", "和Server之间的连接已经断开，消息未处理");
+		return 0;
+	}
+	AcquireSRWLockExclusive(&RecvLock);
+
+	__try
+	{
+		pSharedMemRecv->EventType = BOIT_EVENT_RECV_PRIVATE;
+		int cchWideCharLen = MultiByteToWideChar(CP_ACP, 0, msg, -1, 0, 0);
+		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
+		MultiByteToWideChar(CP_ACP, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
+		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen] = 0;
+		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen + 1] = 0;
+
+		SetEvent(hEventRecvStart);//等待对方读取
+
+		if (ConnWaitForObject(hEventRecvEnd) == 0)
+		{
+			__leave;
+		}
+		//成功
+	}
+	__finally
+	{
+		ReleaseSRWLockExclusive(&RecvLock);
+	}
+	
+	
 	return 0;
 }
 
 
 int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fromQQ, const char * fromAnonymous, const char * msg, int font)
 {
+	if (GetConnState() == 0)
+	{
+		AddLog(CQLOG_INFO, "BOIT", "和Server之间的连接已经断开，消息未处理");
+		return 0;
+	}
+
 	if (msg[0] == '#')
 	{
 		SendGroupMessage(fromGroup, "正在施工中\nGithub地址:https://github.com/kernelbin/BOIT \n快来star！\n有什么好的idea也欢迎来提issue！qwq我会认真看的");
