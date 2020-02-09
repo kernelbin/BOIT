@@ -78,10 +78,32 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 		AddLog(CQLOG_INFO, "BOIT", "和Server之间的连接已经断开，消息未处理");
 		return 0;
 	}
+	AcquireSRWLockExclusive(&RecvLock);
 
-	if (msg[0] == '#')
+	__try
 	{
-		SendGroupMessage(fromGroup, "正在施工中\nGithub地址:https://github.com/kernelbin/BOIT \n快来star！\n有什么好的idea也欢迎来提issue！qwq我会认真看的");
+		pSharedMemRecv->EventType = BOIT_EVENT_RECV_GROUP;
+		int cchWideCharLen = MultiByteToWideChar(CP_ACP, 0, msg, -1, 0, 0);
+		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
+		MultiByteToWideChar(CP_ACP, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);
+		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen] = 0;
+		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen + 1] = 0;
+
+		pSharedMemRecv->u.GroupMsg.QQID = fromQQ;
+		pSharedMemRecv->u.GroupMsg.GroupID = fromGroup;
+
+		SetEvent(hEventRecvStart);//等待对方读取
+
+		if (ConnWaitForObject(hEventRecvEnd) == 0)
+		{
+			__leave;
+		}
+		//成功
 	}
+	__finally
+	{
+		ReleaseSRWLockExclusive(&RecvLock);
+	}
+
 	return 0;
 }

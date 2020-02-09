@@ -2,7 +2,8 @@
 #include "RecvEventHandler.h"
 #include"EstablishConn.h"
 #include"Global.h"
-
+#include"BOITEventType.h"
+#include<strsafe.h>
 unsigned __stdcall RecvEventThread();
 
 
@@ -29,11 +30,29 @@ unsigned __stdcall RecvEventThread()
 			{
 				break;
 			}
-			pEVENT_RECV RecvEvent;
+			EVENT_RECV RecvEvent;
 			//TODO: 复制对象，分发任务
-			MessageBoxW(0, pSharedMemRecv->u.PrivateMsg.Msg, L"qwq", 0);
-			SendEventPrivateMsg(pSharedMemRecv->u.PrivateMsg.QQID, L"nihao");
+			switch (pSharedMemRecv->EventType)
+			{
+			case BOIT_EVENT_RECV_PRIVATE:
+				RecvEvent.EventType = BOIT_EVENT_RECV_PRIVATE;
+				RecvEvent.u.PrivateMsg.QQID = pSharedMemRecv->u.PrivateMsg.QQID;
+				StringCchCopyW(RecvEvent.u.PrivateMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.PrivateMsg.Msg);
+
+				break;
+			case BOIT_EVENT_RECV_GROUP:
+				RecvEvent.EventType = BOIT_EVENT_RECV_GROUP;
+				RecvEvent.u.GroupMsg.QQID = pSharedMemRecv->u.GroupMsg.QQID;
+				RecvEvent.u.GroupMsg.GroupID = pSharedMemRecv->u.GroupMsg.GroupID;
+				StringCchCopyW(RecvEvent.u.GroupMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.GroupMsg.Msg);
+
+				break;
+			default:
+				break;
+			}
 			SetEvent(hEventRecvEnd);
+			//转发
+			SendEventPrivateMsg(1160386205, L"qwq");
 		}
 		Sleep(1000);
 	}
