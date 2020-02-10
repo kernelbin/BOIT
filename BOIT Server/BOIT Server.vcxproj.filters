@@ -34,6 +34,15 @@
     <Filter Include="源文件\注册表读写">
       <UniqueIdentifier>{afff87d3-5f3e-4260-bd01-62c93a098689}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\目录管理">
+      <UniqueIdentifier>{216af931-71c2-403b-abf6-5b9c804abc5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\目录管理">
+      <UniqueIdentifier>{1beaf9fd-6bd3-48e6-acf1-5f318f7669ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\注册表读写">
+      <UniqueIdentifier>{3ebaaac6-e701-4feb-9dab-8962572d6101}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -54,6 +63,9 @@
     <ClCompile Include="RegisterRW.c">
       <Filter>源文件\注册表读写</Filter>
     </ClCompile>
+    <ClCompile Include="DirManagement.c">
+      <Filter>源文件\目录管理</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -67,6 +79,12 @@
     </ClInclude>
     <ClInclude Include="APITransfer.h">
       <Filter>头文件\API转发中间层</Filter>
+    </ClInclude>
+    <ClInclude Include="DirManagement.h">
+      <Filter>头文件\目录管理</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterRW.h">
+      <Filter>头文件\注册表读写</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

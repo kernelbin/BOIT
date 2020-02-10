@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="设置相关">
+      <UniqueIdentifier>{186ebd13-96ef-4bc8-a7a4-638e6155f69e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Settings.h">
+      <Filter>设置相关</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

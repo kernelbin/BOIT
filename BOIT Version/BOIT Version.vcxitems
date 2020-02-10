@@ -3,8 +3,7 @@
   <PropertyGroup Label="Globals">
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <ItemsProjectGuid>{b17851fb-4678-46a9-afbb-26eba1a293cf}</ItemsProjectGuid>
-    <ItemsProjectName>BOIT Event Shared</ItemsProjectName>
+    <ItemsProjectGuid>{c8f4745c-7444-428b-b149-2765b7ad17e2}</ItemsProjectGuid>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -15,12 +14,6 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)BOITEventType.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)EstablishConn.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ObjectName.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)SharedMemStruct.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)EstablishConn.c" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Settings.h" />
   </ItemGroup>
 </Project>

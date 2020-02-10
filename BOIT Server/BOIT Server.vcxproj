@@ -56,6 +56,7 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
     <Import Project="..\BOIT Shared\BOIT Shared.vcxitems" Label="Shared" />
+    <Import Project="..\BOIT Version\BOIT Version.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -140,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="APITransfer.c" />
+    <ClCompile Include="DirManagement.c" />
     <ClCompile Include="RecvEventHandler.c" />
     <ClCompile Include="RegisterRW.c" />
     <ClCompile Include="SendEventDispatch.c" />
@@ -148,8 +150,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APITransfer.h" />
+    <ClInclude Include="DirManagement.h" />
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="RegisterRW.h" />
     <ClInclude Include="SendEventDispatch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
