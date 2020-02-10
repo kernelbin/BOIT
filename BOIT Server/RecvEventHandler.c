@@ -5,7 +5,8 @@
 #include"BOITEventType.h"
 #include<strsafe.h>
 #include"APITransfer.h"
-unsigned __stdcall RecvEventThread();
+#include<process.h>
+unsigned __stdcall RecvEventThread(void* Args);
 
 
 int StartRecvEventHandler()
@@ -21,7 +22,7 @@ int StartRecvEventHandler()
 }
 
 
-unsigned __stdcall RecvEventThread()
+unsigned __stdcall RecvEventThread(void *Args)
 {
 	while (1)
 	{

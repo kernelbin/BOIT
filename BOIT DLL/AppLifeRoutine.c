@@ -3,6 +3,7 @@
 #include"CQAPITransfer.h"
 #include"EstablishConn.h"
 #include"BOITEventType.h"
+#include<process.h>
 
 //生命周期
 

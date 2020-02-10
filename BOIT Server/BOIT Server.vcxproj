@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="APITransfer.c" />
     <ClCompile Include="RecvEventHandler.c" />
+    <ClCompile Include="RegisterRW.c" />
     <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
     <ClCompile Include="ServerState.c" />

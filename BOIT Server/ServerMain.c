@@ -8,6 +8,8 @@
 int main()
 {
 	printf("BOIT Server正在启动\n");
+	//读取注册表，检查配置
+
 	InitServerState();
 	InitSendEventDispatch();;
 	InitEstablishConn();

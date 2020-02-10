@@ -31,6 +31,9 @@
     <Filter Include="头文件\API转发中间层">
       <UniqueIdentifier>{8a66d1aa-7201-4fc9-9e61-b2301e2a7228}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\注册表读写">
+      <UniqueIdentifier>{afff87d3-5f3e-4260-bd01-62c93a098689}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="APITransfer.c">
       <Filter>源文件\API转发中间层</Filter>
+    </ClCompile>
+    <ClCompile Include="RegisterRW.c">
+      <Filter>源文件\注册表读写</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

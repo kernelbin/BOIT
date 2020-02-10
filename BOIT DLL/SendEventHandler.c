@@ -2,8 +2,9 @@
 #include"EstablishConn.h"
 #include"CQAPITransfer.h"
 #include"BOITEventType.h"
+#include<process.h>
 
-unsigned __stdcall SendEventThread();
+unsigned __stdcall SendEventThread(void* Args);
 
 int StartSendEventHandler()
 {
@@ -13,7 +14,7 @@ int StartSendEventHandler()
 }
 
 
-unsigned __stdcall SendEventThread()
+unsigned __stdcall SendEventThread(void *Args)
 {
 	while (1)
 	{

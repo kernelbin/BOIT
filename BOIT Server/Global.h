@@ -8,5 +8,7 @@ HANDLE hEventServerStop;
 int InitServerState();
 int ServerStop();
 
+int StartSendEventHandler();
+
 int InitSendEventDispatch();
 
