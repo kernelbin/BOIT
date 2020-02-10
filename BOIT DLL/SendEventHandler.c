@@ -44,6 +44,7 @@ unsigned __stdcall SendEventThread()
 				int ccbLen;
 				ccbLen = WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.GroupMsg.Msg, -1, 0, 0, 0, 0);
 				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
+				WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.GroupMsg.Msg, -1, ToSendText, (ccbLen + 1), 0, 0);
 				SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
 				free(ToSendText);
 			}

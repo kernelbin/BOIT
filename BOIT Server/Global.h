@@ -10,4 +10,3 @@ int ServerStop();
 
 int InitSendEventDispatch();
 
-int SendEventPrivateMsg(long long QQID, WCHAR * Msg);

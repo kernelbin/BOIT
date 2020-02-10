@@ -89,6 +89,12 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen + 1] = 0;
 
+		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_NICKLEN);
+		MultiByteToWideChar(CP_ACP, 0, fromAnonymous, -1, pSharedMemRecv->u.GroupMsg.AnonymousName, cchWideCharLen);
+		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen] = 0;
+		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen + 1] = 0;
+
+
 		pSharedMemRecv->u.GroupMsg.QQID = fromQQ;
 		pSharedMemRecv->u.GroupMsg.GroupID = fromGroup;
 

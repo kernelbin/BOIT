@@ -13,19 +13,40 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\底层事件处理器">
+      <UniqueIdentifier>{da60ae88-3130-42bc-a589-3826265be5e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\入口函数">
+      <UniqueIdentifier>{1f248004-4a0b-43d8-b5c3-ab38094bb7b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\服务状态">
+      <UniqueIdentifier>{d190c16f-d790-4b79-976a-80726a39b55c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\底层事件处理器">
+      <UniqueIdentifier>{a9c26bb1-3e00-417a-adc7-676fcf1a186c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\API转发中间层">
+      <UniqueIdentifier>{ded49be2-846d-4be3-ba08-a94d6bda6011}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\API转发中间层">
+      <UniqueIdentifier>{8a66d1aa-7201-4fc9-9e61-b2301e2a7228}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ServerMain.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerState.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RecvEventHandler.c">
-      <Filter>源文件</Filter>
+      <Filter>源文件\底层事件处理器</Filter>
     </ClCompile>
     <ClCompile Include="SendEventDispatch.c">
-      <Filter>源文件</Filter>
+      <Filter>源文件\底层事件处理器</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerMain.c">
+      <Filter>源文件\入口函数</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerState.c">
+      <Filter>源文件\服务状态</Filter>
+    </ClCompile>
+    <ClCompile Include="APITransfer.c">
+      <Filter>源文件\API转发中间层</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -33,7 +54,13 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="RecvEventHandler.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\底层事件处理器</Filter>
+    </ClInclude>
+    <ClInclude Include="SendEventDispatch.h">
+      <Filter>头文件\底层事件处理器</Filter>
+    </ClInclude>
+    <ClInclude Include="APITransfer.h">
+      <Filter>头文件\API转发中间层</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

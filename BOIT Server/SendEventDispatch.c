@@ -64,5 +64,4 @@ int SendEventGroupMsg(long long GroupID, WCHAR* Msg)
 		ReleaseSRWLockExclusive(&SendLock);
 	}
 	return 0;
-	return 0;
 }

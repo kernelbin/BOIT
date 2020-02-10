@@ -4,6 +4,7 @@
 #include"Global.h"
 #include"BOITEventType.h"
 #include<strsafe.h>
+#include"APITransfer.h"
 unsigned __stdcall RecvEventThread();
 
 
@@ -45,16 +46,33 @@ unsigned __stdcall RecvEventThread()
 				RecvEvent.u.GroupMsg.QQID = pSharedMemRecv->u.GroupMsg.QQID;
 				RecvEvent.u.GroupMsg.GroupID = pSharedMemRecv->u.GroupMsg.GroupID;
 				StringCchCopyW(RecvEvent.u.GroupMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.GroupMsg.Msg);
+				StringCchCopyW(RecvEvent.u.GroupMsg.AnonymousName, BOIT_MAX_NICKLEN, pSharedMemRecv->u.GroupMsg.AnonymousName);
 
 				break;
 			default:
 				break;
 			}
 			SetEvent(hEventRecvEnd);
-			//转发
-			SendEventPrivateMsg(1160386205, L"qwq");
+			//分发
+			switch (pSharedMemRecv->EventType)
+			{
+			case BOIT_EVENT_RECV_PRIVATE:
+				RecvPrivateMessage(pSharedMemRecv->u.PrivateMsg.QQID,
+					pSharedMemRecv->u.PrivateMsg.Msg);
+				break;
+			case BOIT_EVENT_RECV_GROUP:
+				RecvGroupMessage(pSharedMemRecv->u.GroupMsg.GroupID,
+					pSharedMemRecv->u.GroupMsg.QQID,
+					pSharedMemRecv->u.GroupMsg.AnonymousName,
+					pSharedMemRecv->u.GroupMsg.Msg);
+				break;
+			}
 		}
 		Sleep(1000);
 	}
 }
+
+
+
+
 
