@@ -25,6 +25,8 @@ typedef struct __tagCommand
 
 pBOIT_COMMAND RootCommand;
 
+SRWLOCK CommandChainLock;//访问指令链用的锁
+
 int CommandAllocID;
 
 #define BOIT_MATCH_FULL 1 //全字匹配，大小写不敏感
@@ -44,6 +46,8 @@ int FinalizeCommandManager();
 pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* ManualMsg, int MatchMode);
 
 int RemoveCommand(pBOIT_COMMAND Command);
+
+int AddCommandAlias(pBOIT_COMMAND Command, WCHAR* AliasName);
 
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen);
 

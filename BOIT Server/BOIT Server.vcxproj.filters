@@ -58,6 +58,15 @@
     <Filter Include="头文件\指令回调">
       <UniqueIdentifier>{c874d52d-244f-45d9-bbee-f2b61934a892}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\about">
+      <UniqueIdentifier>{da5508af-109d-4ecc-940b-296bfb3abac4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\coming_feature">
+      <UniqueIdentifier>{dac781c0-6a22-4ace-9f68-6ed0d353d23e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\help">
+      <UniqueIdentifier>{f5c5e421-78b7-4f3d-a2a2-e6877ac63daa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -84,11 +93,20 @@
     <ClCompile Include="CommandManager.c">
       <Filter>源文件\指令处理</Filter>
     </ClCompile>
-    <ClCompile Include="qwq.c">
-      <Filter>源文件\指令回调\qwq</Filter>
-    </ClCompile>
     <ClCompile Include="InlineCommand.c">
       <Filter>源文件\指令回调</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_qwq.c">
+      <Filter>源文件\指令回调\qwq</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_about.c">
+      <Filter>源文件\指令回调\about</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_commingfeature.c">
+      <Filter>源文件\指令回调\coming_feature</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_help.c">
+      <Filter>源文件\指令回调\help</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

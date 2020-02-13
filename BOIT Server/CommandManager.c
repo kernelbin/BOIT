@@ -3,7 +3,7 @@
 #include<wchar.h>
 #include<strsafe.h>
 
-SRWLOCK CommandChainLock;
+
 
 int InitializeCommandManager()
 {
@@ -45,6 +45,7 @@ pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* Ma
 
 	StrLength = lstrlenW(ManualMsg);
 	Command->ManualMsg = malloc(sizeof(WCHAR) * (StrLength + 1));
+	StringCchCopyW(Command->ManualMsg, StrLength + 1, ManualMsg);
 	Command->ManualMsg[StrLength] = 0;
 
 	Command->MatchMode = MatchMode;
@@ -117,10 +118,12 @@ int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 		return 0;
 	}
 	int AliasLen = lstrlenW(AliasName);
-	Command->CommandName[Command->AliasCount++] = malloc(sizeof(WCHAR) * (AliasLen + 1));
+	Command->CommandName[Command->AliasCount] = malloc(sizeof(WCHAR) * (AliasLen + 1));
+	StringCchCopyW(Command->CommandName[Command->AliasCount], AliasLen + 1, AliasName);
 	Command->CommandName[Command->AliasCount++][AliasLen] = 0;
-	return 0;
+	
 	ReleaseSRWLockExclusive(&CommandChainLock);
+	return 0;
 }
 
 
@@ -132,7 +135,7 @@ int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen)
 {
 	//TODO: 从配置中读取指令前缀和昵称
-	if (Msg[0] == L'#')
+	if (Msg[0] == L'%')
 	{
 		if (PrefixLen)
 		{

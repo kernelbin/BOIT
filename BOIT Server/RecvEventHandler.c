@@ -6,6 +6,7 @@
 #include<strsafe.h>
 #include"APITransfer.h"
 #include<process.h>
+#include<time.h>
 unsigned __stdcall RecvEventThread(void* Args);
 
 
@@ -16,14 +17,23 @@ int StartRecvEventHandler()
 
 	for (unsigned int i = 0; i < SysInfo.dwNumberOfProcessors; i++)
 	{
-		_beginthreadex(NULL, 0, RecvEventThread, (LPVOID)0, 0, NULL);
+		_beginthreadex(NULL, 0, RecvEventThread, (LPVOID)i, 0, NULL);
 	}
 	return 0;
 }
 
 
+int InitailizeThreadCRT(int ThreadID)//由于这些线程是要处理指令的，所以这里初始化CRT
+{
+	srand(time(0) + ThreadID);
+	return 0;
+}
+
+
+
 unsigned __stdcall RecvEventThread(void *Args)
 {
+	InitailizeThreadCRT(Args);
 	while (1)
 	{
 		while (GetConnState() == 1)
@@ -72,8 +82,6 @@ unsigned __stdcall RecvEventThread(void *Args)
 		Sleep(1000);
 	}
 }
-
-
 
 
 
