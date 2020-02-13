@@ -43,6 +43,21 @@
     <Filter Include="头文件\注册表读写">
       <UniqueIdentifier>{3ebaaac6-e701-4feb-9dab-8962572d6101}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令处理">
+      <UniqueIdentifier>{2f777593-e2ae-4aa0-890c-b1a82ab81f02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\指令处理">
+      <UniqueIdentifier>{9ed838b4-78d2-449d-947d-70a22b00351b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调">
+      <UniqueIdentifier>{5e5ea7e6-8931-4697-ba78-d92c6e02c465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\qwq">
+      <UniqueIdentifier>{b2ebdbaa-b141-4f4b-bc67-b70ab188d006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\指令回调">
+      <UniqueIdentifier>{c874d52d-244f-45d9-bbee-f2b61934a892}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -66,6 +81,15 @@
     <ClCompile Include="DirManagement.c">
       <Filter>源文件\目录管理</Filter>
     </ClCompile>
+    <ClCompile Include="CommandManager.c">
+      <Filter>源文件\指令处理</Filter>
+    </ClCompile>
+    <ClCompile Include="qwq.c">
+      <Filter>源文件\指令回调\qwq</Filter>
+    </ClCompile>
+    <ClCompile Include="InlineCommand.c">
+      <Filter>源文件\指令回调</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -85,6 +109,12 @@
     </ClInclude>
     <ClInclude Include="RegisterRW.h">
       <Filter>头文件\注册表读写</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandManager.h">
+      <Filter>头文件\指令处理</Filter>
+    </ClInclude>
+    <ClInclude Include="InlineCommand.h">
+      <Filter>头文件\指令回调</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

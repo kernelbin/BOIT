@@ -7,10 +7,15 @@
 #include"DirManagement.h"
 #include"Settings.h"
 #include<conio.h>
+#include"CommandManager.h"
 
 int main()
 {
 	puts("BOIT Server正在启动\n");
+
+	InitializeCommandManager();//注册指令
+	RegisterInlineCommand();//注册所有指令
+
 	//读取注册表，检查配置
 	switch (RegisterRead(GetBOITBaseDir()))
 	{
@@ -70,6 +75,7 @@ int main()
 		break;
 	}
 
+	
 	InitServerState();
 	InitSendEventDispatch();;
 	InitEstablishConn();
@@ -82,6 +88,7 @@ int main()
 	WaitForSingleObject(hEventServerStop, INFINITE);
 
 	//TODO:清理工作
+	FinalizeCommandManager();
 
 	return 0;
 }

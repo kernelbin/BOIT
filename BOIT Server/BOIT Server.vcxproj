@@ -141,8 +141,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="APITransfer.c" />
+    <ClCompile Include="CommandManager.c" />
     <ClCompile Include="DirManagement.c" />
+    <ClCompile Include="qwq.c" />
     <ClCompile Include="RecvEventHandler.c" />
+    <ClCompile Include="InlineCommand.c" />
     <ClCompile Include="RegisterRW.c" />
     <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
@@ -150,7 +153,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APITransfer.h" />
+    <ClInclude Include="CommandManager.h" />
     <ClInclude Include="DirManagement.h" />
+    <ClInclude Include="InlineCommand.h" />
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="RegisterRW.h" />
