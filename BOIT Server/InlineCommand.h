@@ -7,3 +7,5 @@ MSGPROC CmdMsg_about_Proc(long long GroupID, long long QQID, WCHAR* AnonymousNam
 MSGPROC CmdMsg_commingfeature_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
 MSGPROC CmdMsg_help_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
 MSGPROC CmdMsg_run_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
+
+EVENTPROC CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB);

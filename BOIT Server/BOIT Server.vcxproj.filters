@@ -149,5 +149,8 @@
     <ClInclude Include="InlineCommand.h">
       <Filter>头文件\指令回调</Filter>
     </ClInclude>
+    <ClInclude Include="CommandEvent.h">
+      <Filter>头文件\指令回调</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

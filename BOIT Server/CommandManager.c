@@ -42,7 +42,7 @@ pBOIT_COMMAND RegisterCommandEx(WCHAR* CommandName, MSGPROC MessageProc, EVENTPR
 	Command->AliasCount++;
 
 	Command->MessageProc = MessageProc;
-	Command->CommandProc = EventProc;
+	Command->EventProc = EventProc;
 
 	StrLength = lstrlenW(ManualMsg);
 	Command->ManualMsg = malloc(sizeof(WCHAR) * (StrLength + 1));
@@ -117,6 +117,15 @@ int FreeCommand(pBOIT_COMMAND Command)
 	return 0;
 }
 
+
+int SendCommandEvent(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
+{
+	if (pCmd && pCmd->EventProc)
+	{
+		return pCmd->EventProc(pCmd, Event, ParamA, ParamB);
+	}
+	return 0;
+}
 
 int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 {

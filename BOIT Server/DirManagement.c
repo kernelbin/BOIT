@@ -41,6 +41,8 @@ int InitBOITDir()
 			wcscpy_s(PerCommandDir, MAX_PATH, GetBOITCommandCfgDir());
 			PathAppendW(PerCommandDir, pList->CommandName[0]);
 			CreateDirectoryW(PerCommandDir, 0);
+
+			SendCommandEvent(pList, EC_DIRINIT, 0, 0);
 		}
 	}
 	ReleaseSRWLockShared(&CommandChainLock);

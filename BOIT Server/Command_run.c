@@ -9,3 +9,12 @@ MSGPROC CmdMsg_run_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName,
 	return 0;
 }
 
+EVENTPROC CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
+{
+	switch (Event)
+	{
+	case EC_DIRINIT:
+		break;
+	}
+	return 0;
+}
