@@ -148,6 +148,7 @@
     <ClCompile Include="Command_run.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
+    <ClCompile Include="PerCommandData.c" />
     <ClCompile Include="PerUserData.c" />
     <ClCompile Include="RecvEventHandler.c" />
     <ClCompile Include="InlineCommand.c" />

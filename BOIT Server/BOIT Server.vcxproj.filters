@@ -123,6 +123,9 @@
     <ClCompile Include="Command_run.c">
       <Filter>源文件\指令回调\run</Filter>
     </ClCompile>
+    <ClCompile Include="PerCommandData.c">
+      <Filter>源文件\目录管理\指令目录管理</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">

@@ -26,3 +26,7 @@ int PathSimplifyW(WCHAR* Path);
 int CheckPerUserDataExist(long long QQID);
 
 int CreatePerUserData(WCHAR* Path);
+
+int GetPerUserDir(WCHAR* Buffer, long long QQID);
+
+BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName);
