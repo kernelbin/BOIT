@@ -2,7 +2,7 @@
 #include"CommandManager.h"
 #include<wchar.h>
 #include<strsafe.h>
-
+#include"DirManagement.h"
 
 
 int InitializeCommandManager()
@@ -29,7 +29,7 @@ int FinalizeCommandManager()
 }
 
 
-pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* ManualMsg, int MatchMode)
+pBOIT_COMMAND RegisterCommandEx(WCHAR* CommandName, MSGPROC MessageProc, EVENTPROC EventProc, WCHAR* ManualMsg, int MatchMode)
 {
 	pBOIT_COMMAND Command = malloc(sizeof(BOIT_COMMAND));
 	ZeroMemory(Command, sizeof(BOIT_COMMAND));
@@ -41,7 +41,8 @@ pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* Ma
 
 	Command->AliasCount++;
 
-	Command->CommandProc = CommandProc;
+	Command->MessageProc = MessageProc;
+	Command->CommandProc = EventProc;
 
 	StrLength = lstrlenW(ManualMsg);
 	Command->ManualMsg = malloc(sizeof(WCHAR) * (StrLength + 1));
@@ -67,6 +68,13 @@ pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* Ma
 
 	ReleaseSRWLockExclusive(&CommandChainLock);
 	return Command;
+}
+
+
+
+pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, MSGPROC MessageProc, WCHAR* ManualMsg, int MatchMode)
+{
+	return RegisterCommandEx(CommandName, MessageProc, NULL, ManualMsg, MatchMode);
 }
 
 int RemoveCommand(pBOIT_COMMAND Command)
@@ -135,7 +143,7 @@ int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen)
 {
 	//TODO: 从配置中读取指令前缀和昵称
-	if (Msg[0] == L'%')
+	if (Msg[0] == L'#')
 	{
 		if (PrefixLen)
 		{
@@ -218,7 +226,8 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 
 			if (bMatch)
 			{
-				pList->CommandProc(GroupID, QQID, AnonymousName, Msg);
+				CheckPerUserDataExist(QQID);
+				pList->MessageProc(GroupID, QQID, AnonymousName, Msg);
 			}
 		}
 	}

@@ -1,7 +1,8 @@
 #pragma once
 #include<Windows.h>
 
-typedef INT(*COMPROC)(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);//回调函数定义
+typedef UINT_PTR PARAMA;
+typedef UINT_PTR PARAMB;
 
 //指令链表数据结构定义
 
@@ -10,13 +11,19 @@ typedef INT(*COMPROC)(long long GroupID, long long QQID, WCHAR* AnonymousName, W
 
 typedef struct __tagCommand BOIT_COMMAND, * pBOIT_COMMAND;
 
+
+typedef INT(*MSGPROC)(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);//回调函数定义
+typedef INT(*EVENTPROC)(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB);//回调函数定义
+
+
 typedef struct __tagCommand
 {
 	unsigned int CommandID;
 
 	WCHAR* CommandName[COMMAND_MAX_ALIAS];//指令名称
 	int AliasCount;//名称，或者说是别名的数量
-	COMPROC CommandProc;
+	MSGPROC MessageProc;//接收消息专用的回调函数
+	EVENTPROC CommandProc;//处理各类事件的回调函数
 	WCHAR* ManualMsg;
 	int MatchMode;
 
@@ -43,7 +50,9 @@ int InitializeCommandManager();
 
 int FinalizeCommandManager();
 
-pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, COMPROC CommandProc, WCHAR* ManualMsg, int MatchMode);
+pBOIT_COMMAND RegisterCommandEx(WCHAR* CommandName, MSGPROC MessageProc, EVENTPROC CommandProc, WCHAR* ManualMsg, int MatchMode);
+
+pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, MSGPROC MessageProc, WCHAR* ManualMsg, int MatchMode);
 
 int RemoveCommand(pBOIT_COMMAND Command);
 

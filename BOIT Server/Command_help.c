@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-COMPROC Command_help_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+MSGPROC CmdMsg_help_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	WCHAR * HelpInfoStr = 0;
 

@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-COMPROC Command_qwq_Proc(long long GroupID, long long QQID, WCHAR * AnonymousName, WCHAR * Msg)
+MSGPROC CmdMsg_qwq_Proc(long long GroupID, long long QQID, WCHAR * AnonymousName, WCHAR * Msg)
 {
 	WCHAR ReplyMessage[][16] = {
 		L"pwp",

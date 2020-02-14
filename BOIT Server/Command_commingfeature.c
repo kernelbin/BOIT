@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-COMPROC Command_commingfeature_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+MSGPROC CmdMsg_commingfeature_Proc(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	WCHAR ReplyMessage[][128] = {
 		L"我可以查询codeforce上的比赛时间呢，我还能查询tourist的profile！",

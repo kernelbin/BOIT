@@ -67,6 +67,15 @@
     <Filter Include="源文件\指令回调\help">
       <UniqueIdentifier>{f5c5e421-78b7-4f3d-a2a2-e6877ac63daa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\run">
+      <UniqueIdentifier>{e17d422f-60ea-480f-80b1-6485ce9ade16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\目录管理\用户目录管理">
+      <UniqueIdentifier>{f7420c86-4e6f-4124-b9b9-e6ff6a7f8541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\目录管理\指令目录管理">
+      <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -107,6 +116,12 @@
     </ClCompile>
     <ClCompile Include="Command_help.c">
       <Filter>源文件\指令回调\help</Filter>
+    </ClCompile>
+    <ClCompile Include="PerUserData.c">
+      <Filter>源文件\目录管理\用户目录管理</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_run.c">
+      <Filter>源文件\指令回调\run</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
