@@ -1,6 +1,7 @@
 #pragma once
 #include<Windows.h>
 #include<Shlwapi.h>
+#include"CommandManager.h"
 
 WCHAR* GetBOITBaseDir();
 
@@ -30,3 +31,7 @@ int CreatePerUserData(WCHAR* Path);
 int GetPerUserDir(WCHAR* Buffer, long long QQID);
 
 BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName);
+
+int GetPerCommandCfgDir(WCHAR* Buffer, pBOIT_COMMAND pCmd);
+
+BOOL PerCommandCfgCreateDirIfNExist(pBOIT_COMMAND pCmd, WCHAR* FolderName);

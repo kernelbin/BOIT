@@ -146,9 +146,6 @@ int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 
 
 
-
-
-
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen)
 {
 	//TODO: 从配置中读取指令前缀和昵称
@@ -177,6 +174,22 @@ int GetParamLen(WCHAR* String)
 			String[i] == L'\n' ||
 			String[i] == L'\t' ||
 			String[i] == 0)
+		{
+			break;
+		}
+	}
+	return i;
+}
+
+int GetSpaceLen(WCHAR* String)
+{
+	int i;
+	for (i = 0;; i++)
+	{
+		if (String[i] != L' ' &&
+			String[i] != L'\r' &&
+			String[i] != L'\n' &&
+			String[i] != L'\t')
 		{
 			break;
 		}
@@ -236,7 +249,7 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 			if (bMatch)
 			{
 				CheckPerUserDataExist(QQID);
-				pList->MessageProc(GroupID, QQID, AnonymousName, Msg);
+				pList->MessageProc(pList, GroupID, QQID, AnonymousName, Msg);
 			}
 		}
 	}
