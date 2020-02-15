@@ -164,7 +164,7 @@ BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen)
 }
 
 
-int GetParamLen(WCHAR* String)
+int GetCmdParamLen(WCHAR* String)
 {
 	int i;
 	for (i = 0;; i++)
@@ -181,7 +181,7 @@ int GetParamLen(WCHAR* String)
 	return i;
 }
 
-int GetSpaceLen(WCHAR* String)
+int GetCmdSpaceLen(WCHAR* String)
 {
 	int i;
 	for (i = 0;; i++)
@@ -222,19 +222,19 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 				break;
 			case BOIT_MATCH_PARAM:
 			{
-				int ParamLen = GetParamLen(Msg);
+				int ParamLen = GetCmdParamLen(Msg);
 				if (_wcsnicmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_PARAM_CASE:
 			{
-				int ParamLen = GetParamLen(Msg);
+				int ParamLen = GetCmdParamLen(Msg);
 				if (wcsncmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_HEAD:
 			{
-				int CommandLen = GetParamLen(pList->CommandName[i]);
+				int CommandLen = GetCmdParamLen(pList->CommandName[i]);
 				if (_wcsnicmp(pList->CommandName[i], Msg, CommandLen) == 0) bMatch = TRUE;
 			}
 				break;

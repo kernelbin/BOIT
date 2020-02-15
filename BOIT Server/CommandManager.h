@@ -63,9 +63,9 @@ int AddCommandAlias(pBOIT_COMMAND Command, WCHAR* AliasName);
 
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen);
 
-int GetParamLen(WCHAR* String);
+int GetCmdParamLen(WCHAR* String);
 
-int GetSpaceLen(WCHAR* String);
+int GetCmdSpaceLen(WCHAR* String);
 
 int CommandHandler(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
 
