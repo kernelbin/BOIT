@@ -223,18 +223,18 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 			case BOIT_MATCH_PARAM:
 			{
 				int ParamLen = GetCmdParamLen(Msg);
-				if (_wcsnicmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
+				if (ParamLen && _wcsnicmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_PARAM_CASE:
 			{
 				int ParamLen = GetCmdParamLen(Msg);
-				if (wcsncmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
+				if (ParamLen && wcsncmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_HEAD:
 			{
-				int CommandLen = GetCmdParamLen(pList->CommandName[i]);
+				int CommandLen = wcslen(pList->CommandName[i]);
 				if (_wcsnicmp(pList->CommandName[i], Msg, CommandLen) == 0) bMatch = TRUE;
 			}
 				break;

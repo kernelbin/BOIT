@@ -148,9 +148,9 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 		SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
 	}
 
-	//TODO:校验权限
 
 
+	//SendBackMessage(GroupID, QQID, GetCmdParamLen(Msg) + Msg);
 	return 0;
 }
 
