@@ -76,6 +76,9 @@
     <Filter Include="源文件\目录管理\指令目录管理">
       <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\沙盒">
+      <UniqueIdentifier>{7c7c0bb6-fe90-40c8-8680-b9a3b21e623e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">

@@ -106,6 +106,8 @@ int main()
 	}
 
 	
+	BroadcastCommandEvent(EC_CMDLOAD, 0, 0);
+
 	InitServerState();
 	InitSendEventDispatch();;
 	InitEstablishConn();
@@ -118,6 +120,7 @@ int main()
 	WaitForSingleObject(hEventServerStop, INFINITE);
 
 	//TODO:清理工作
+	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
 
 	return 0;

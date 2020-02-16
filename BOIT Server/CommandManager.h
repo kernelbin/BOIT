@@ -57,6 +57,8 @@ pBOIT_COMMAND RegisterCommand(WCHAR* CommandName, MSGPROC MessageProc, WCHAR* Ma
 
 int RemoveCommand(pBOIT_COMMAND Command);
 
+int BroadcastCommandEvent(UINT Event, PARAMA ParamA, PARAMB ParamB);
+
 int SendCommandEvent(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB);
 
 int AddCommandAlias(pBOIT_COMMAND Command, WCHAR* AliasName);

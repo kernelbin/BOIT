@@ -29,6 +29,7 @@ int GetLineFeedLen(WCHAR* String);
 
 int GetLineSpaceLen(WCHAR* String);
 
+LONGLONG CompileID;
 
 MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
@@ -150,6 +151,56 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 
 	//TODO:校验权限
 
+	LONGLONG AllocCompileID = InterlockedIncrement64(&CompileID);
+	//写入源代码文件
+
+	WCHAR SourceCodeFile[MAX_PATH];
+
+	GetPerUserDir(SourceCodeFile, QQID);
+	PathAppendW(SourceCodeFile, L"Compile\\");
+
+	WCHAR SourceFileName[16];
+
+	swprintf_s(SourceFileName, _countof(SourceFileName), L"Temp%lld%ls", AllocCompileID, CompileCfg.SourceSuffix);
+
+	PathAppendW(SourceCodeFile, SourceFileName);
+
+	HFILE hSourceFile = CreateFile(SourceCodeFile, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	PBYTE UTF8Code = 0;
+
+	BOOL bFileCreated = FALSE;
+	__try
+	{
+		int wcCodeLen = wcslen(CodeStr);
+		int UTF8Len = WideCharToMultiByte(CP_UTF8, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
+		UTF8Code = malloc(UTF8Len + 1);
+		DWORD BytesWritten;
+		ZeroMemory(UTF8Code, UTF8Len + 1);
+		WideCharToMultiByte(CP_UTF8, 0, CodeStr, wcCodeLen, UTF8Code, UTF8Len, 0, 0);
+
+		WriteFile(hSourceFile, UTF8Code, UTF8Len, &BytesWritten, 0);
+		if (BytesWritten != UTF8Len)
+		{
+			__leave;
+		}
+
+		bFileCreated = TRUE;
+	}
+	__finally
+	{
+		CloseHandle(hSourceFile);
+		if (UTF8Code)free(UTF8Code);
+	}
+
+	if (bFileCreated)
+	{
+		//创建线程来编译
+
+	}
+	else
+	{
+		SendBackMessage(GroupID, QQID, L"写入文件时出现错误");
+	}
 
 	return 0;
 }
@@ -163,6 +214,9 @@ EVENTPROC CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAM
 		PerCommandCfgCreateDirIfNExist(pCmd, L"Compiler\\");
 		//肯定没创建
 		//创建说明文件
+		break;
+	case EC_CMDLOAD:
+		CompileID = 0;
 		break;
 	}
 	return 0;

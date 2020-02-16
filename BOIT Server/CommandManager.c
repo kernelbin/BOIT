@@ -118,6 +118,18 @@ int FreeCommand(pBOIT_COMMAND Command)
 }
 
 
+
+int BroadcastCommandEvent(UINT Event, PARAMA ParamA, PARAMB ParamB)//对指令链里所有指令广播事件
+{
+	AcquireSRWLockShared(&CommandChainLock);
+	for (pBOIT_COMMAND pList = RootCommand; pList; pList = pList->NextCommand)
+	{
+		SendCommandEvent(pList, Event, ParamA, ParamB);
+	}
+	ReleaseSRWLockShared(&CommandChainLock);
+	return 0;
+}
+
 int SendCommandEvent(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
 {
 	if (pCmd && pCmd->EventProc)
