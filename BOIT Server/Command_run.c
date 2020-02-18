@@ -3,6 +3,8 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 #include"DirManagement.h"
+#include"SimpleSandbox.h"
+#include"SessionManage.h"
 #include<wchar.h>
 
 #define COMPILECMD_MAXLEN 512
@@ -22,6 +24,8 @@ typedef struct __tagCompileCfg
 
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen);
+
+SANDBOX_CALLBACK CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
 
 int GetLineLen(WCHAR* String);
 
@@ -147,6 +151,7 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 	if (bFailed)
 	{
 		SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
+		return 0;
 	}
 
 	//TODO:校验权限
@@ -194,8 +199,13 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 
 	if (bFileCreated)
 	{
-		//创建线程来编译
-
+		WCHAR cmdline[100] = L"notepad.exe";
+		//TODO; 这个Session是临时瞎写的
+		pBOIT_SESSION Session = malloc(sizeof(BOIT_SESSION));
+		Session->QQID = QQID;
+		Session->GroupID = GroupID;
+		if(AnonymousName) wcscpy_s(Session->AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+		CreateSimpleSandboxW(NULL, cmdline, NULL, 10000000 * 10, -1, -1, Session, CmdRunSandboxCallback);
 	}
 	else
 	{
@@ -204,6 +214,25 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 
 	return 0;
 }
+
+
+SANDBOX_CALLBACK CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
+{
+	pBOIT_SESSION Session = (pBOIT_SESSION)pData;
+	switch (Event)
+	{
+	case SANDBOX_EVTNT_PROCESS_ZERO:
+		SendBackMessage(Session->GroupID, Session->QQID, L"执行完毕");
+		FreeSimpleSandboxW(Sandbox);
+		break;
+	case SANDBOX_EVENT_STD_OUTPUT:
+		break;
+	}
+	
+	return 0;
+}
+
+
 
 EVENTPROC CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
 {
@@ -262,7 +291,6 @@ BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen,
 
 	return bMatch;
 }
-
 
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen)

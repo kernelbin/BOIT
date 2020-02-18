@@ -11,6 +11,6 @@ int RegisterInlineCommand()
 	RegisterCommand(L"boast", CmdMsg_commingfeature_Proc, L"吹牛逼(开发中的功能)", BOIT_MATCH_FULL);
 	RegisterCommandEx(L"run", CmdMsg_run_Proc, CmdEvent_run_Proc, L"运行代码", BOIT_MATCH_PARAM);
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
-	
+	RegisterCommand(L"stop", CmdMsg_stop_Proc, L"关闭BOIT", BOIT_MATCH_FULL);
 	return 0;
 }

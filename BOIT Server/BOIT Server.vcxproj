@@ -146,6 +146,7 @@
     <ClCompile Include="Command_commingfeature.c" />
     <ClCompile Include="Command_help.c" />
     <ClCompile Include="Command_run.c" />
+    <ClCompile Include="Command_stop.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="PerCommandData.c" />
@@ -156,6 +157,8 @@
     <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
     <ClCompile Include="ServerState.c" />
+    <ClCompile Include="SessionManage.c" />
+    <ClCompile Include="SimpleSandbox.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APITransfer.h" />
@@ -167,6 +170,8 @@
     <ClInclude Include="Global.h" />
     <ClInclude Include="RegisterRW.h" />
     <ClInclude Include="SendEventDispatch.h" />
+    <ClInclude Include="SessionManage.h" />
+    <ClInclude Include="SimpleSandbox.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -14,6 +14,7 @@ int InitializeCommandManager()
 
 int FinalizeCommandManager()
 {
+	AcquireSRWLockExclusive(&CommandChainLock);
 	if (!RootCommand)
 	{
 		return 0;
@@ -22,8 +23,9 @@ int FinalizeCommandManager()
 	{
 		pBOIT_COMMAND NextCommand = pList->NextCommand;
 		FreeCommand(pList);
+		pList = NextCommand;
 	}
-
+	ReleaseSRWLockExclusive(&CommandChainLock);
 	RootCommand = 0;
 	return 0;
 }

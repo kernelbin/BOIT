@@ -10,11 +10,14 @@
 #include"CommandManager.h"
 #include"DirManagement.h"
 #include<Shlwapi.h>
+#include"SimpleSandbox.h"
+
 
 int main()
 {
 	puts("BOIT Server正在启动\n");
 
+	InitializeSandbox(2, 2);
 	InitializeCommandManager();
 	RegisterInlineCommand();//注册所有指令
 
@@ -122,6 +125,6 @@ int main()
 	//TODO:清理工作
 	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
-
+	FinalizeSandbox();
 	return 0;
 }

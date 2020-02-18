@@ -76,8 +76,20 @@
     <Filter Include="源文件\目录管理\指令目录管理">
       <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\沙盒">
+    <Filter Include="源文件\简易沙盒">
       <UniqueIdentifier>{7c7c0bb6-fe90-40c8-8680-b9a3b21e623e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\会话管理">
+      <UniqueIdentifier>{45930e49-1d64-402e-89cc-c1c26d8b3cc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\会话管理">
+      <UniqueIdentifier>{aef568cc-8fd3-4452-80cc-4c661b0efb8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\简易沙盒">
+      <UniqueIdentifier>{2afa450a-9ff2-455a-81f6-7a48a807963f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\stop">
+      <UniqueIdentifier>{abf01ef4-d057-40f8-b22a-71e554fbb242}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +141,15 @@
     <ClCompile Include="PerCommandData.c">
       <Filter>源文件\目录管理\指令目录管理</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleSandbox.c">
+      <Filter>源文件\简易沙盒</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManage.c">
+      <Filter>源文件\会话管理</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_stop.c">
+      <Filter>源文件\指令回调\stop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -157,6 +178,12 @@
     </ClInclude>
     <ClInclude Include="CommandEvent.h">
       <Filter>头文件\指令回调</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManage.h">
+      <Filter>头文件\会话管理</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleSandbox.h">
+      <Filter>头文件\简易沙盒</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

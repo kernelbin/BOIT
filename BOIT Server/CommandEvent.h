@@ -17,4 +17,4 @@ ParamB: 未使用  */
 /* 指令卸载，可以进行指令初清理工作
 ParamA: 未使用
 ParamB: 未使用  */
-#define EC_CMDFREE 0x02
+#define EC_CMDFREE 0x03
