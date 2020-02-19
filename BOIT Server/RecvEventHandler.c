@@ -25,7 +25,7 @@ int StartRecvEventHandler()
 
 int InitailizeThreadCRT(int ThreadID)//ÓÉÓÚÕâĞ©Ïß³ÌÊÇÒª´¦ÀíÖ¸ÁîµÄ£¬ËùÒÔÕâÀï³õÊ¼»¯CRT
 {
-	srand(time(0) + ThreadID);
+	srand((unsigned int)time(0) + ThreadID);
 	return 0;
 }
 
@@ -33,7 +33,7 @@ int InitailizeThreadCRT(int ThreadID)//ÓÉÓÚÕâĞ©Ïß³ÌÊÇÒª´¦ÀíÖ¸ÁîµÄ£¬ËùÒÔÕâÀï³õÊ¼»
 
 unsigned __stdcall RecvEventThread(void *Args)
 {
-	InitailizeThreadCRT(Args);
+	InitailizeThreadCRT((int)Args);
 	while (1)
 	{
 		while (GetConnState() == 1)

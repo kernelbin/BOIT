@@ -10,6 +10,7 @@ int InitializeCommandManager()
 	InitializeSRWLock(&CommandChainLock);
 	CommandAllocID = 0;
 	RootCommand = 0;
+	return 0;
 }
 
 int FinalizeCommandManager()
@@ -33,42 +34,63 @@ int FinalizeCommandManager()
 
 pBOIT_COMMAND RegisterCommandEx(WCHAR* CommandName, MSGPROC MessageProc, EVENTPROC EventProc, WCHAR* ManualMsg, int MatchMode)
 {
+	BOOL bSuccess = FALSE;
 	pBOIT_COMMAND Command = malloc(sizeof(BOIT_COMMAND));
+	if (!Command)return 0;
 	ZeroMemory(Command, sizeof(BOIT_COMMAND));
-
-	int StrLength = lstrlenW(CommandName);
-	Command->CommandName[0] = malloc(sizeof(WCHAR) * (StrLength + 1));
-	StringCchCopyW(Command->CommandName[0], StrLength + 1, CommandName);
-	Command->CommandName[0][StrLength] = 0;
-
-	Command->AliasCount++;
-
-	Command->MessageProc = MessageProc;
-	Command->EventProc = EventProc;
-
-	StrLength = lstrlenW(ManualMsg);
-	Command->ManualMsg = malloc(sizeof(WCHAR) * (StrLength + 1));
-	StringCchCopyW(Command->ManualMsg, StrLength + 1, ManualMsg);
-	Command->ManualMsg[StrLength] = 0;
-
-	Command->MatchMode = MatchMode;
-
-	Command->CommandID = ++CommandAllocID;
-	//插入链表
-	AcquireSRWLockExclusive(&CommandChainLock);
-
-	if (RootCommand)
+	__try
 	{
-		pBOIT_COMMAND pList;
-		for (pList = RootCommand; pList->NextCommand; pList = pList->NextCommand);
-		pList->NextCommand = Command;
+		int StrLength = lstrlenW(CommandName);
+		Command->CommandName[0] = malloc(sizeof(WCHAR) * (StrLength + 1));
+		if (!Command->CommandName[0])__leave;
+		StringCchCopyW(Command->CommandName[0], StrLength + 1, CommandName);
+		Command->CommandName[0][StrLength] = 0;
+
+		Command->AliasCount++;
+
+		Command->MessageProc = MessageProc;
+		Command->EventProc = EventProc;
+
+		StrLength = lstrlenW(ManualMsg);
+		Command->ManualMsg = malloc(sizeof(WCHAR) * (StrLength + 1));
+		if (!Command->ManualMsg)__leave;
+		StringCchCopyW(Command->ManualMsg, StrLength + 1, ManualMsg);
+		Command->ManualMsg[StrLength] = 0;
+
+		Command->MatchMode = MatchMode;
+
+		Command->CommandID = ++CommandAllocID;
+		//插入链表
+		AcquireSRWLockExclusive(&CommandChainLock);
+
+		if (RootCommand)
+		{
+			pBOIT_COMMAND pList;
+			for (pList = RootCommand; pList->NextCommand; pList = pList->NextCommand);
+			pList->NextCommand = Command;
+		}
+		else
+		{
+			RootCommand = Command;
+		}
+
+		ReleaseSRWLockExclusive(&CommandChainLock);
+
+		bSuccess = TRUE;
 	}
-	else
+	__finally
 	{
-		RootCommand = Command;
+		if (!bSuccess)
+		{
+			if (Command->CommandName[0])free(Command->CommandName[0]);
+			if (Command->ManualMsg)free(Command->ManualMsg);
+		}
+		free(Command);
+		Command = 0;
 	}
 
-	ReleaseSRWLockExclusive(&CommandChainLock);
+
+	
 	return Command;
 }
 
@@ -150,6 +172,7 @@ int AddCommandAlias(pBOIT_COMMAND Command,WCHAR * AliasName)
 	}
 	int AliasLen = lstrlenW(AliasName);
 	Command->CommandName[Command->AliasCount] = malloc(sizeof(WCHAR) * (AliasLen + 1));
+	if (!Command->CommandName[Command->AliasCount])return 0;
 	StringCchCopyW(Command->CommandName[Command->AliasCount], AliasLen + 1, AliasName);
 	Command->CommandName[Command->AliasCount++][AliasLen] = 0;
 	

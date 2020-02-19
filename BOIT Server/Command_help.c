@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-MSGPROC CmdMsg_help_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_help_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	WCHAR * HelpInfoStr = 0;
 
@@ -24,6 +24,7 @@ MSGPROC CmdMsg_help_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, 
 		TotLen += 100;//‘§¡Ù◊„ø’º‰
 
 		HelpInfoStr = malloc(sizeof(WCHAR) * TotLen);
+		if (!HelpInfoStr) __leave;
 		ZeroMemory(HelpInfoStr, sizeof(WCHAR) * TotLen);
 
 		wcscpy_s(HelpInfoStr, TotLen, L"∞Ô÷˙–≈œ¢:\n");

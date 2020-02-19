@@ -32,8 +32,8 @@ int main()
 		while (1)
 		{
 			puts("注册表加载失败，是否清空设置并初始化? (y/n)");
-			char Answer[128];
-			scanf_s("%s", Answer, 128);
+			char Answer[128] = { 0 };
+			scanf_s("%s", Answer, 127);
 			getchar();//读掉那个换行
 			if (strcmp(Answer,"y") == 0 || 
 				strcmp(Answer, "Y") == 0 ||

@@ -3,6 +3,7 @@
 #include"CommandManager.h"
 #include"InlineCommand.h"
 
+
 int RegisterInlineCommand()
 {
 	pBOIT_COMMAND Command_qwq = RegisterCommand(L"qwq", CmdMsg_qwq_Proc, L"¬Ù√»", BOIT_MATCH_FULL);

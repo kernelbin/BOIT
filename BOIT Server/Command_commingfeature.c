@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-MSGPROC CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	WCHAR ReplyMessage[][128] = {
 		L"我可以查询codeforce上的比赛时间呢，我还能查询tourist的profile！",
@@ -14,7 +14,7 @@ MSGPROC CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long l
 		L"成语接龙和飞花令也是我的拿手长项",
 		L"什么时候通过图灵测试？我早就通过图灵测试了你不知道吗？"
 	};
-	SendBackMessage(GroupID, QQID, ReplyMessage + rand() % _countof(ReplyMessage));
+	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
 
 	switch (rand() % 20)
 	{

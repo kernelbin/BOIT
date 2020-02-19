@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-MSGPROC CmdMsg_qwq_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR * AnonymousName, WCHAR * Msg)
+int CmdMsg_qwq_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR * AnonymousName, WCHAR * Msg)
 {
 	WCHAR ReplyMessage[][16] = {
 		L"pwp",
@@ -15,6 +15,6 @@ MSGPROC CmdMsg_qwq_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 		L"`(*>©n<*)¡ä",
 		L"(o©b¨Œ©b)o¡î" ,
 		L"(*/¦Ø£Ü*)"};
-	SendBackMessage(GroupID, QQID, ReplyMessage + rand() % _countof(ReplyMessage));
+	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
 	return 0;
 }

@@ -37,11 +37,11 @@ int RegisterRead(WCHAR * BaseDir)
 
 		cbDataSize = sizeof(DWORD);
 		DWORD RegType = REG_DWORD;
-		Result = RegQueryValueEx(RootKey, TEXT("VersionMajor"), 0, 0, &VersionMajor, &cbDataSize);
+		Result = RegQueryValueEx(RootKey, TEXT("VersionMajor"), 0, 0, (LPBYTE)&VersionMajor, &cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		cbDataSize = sizeof(DWORD);
-		Result = RegQueryValueEx(RootKey, TEXT("VersionMinor"), 0, 0, &VersionMinor, &cbDataSize);
+		Result = RegQueryValueEx(RootKey, TEXT("VersionMinor"), 0, 0, (LPBYTE)&VersionMinor, &cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		if (VersionMajor < VERSION_MAJOR)
@@ -71,7 +71,7 @@ int RegisterRead(WCHAR * BaseDir)
 		}
 
 		cbDataSize = sizeof(WCHAR) * MAX_PATH;
-		Result = RegQueryValueEx(RootKey, TEXT("BaseDir"), 0, 0, BaseDir, &cbDataSize);
+		Result = RegQueryValueEx(RootKey, TEXT("BaseDir"), 0, 0, (LPBYTE)BaseDir, &cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 	}
 	__finally
@@ -102,15 +102,15 @@ int RegisterWrite(WCHAR* BaseDir)
 
 		cbDataSize = sizeof(DWORD);
 		DWORD RegType = REG_DWORD;
-		Result = RegSetValueEx(RootKey, TEXT("VersionMajor"), 0, RegType, &VersionMajor, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("VersionMajor"), 0, RegType, (const BYTE*)&VersionMajor, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		cbDataSize = sizeof(DWORD);
-		Result = RegSetValueEx(RootKey, TEXT("VersionMinor"), 0, RegType, &VersionMinor, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("VersionMinor"), 0, RegType, (const BYTE*)&VersionMinor, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		cbDataSize = sizeof(WCHAR) * MAX_PATH;
-		Result = RegSetValueEx(RootKey, TEXT("BaseDir"), 0, 0, BaseDir, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("BaseDir"), 0, 0, (const BYTE*)BaseDir, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 	}
@@ -132,23 +132,23 @@ int InitializeSettings(WCHAR* BaseDir)
 	int iSuccess = SETTINGS_INITIALIZED;
 	__try
 	{
-		Result = RegCreateKeyEx(REG_STORE_PLACE, TEXT("Software\\BOIT"), 0, NULL, NULL, KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_CREATE_SUB_KEY, 0, &RootKey, NULL);
+		Result = RegCreateKeyEx(REG_STORE_PLACE, TEXT("Software\\BOIT"), 0, NULL, (DWORD)NULL, KEY_QUERY_VALUE | KEY_SET_VALUE | KEY_CREATE_SUB_KEY, 0, &RootKey, NULL);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		DWORD VersionMajor = VERSION_MAJOR, VersionMinor = VERSION_MINOR;
 
 		cbDataSize = sizeof(DWORD);
 		DWORD RegType = REG_DWORD;
-		Result = RegSetValueEx(RootKey, TEXT("VersionMajor"), 0, RegType, &VersionMajor, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("VersionMajor"), 0, RegType, (const BYTE*)&VersionMajor, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		cbDataSize = sizeof(DWORD);
-		Result = RegSetValueEx(RootKey, TEXT("VersionMinor"), 0, RegType, &VersionMinor, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("VersionMinor"), 0, RegType, (const BYTE*)&VersionMinor, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 
 		cbDataSize = sizeof(WCHAR) * MAX_PATH;
 		RegType = REG_SZ;
-		Result = RegSetValueEx(RootKey, TEXT("BaseDir"), 0, RegType, BaseDir, cbDataSize);
+		Result = RegSetValueEx(RootKey, TEXT("BaseDir"), 0, RegType, (const BYTE*)BaseDir, cbDataSize);
 		LeaveIfRegFailed(Result, iSuccess);
 	}
 	__finally

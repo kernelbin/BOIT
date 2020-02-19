@@ -55,5 +55,6 @@ int FreeSimpleSandboxW(pSANDBOX Sandbox);
 #define SANDBOX_ER_ABNORMAL 3	//异常退出
 #define SANDBOX_ER_KILLED 4		//被沙箱强制关闭了
 
+#define SANDBOX_ER_ERROR 5
 
 

@@ -55,7 +55,7 @@ BOOL CreateLimitedProcessW(
 	_In_ LPSTARTUPINFOW lpStartupInfo,
 	_Out_ LPPROCESS_INFORMATION lpProcessInformation);
 
-PTIMERAPCROUTINE __stdcall TerminateJobTimerRoutine(
+void __stdcall TerminateJobTimerRoutine(
 	_In_opt_ LPVOID lpArgToCompletionRoutine,
 	_In_     DWORD dwTimerLowValue,
 	_In_     DWORD dwTimerHighValue
@@ -95,11 +95,11 @@ int InitializeSandbox(int JobObjCompThreadNum, int PipeIOCompThreadNum)
 
 	for (int i = 0; i < (int)JobObjCompThreadNum; i++)
 	{
-		hJobObjPortThread[i] = _beginthreadex(NULL, 0, JobObjCompletionPort, (LPVOID)0, 0, NULL);
+		hJobObjPortThread[i] = (HANDLE)_beginthreadex(NULL, 0, JobObjCompletionPort, (LPVOID)0, 0, NULL);
 	}
 	for (int i = 0; i < (int)PipeIOCompThreadNum; i++)
 	{
-		hPipeIOPortThread[i] = _beginthreadex(NULL, 0, PipeIOCompletionPort, (LPVOID)0, 0, NULL);
+		hPipeIOPortThread[i] = (HANDLE)_beginthreadex(NULL, 0, PipeIOCompletionPort, (LPVOID)0, 0, NULL);
 	}
 
 
@@ -108,7 +108,7 @@ int InitializeSandbox(int JobObjCompThreadNum, int PipeIOCompThreadNum)
 	EventPassArgStart = CreateEvent(0, 0, 0, 0);
 	EventPassArgEnd = CreateEvent(0, 0, 0, 0);
 
-	TimerThread = _beginthreadex(NULL, 0, TerminateJobTimerThread, (LPVOID)0, 0, NULL);
+	TimerThread = (HANDLE)_beginthreadex(NULL, 0, TerminateJobTimerThread, (LPVOID)0, 0, NULL);
 	/*我需要：
 		维护SESSION和Job之间的关系，SESSION与IO线程之间的关系
 		Job对象可传递一个Key (在Assoc的时候指定)
@@ -136,8 +136,8 @@ int FinalizeSandbox()
 
 	for (int i = 0; i < g_JobObjCompThreadNum; i++)
 	{
-		//PostQueuedCompletionStatus要求传递一个Overlapped结构，我是真的不想传！！！\
-		保险起见还是传递一下吧万一UB了呢，在完成端口那边再释放
+		//PostQueuedCompletionStatus要求传递一个Overlapped结构，我是真的不想传！！！
+		//保险起见还是传递一下吧万一UB了呢，在完成端口那边再释放
 		LPOVERLAPPED lpOverlapped = malloc(sizeof(OVERLAPPED));
 		ZeroMemory(lpOverlapped, sizeof(OVERLAPPED));
 
@@ -193,7 +193,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			}
 			if (TotMemoryLimit != -1)
 			{
-				ExtendLimit.JobMemoryLimit = TotMemoryLimit;
+				ExtendLimit.JobMemoryLimit = (SIZE_T)TotMemoryLimit;
 				ExtendLimit.BasicLimitInformation.LimitFlags |= JOB_OBJECT_LIMIT_JOB_MEMORY;
 			}
 			ExtendLimit.BasicLimitInformation.LimitFlags |= JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION | JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
@@ -282,6 +282,12 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			SignalObjectAndWait(EventPassArgStart, EventPassArgEnd, INFINITE, FALSE);
 			Sandbox->hWaitableTimer = hWaitableTimer;   // Out
 			ReleaseSRWLockExclusive(&PassArgTimerLock);
+
+			if (!Sandbox->hWaitableTimer)
+			{
+				TerminateJobObject(Sandbox->hJob, 1);
+				Sandbox->ExitReason = SANDBOX_ER_ERROR;
+			}
 		}
 		
 
@@ -336,7 +342,7 @@ unsigned __stdcall JobObjCompletionPort(LPVOID Args)
 		DWORD ByteTrans;
 		LPOVERLAPPED lpOverlapped;
 		pSANDBOX  pSandbox;
-		GetQueuedCompletionStatus(JobObjCompPort, &ByteTrans, &pSandbox, (LPOVERLAPPED*)&lpOverlapped, INFINITE);
+		GetQueuedCompletionStatus(JobObjCompPort, &ByteTrans, (PULONG_PTR)(&pSandbox), (LPOVERLAPPED*)&lpOverlapped, INFINITE);
 		
 		switch (ByteTrans)
 		{
@@ -421,7 +427,10 @@ unsigned __stdcall TerminateJobTimerThread(LPVOID Args)
 			HANDLE hTimer = CreateWaitableTimer(0, 0, 0);
 			LARGE_INTEGER LargeInteger;
 			LargeInteger.QuadPart = -g_ArgTimeLimit;
-			SetWaitableTimer(hTimer, &LargeInteger, 0, TerminateJobTimerRoutine, g_ArgSandboxID, NULL);
+			if (hTimer)
+			{
+				SetWaitableTimer(hTimer, &LargeInteger, 0, TerminateJobTimerRoutine, (LPVOID)g_ArgSandboxID, FALSE);
+			}
 			hWaitableTimer = hTimer;
 			SetEvent(EventPassArgEnd);
 		}
@@ -432,7 +441,7 @@ unsigned __stdcall TerminateJobTimerThread(LPVOID Args)
 	return 0;
 }
 
-PTIMERAPCROUTINE __stdcall TerminateJobTimerRoutine(
+void __stdcall TerminateJobTimerRoutine(
 	_In_opt_ LPVOID lpArgToCompletionRoutine,
 	_In_     DWORD dwTimerLowValue,
 	_In_     DWORD dwTimerHighValue
@@ -560,5 +569,5 @@ BOOL CreateLimitedProcessW(
 //		OPEN_EXISTING,  // opens existing pipe 
 //		0,              // default attributes 
 //		NULL);          // no template file 
-//	这个函数，测试！
+//
 //}

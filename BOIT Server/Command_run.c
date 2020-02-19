@@ -23,9 +23,11 @@ typedef struct __tagCompileCfg
 }COMPILE_CFG, * pCOMPILE_CFG;
 
 
+BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen, WCHAR* ConfigSuffix, pCOMPILE_CFG CompileCfg);
+
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen);
 
-SANDBOX_CALLBACK CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
+int CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
 
 int GetLineLen(WCHAR* String);
 
@@ -35,7 +37,7 @@ int GetLineSpaceLen(WCHAR* String);
 
 LONGLONG CompileID;
 
-MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	//检查用户目录下是否有相应文件夹
 	if (PerUserCreateDirIfNExist(QQID, L"Sandbox"))
@@ -170,7 +172,7 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 
 	PathAppendW(SourceCodeFile, SourceFileName);
 
-	HFILE hSourceFile = CreateFile(SourceCodeFile, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	HANDLE hSourceFile = CreateFile(SourceCodeFile, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	PBYTE UTF8Code = 0;
 
 	BOOL bFileCreated = FALSE;
@@ -183,7 +185,7 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 		ZeroMemory(UTF8Code, UTF8Len + 1);
 		WideCharToMultiByte(CP_UTF8, 0, CodeStr, wcCodeLen, UTF8Code, UTF8Len, 0, 0);
 
-		WriteFile(hSourceFile, UTF8Code, UTF8Len, &BytesWritten, 0);
+		WriteFile(hSourceFile, (LPCVOID)UTF8Code, UTF8Len, &BytesWritten, 0);
 		if (BytesWritten != UTF8Len)
 		{
 			__leave;
@@ -205,7 +207,7 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 		Session->QQID = QQID;
 		Session->GroupID = GroupID;
 		if(AnonymousName) wcscpy_s(Session->AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
-		CreateSimpleSandboxW(NULL, cmdline, NULL, 10000000 * 10, -1, -1, Session, CmdRunSandboxCallback);
+		CreateSimpleSandboxW(NULL, cmdline, NULL, 10000000 * 10, -1, -1, (PBYTE)Session, CmdRunSandboxCallback);
 	}
 	else
 	{
@@ -216,7 +218,7 @@ MSGPROC CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 }
 
 
-SANDBOX_CALLBACK CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
+int CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
 {
 	pBOIT_SESSION Session = (pBOIT_SESSION)pData;
 	switch (Event)
@@ -234,7 +236,7 @@ SANDBOX_CALLBACK CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event
 
 
 
-EVENTPROC CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
+int CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
 {
 	switch (Event)
 	{
@@ -295,7 +297,7 @@ BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen,
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen)
 {
-	HFILE hCfgFile = CreateFileW(ConfigFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	HANDLE hCfgFile = CreateFileW(ConfigFileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if (hCfgFile == INVALID_HANDLE_VALUE) return FALSE;
 	PBYTE pData = 0;
 	WCHAR* pwData = 0;
@@ -305,9 +307,10 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 	{
 		DWORD FileSize = GetFileSize(hCfgFile, 0);
 		pData = malloc(FileSize + 1);
+		if (!pData)__leave;
 		ZeroMemory(pData, FileSize + 1);
 		DWORD BytesRead;
-		ReadFile(hCfgFile, pData, FileSize, &BytesRead, NULL);
+		if (ReadFile(hCfgFile, pData, FileSize, &BytesRead, NULL) == FALSE)__leave;
 		if (BytesRead != FileSize)
 		{
 			__leave;
