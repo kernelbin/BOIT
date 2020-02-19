@@ -122,7 +122,7 @@ int main()
 
 	WaitForSingleObject(hEventServerStop, INFINITE);
 
-	//TODO:清理工作
+	//清理工作
 	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
 	FinalizeSandbox();

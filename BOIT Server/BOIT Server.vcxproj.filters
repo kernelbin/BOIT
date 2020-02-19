@@ -91,6 +91,12 @@
     <Filter Include="源文件\指令回调\stop">
       <UniqueIdentifier>{abf01ef4-d057-40f8-b22a-71e554fbb242}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\VBuffer">
+      <UniqueIdentifier>{6077c956-fa43-41e5-9f76-21cabdd5a24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\VBuffer">
+      <UniqueIdentifier>{db5e04c9-90cf-4244-863e-17b209461514}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -150,6 +156,9 @@
     <ClCompile Include="Command_stop.c">
       <Filter>源文件\指令回调\stop</Filter>
     </ClCompile>
+    <ClCompile Include="VBuffer.c">
+      <Filter>源文件\VBuffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -184,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="SimpleSandbox.h">
       <Filter>头文件\简易沙盒</Filter>
+    </ClInclude>
+    <ClInclude Include="VBuffer.h">
+      <Filter>头文件\VBuffer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

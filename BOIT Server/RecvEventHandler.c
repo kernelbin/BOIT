@@ -43,7 +43,7 @@ unsigned __stdcall RecvEventThread(void *Args)
 				break;
 			}
 			EVENT_RECV RecvEvent;
-			//TODO: 复制对象，分发任务
+
 			switch (pSharedMemRecv->EventType)
 			{
 			case BOIT_EVENT_RECV_PRIVATE:

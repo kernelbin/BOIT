@@ -6,10 +6,12 @@
 #include"SimpleSandbox.h"
 #include"SessionManage.h"
 #include<wchar.h>
+#include"VBuffer.h"
+
 
 #define COMPILECMD_MAXLEN 512
 
-#define COMPILE_MAXSUFFIX 16
+#define COMPILE_MAXSUFFIX 8
 
 
 #define COMPILE_TYPE_NULL 0
@@ -23,11 +25,27 @@ typedef struct __tagCompileCfg
 }COMPILE_CFG, * pCOMPILE_CFG;
 
 
+typedef struct __tagCompileSession
+{
+	BOIT_SESSION boitSession;
+	pVBUF StdOutBuffer;
+	pBOIT_COMMAND Command;
+	pCOMPILE_CFG CompileCfg;
+	LONGLONG AllocCompileID;
+}COMPILE_SESSION, * pCOMPILE_SESSION;
+
+typedef struct __tagRunSession
+{
+	BOIT_SESSION boitSession;
+	pVBUF StdOutBuffer;
+}RUN_SESSION, * pRUN_SESSION;
+
+
 BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen, WCHAR* ConfigSuffix, pCOMPILE_CFG CompileCfg);
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen);
 
-int CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
+int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
 
 int GetLineLen(WCHAR* String);
 
@@ -56,7 +74,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	int MsgLen = wcslen(Msg);
 	WCHAR* lpwcParam = Msg;
 	int ParamCnt = 0;
-	COMPILE_CFG CompileCfg;
+	pCOMPILE_CFG CompileCfg = malloc(sizeof(COMPILE_CFG));
 
 	BOOL LanguageMatched = 0, bCodeFound = 0;
 	WCHAR* CodeStr = 0;
@@ -64,97 +82,105 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	BOOL bFailed = 0, bIsSU = 0;
 
 	WCHAR FailedReason[128];
-	while (MsgLen > 0)
+	__try
 	{
-		int ParamLen = GetCmdParamLen(lpwcParam);
-		//处理这个 Param
-		if (ParamCnt == 1)
+		while (MsgLen > 0)
 		{
-			if (FindCompileConfig(pCmd, lpwcParam, ParamLen, L".cfg", &CompileCfg) == TRUE)
+			int ParamLen = GetCmdParamLen(lpwcParam);
+			//处理这个 Param
+			if (ParamCnt == 1)
 			{
-				LanguageMatched = TRUE;
+				if (FindCompileConfig(pCmd, lpwcParam, ParamLen, L".cfg", CompileCfg) == TRUE)
+				{
+					LanguageMatched = TRUE;
+				}
 			}
-		}
-		else if (ParamCnt > 1)
-		{
-			//解析可能的参数
-			if (lpwcParam[0] == '-' || lpwcParam[0] == '/' || lpwcParam[0] == '\\')
+			else if (ParamCnt > 1)
 			{
-				int ParamLen = GetCmdParamLen(lpwcParam);
-				if (ParamLen == 1)
+				//解析可能的参数
+				if (lpwcParam[0] == '-' || lpwcParam[0] == '/' || lpwcParam[0] == '\\')
 				{
-					swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %lc", lpwcParam[0]);
-					SendBackMessage(GroupID, QQID, FailedReason);
-					bFailed = 1;
-					break;
-				}
-				else if (ParamLen >= 16)
-				{
-					SendBackMessage(GroupID, QQID, L"参数名称过长");
-					bFailed = 1;
-					break;
-				}
-				else
-				{
-					if ((ParamLen == wcslen(L"su") + 1) && _wcsnicmp(lpwcParam + 1, L"su", wcslen(L"su")) == 0)
+					int ParamLen = GetCmdParamLen(lpwcParam);
+					if (ParamLen == 1)
 					{
-						bIsSU = TRUE;
-					}
-					else
-					{
-						WCHAR ParamBuf[16] = { 0 };
-						wcsncpy_s(ParamBuf, _countof(ParamBuf), lpwcParam, ParamLen);
-						swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %ls", ParamBuf);
+						swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %lc", lpwcParam[0]);
 						SendBackMessage(GroupID, QQID, FailedReason);
 						bFailed = 1;
 						break;
 					}
+					else if (ParamLen >= 16)
+					{
+						SendBackMessage(GroupID, QQID, L"参数名称过长");
+						bFailed = 1;
+						break;
+					}
+					else
+					{
+						if ((ParamLen == wcslen(L"su") + 1) && _wcsnicmp(lpwcParam + 1, L"su", wcslen(L"su")) == 0)
+						{
+							bIsSU = TRUE;
+						}
+						else
+						{
+							WCHAR ParamBuf[16] = { 0 };
+							wcsncpy_s(ParamBuf, _countof(ParamBuf), lpwcParam, ParamLen);
+							swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %ls", ParamBuf);
+							SendBackMessage(GroupID, QQID, FailedReason);
+							bFailed = 1;
+							break;
+						}
+					}
+				}
+				else
+				{
+					//当作程序代码解析
+					bCodeFound = 1;
+					CodeStr = lpwcParam;
+					break;
+				}
+			}
+			lpwcParam += ParamLen;
+			MsgLen -= ParamLen;
+			int SpaceLen = GetCmdSpaceLen(lpwcParam);
+			lpwcParam += SpaceLen;
+			MsgLen -= SpaceLen;
+			ParamCnt++;
+		}
+	}
+	__finally
+	{
+		if (!bFailed)
+		{
+			if (LanguageMatched)
+			{
+				if (bCodeFound)
+				{
+					//撒花！
+				}
+				else
+				{
+					SendBackMessage(GroupID, QQID, L"未找到源代码");
+					bFailed = TRUE;
 				}
 			}
 			else
 			{
-				//当作程序代码解析
-				bCodeFound = 1;
-				CodeStr = lpwcParam;
-				break;
-			}
-		}
-		lpwcParam += ParamLen;
-		MsgLen -= ParamLen;
-		int SpaceLen = GetCmdSpaceLen(lpwcParam);
-		lpwcParam += SpaceLen;
-		MsgLen -= SpaceLen;
-		ParamCnt++;
-	}
-
-	if (!bFailed)
-	{
-		if (LanguageMatched)
-		{
-			if (bCodeFound)
-			{
-				//撒花！
-				SendBackMessage(GroupID, QQID, CodeStr);
-			}
-			else
-			{
-				SendBackMessage(GroupID, QQID, L"未找到源代码");
+				SendBackMessage(GroupID, QQID, L"未找到语言类型或该语言不受支持");
 				bFailed = TRUE;
 			}
 		}
-		else
+
+
+		if (bFailed)
 		{
-			SendBackMessage(GroupID, QQID, L"未找到语言类型或该语言不受支持");
-			bFailed = TRUE;
+			SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
+			free(CompileCfg);
+			return 0;
 		}
 	}
-	
 
-	if (bFailed)
-	{
-		SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
-		return 0;
-	}
+
+
 
 	//TODO:校验权限
 
@@ -168,7 +194,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 	WCHAR SourceFileName[16];
 
-	swprintf_s(SourceFileName, _countof(SourceFileName), L"Temp%lld%ls", AllocCompileID, CompileCfg.SourceSuffix);
+	swprintf_s(SourceFileName, _countof(SourceFileName), L"Temp%lld%ls", AllocCompileID, CompileCfg->SourceSuffix);
 
 	PathAppendW(SourceCodeFile, SourceFileName);
 
@@ -197,43 +223,244 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	{
 		CloseHandle(hSourceFile);
 		if (UTF8Code)free(UTF8Code);
+
+		if (!bFileCreated)
+		{
+			SendBackMessage(GroupID, QQID, L"写入文件时出现错误");
+			free(CompileCfg);
+			return 0;
+		}
 	}
 
-	if (bFileCreated)
+
+	//如果有，移除之前的可执行文件
+	WCHAR ExecutableCodeFile[MAX_PATH];
+	WCHAR ExecutableFileName[16];
+
+
+	GetPerUserDir(ExecutableCodeFile, QQID);
+	PathAppendW(ExecutableCodeFile, L"Compile\\");
+	swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", AllocCompileID);
+	PathAppendW(ExecutableCodeFile, ExecutableFileName);
+
+	if (PathFileExistsW(ExecutableCodeFile))
 	{
-		WCHAR cmdline[100] = L"notepad.exe";
-		//TODO; 这个Session是临时瞎写的
-		pBOIT_SESSION Session = malloc(sizeof(BOIT_SESSION));
-		Session->QQID = QQID;
-		Session->GroupID = GroupID;
-		if(AnonymousName) wcscpy_s(Session->AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
-		CreateSimpleSandboxW(NULL, cmdline, NULL, 10000000 * 10, -1, -1, (PBYTE)Session, CmdRunSandboxCallback);
+		DeleteFile(ExecutableCodeFile);
 	}
-	else
+
+
+
+	WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
+	GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
+
+	WCHAR WorkDir[MAX_PATH];
+	GetPerUserDir(WorkDir, QQID);
+	PathAppendW(WorkDir, L"Compile\\");
+
+	//TODO; 这个Session是临时瞎写的
+	pCOMPILE_SESSION CompileSession = malloc(sizeof(COMPILE_SESSION));
+	ZeroMemory(CompileSession, sizeof(COMPILE_SESSION));
+	CompileSession->boitSession.QQID = QQID;
+	CompileSession->boitSession.GroupID = GroupID;
+	if (AnonymousName) wcscpy_s(CompileSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+	CompileSession->StdOutBuffer = AllocVBuf();
+	CompileSession->CompileCfg = CompileCfg;
+	CompileSession->Command = pCmd;
+	CompileSession->AllocCompileID = AllocCompileID;
+
+
+	//TODO:这些限制都是我临时写的
+	if (CreateSimpleSandboxW(NULL,
+		CompileCmd,
+		WorkDir,
+		10000000 * 10,		//10秒
+		256 * 1024 * 1024,	//256MB内存
+		20 * 100,				//10% CPU
+		FALSE,				//不设置权限限制
+		(PBYTE)CompileSession,
+		CompileSandboxCallback) == 0)
 	{
-		SendBackMessage(GroupID, QQID, L"写入文件时出现错误");
+		SendBackMessage(GroupID, QQID, L"为编译器创建沙盒时出现意外");
+		free(CompileCfg);
+		free(CompileSession);
 	}
 
 	return 0;
 }
 
 
-int CmdRunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
+int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
 {
-	pBOIT_SESSION Session = (pBOIT_SESSION)pData;
+	pCOMPILE_SESSION Session = (pCOMPILE_SESSION)pData;
 	switch (Event)
 	{
 	case SANDBOX_EVTNT_PROCESS_ZERO:
-		SendBackMessage(Session->GroupID, Session->QQID, L"执行完毕");
-		FreeSimpleSandboxW(Sandbox);
-		break;
+	{
+		DWORD CompileExitCode;
+		GetExitCodeProcess(Sandbox->hProcess, &CompileExitCode);
+
+		WCHAR ExecutableCodeFile[MAX_PATH];
+		WCHAR ExecutableFileName[16];
+		GetPerUserDir(ExecutableCodeFile, Session->boitSession.QQID);
+		PathAppendW(ExecutableCodeFile, L"Compile\\");
+		swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", Session->AllocCompileID);
+		PathAppendW(ExecutableCodeFile, ExecutableFileName);
+
+		if (Sandbox->ExitReason == SANDBOX_ER_EXIT && PathFileExistsW(ExecutableCodeFile)) //不对返回值进行检查，有的编译器乱返回
+		{
+			//清理原有的目录
+
+			WCHAR SandboxFile[MAX_PATH] = { 0 };
+			WCHAR SandboxDirName[16];
+			GetPerUserDir(SandboxFile, Session->boitSession.QQID);
+			PathAppendW(SandboxFile, L"Sandbox\\");
+			swprintf_s(SandboxDirName, _countof(SandboxDirName), L"Sandbox%lld", Session->AllocCompileID);
+
+			PathAppendW(SandboxFile, SandboxDirName);
+			SHFILEOPSTRUCTW FileOp;
+			if (PathIsDirectoryW(SandboxFile))
+			{
+				int FileLen = wcslen(SandboxFile);
+				SandboxFile[FileLen] = 0;
+				SandboxFile[FileLen + 1] = 0;
+				FileOp.fFlags = FOF_NOCONFIRMATION;
+				FileOp.hNameMappings = NULL;
+				FileOp.hwnd = NULL;
+				FileOp.lpszProgressTitle = NULL;
+				FileOp.pFrom = SandboxFile;
+				FileOp.pTo = NULL;
+				FileOp.wFunc = FO_DELETE;
+				int iRet = SHFileOperationW(&FileOp);
+			}
+			CreateDirectoryW(SandboxFile, 0);
+			//我寻思上面这个目录变量也不用了，拿过来直接往后接可执行文件名吧
+			PathAppendW(SandboxFile, ExecutableFileName);
+			
+			CopyFile(ExecutableCodeFile, SandboxFile, TRUE);
+
+			StartRunSandbox(SandboxFile, &(Session->boitSession));
+		}
+		else
+		{
+			if (Sandbox->ExitReason == SANDBOX_ER_TIMEOUT)
+			{
+				SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"Oh... 编译超时了");
+			}
+			else
+			{
+				SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"Opps... 编译失败了");
+			}
+			WCHAR* wcStdout;
+			int cchStdout = MultiByteToWideChar(CP_UTF8, 0,
+				Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, 0, 0);
+
+			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
+			MultiByteToWideChar(CP_UTF8, 0,
+				Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, wcStdout, cchStdout);
+			wcStdout[cchStdout] = 0;
+
+			//实行截断
+			if (cchStdout > BOIT_MAX_TEXTLEN)
+			{
+				wcStdout[BOIT_MAX_TEXTLEN] = 0;
+			}
+
+			WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
+			swprintf_s(ShowMessage, cchStdout + 32, L"编译器输出：\n%ls\n编译器返回值：%ld", wcStdout, CompileExitCode);
+			free(wcStdout);
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, ShowMessage);
+			free(ShowMessage);
+		}
+
+		FreeSimpleSandbox(Sandbox);
+		FreeVBuf(Session->StdOutBuffer);
+		free(Session->CompileCfg);
+		free(Session);
+	}
+
+	break;
 	case SANDBOX_EVENT_STD_OUTPUT:
+		if (Session->StdOutBuffer->Length + DataLen < BOIT_MAX_TEXTLEN * 4) // UTF8编码在最恶劣情况下一个字符4字节
+		{
+			int OrgDataLen = Session->StdOutBuffer->Length;
+			AdjustVBuf(Session->StdOutBuffer, Session->StdOutBuffer->Length + DataLen);
+			memcpy(Session->StdOutBuffer->Data + OrgDataLen, StdOutData, DataLen);
+		}
+		//剩下的直接丢掉包
 		break;
 	}
-	
+
 	return 0;
 }
 
+
+int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen)
+{
+	pRUN_SESSION Session = (pRUN_SESSION)pData;
+	switch (Event)
+	{
+	case SANDBOX_EVTNT_PROCESS_ZERO:
+	{
+		if (Session->StdOutBuffer->Length == 0)
+		{
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序莫得输出诶");
+		}
+		else
+		{
+			WCHAR* wcStdout;
+			int cchStdout = MultiByteToWideChar(CP_UTF8, 0,
+				Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, 0, 0);
+			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
+			MultiByteToWideChar(CP_UTF8, 0,
+				Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, wcStdout, cchStdout);
+			wcStdout[cchStdout] = 0;
+
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+
+			free(wcStdout);
+		}
+		FreeVBuf(Session->StdOutBuffer);
+		free(Session);
+	}
+	break;
+	case SANDBOX_EVENT_STD_OUTPUT:
+	{
+		if (Session->StdOutBuffer->Length + DataLen < BOIT_MAX_TEXTLEN * 4) // UTF8编码在最恶劣情况下一个字符4字节
+		{
+			int OrgDataLen = Session->StdOutBuffer->Length;
+			AdjustVBuf(Session->StdOutBuffer, Session->StdOutBuffer->Length + DataLen);
+			memcpy(Session->StdOutBuffer->Data + OrgDataLen, StdOutData, DataLen);
+		}
+		//剩下的直接丢掉包
+		break;
+	}
+	break;
+	}
+}
+
+
+BOOL StartRunSandbox(WCHAR* CommandLine, pBOIT_SESSION boitSession)
+{
+	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
+	RunSession->boitSession.GroupID = boitSession->GroupID;
+	RunSession->boitSession.QQID = boitSession->QQID;
+	RunSession->StdOutBuffer = AllocVBuf();
+	if (RunSession->boitSession.AnonymousName) wcscpy_s(RunSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, boitSession->AnonymousName);
+	if (CreateSimpleSandboxW(NULL, CommandLine, NULL,
+		10000000 * 10,		//10秒
+		256 * 1024 * 1024,	//256MB内存
+		10 * 100,			//10% CPU
+		TRUE, RunSession, RunSandboxCallback) == 0)
+	{
+		SendBackMessage(RunSession->boitSession.GroupID, RunSession->boitSession.QQID, L"为程序创建沙盒时出现意外");
+		free(RunSession);
+	}
+	return 0;
+}
 
 
 int CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB)
@@ -444,6 +671,7 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 	return bMatch;
 }
 
+
 int GetLineLen(WCHAR* String)
 {
 	int i;
@@ -488,4 +716,46 @@ int GetLineFeedLen(WCHAR* String)
 		}
 	}
 	return i;
+}
+
+
+BOOL GetCompileCommand(WCHAR* CommandBuffer, pCOMPILE_CFG CompileCfg, LONGLONG AllocCompileID)
+{
+	int len = wcslen(CompileCfg->Command);
+	WCHAR SourceFile[16];
+	WCHAR ExecutableFile[16];
+
+	swprintf_s(SourceFile, _countof(SourceFile), L"Temp%lld%ls", AllocCompileID, CompileCfg->SourceSuffix);
+	swprintf_s(ExecutableFile, _countof(ExecutableFile), L"Temp%lld.exe", AllocCompileID);
+	int j = 0;
+	for (int i = 0; i < len; )
+	{
+		if (j >= COMPILECMD_MAXLEN - 1)
+		{
+			break;
+		}
+		if (_wcsnicmp(CompileCfg->Command + i, L"%In", wcslen(L"%In")) == 0)
+		{
+			wcscpy_s(CommandBuffer + j, COMPILECMD_MAXLEN - j, SourceFile);
+			i += 3;
+			j += wcslen(SourceFile);
+		}
+		else if (_wcsnicmp(CompileCfg->Command + i, L"%Out", wcslen(L"%Out")) == 0)
+		{
+			wcscpy_s(CommandBuffer + j, COMPILECMD_MAXLEN - j, ExecutableFile);
+			i += 4;
+			j += wcslen(ExecutableFile);
+		}
+		else if (_wcsnicmp(CompileCfg->Command + i, L"%%", wcslen("%%")) == 0)
+		{
+			CommandBuffer[j++] = CompileCfg->Command[i++];
+			i++;
+		}
+		else
+		{
+			CommandBuffer[j++] = CompileCfg->Command[i++];
+		}
+	}
+	CommandBuffer[j++] = 0;
+	return 0;
 }

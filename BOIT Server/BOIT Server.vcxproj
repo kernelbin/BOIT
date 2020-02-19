@@ -115,6 +115,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,6 +160,7 @@
     <ClCompile Include="ServerState.c" />
     <ClCompile Include="SessionManage.c" />
     <ClCompile Include="SimpleSandbox.c" />
+    <ClCompile Include="VBuffer.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APITransfer.h" />
@@ -172,6 +174,7 @@
     <ClInclude Include="SendEventDispatch.h" />
     <ClInclude Include="SessionManage.h" />
     <ClInclude Include="SimpleSandbox.h" />
+    <ClInclude Include="VBuffer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

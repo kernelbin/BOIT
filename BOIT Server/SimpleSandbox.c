@@ -143,12 +143,22 @@ int FinalizeSandbox()
 
 		PostQueuedCompletionStatus(JobObjCompPort, JOB_OBJECT_MSG_MY_CLEANUP, 0, lpOverlapped);
 	}
+
+	for (int i = 0; i < g_PipeIOCompThreadNum; i++)
+	{
+		PipeIOSendClose(PipeIOCompPort);
+	}
+
 	WaitForMultipleObjects(g_JobObjCompThreadNum, hJobObjPortThread, 1, INFINITE);
 	WaitForMultipleObjects(g_PipeIOCompThreadNum, hPipeIOPortThread, 1, INFINITE);
 	WaitForSingleObject(TimerThread, INFINITE);
 
 	CloseHandle(EventPassArgStart);
 	CloseHandle(EventPassArgEnd);
+
+	CloseHandle(JobObjCompPort);
+	CloseHandle(PipeIOCompPort);
+
 	CloseHandle(SandboxCleaning);
 	return 0;
 }
@@ -160,7 +170,8 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	long long TotUserTimeLimit,		//整个沙盒的时间限制，msdn上说是100纳秒为单位。（奇怪？我觉得是10000*秒）设为-1不设置时间限制
 	long long TotMemoryLimit,		//整个沙盒的内存限制，Byte为单位。设为-1不设置内存限制
 	int CpuRateLimit,				//CPU限制，1-10000，（10000意味着可以用100%的CPU）不可以是0。设为-1不设置限制
-	PBYTE pExternalData,					//附带的信息
+	BOOL bLimitPrivileges,			//限制权限
+	PBYTE pExternalData,			//附带的信息
 	SANDBOX_CALLBACK CallbackFunc	//回调函数
 	)
 {
@@ -168,6 +179,9 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	STARTUPINFOW SysInfo = { 0 };
 	PROCESS_INFORMATION ProcInfo = { 0 };
 	HANDLE hJob = 0;
+	HANDLE hPipeInRead = 0, hPipeInWrite = 0;
+	HANDLE hPipeOutRead = 0, hPipeOutWrite = 0;
+
 	pSANDBOX Sandbox = malloc(sizeof(SANDBOX));
 	if (!Sandbox) return 0;
 
@@ -237,14 +251,48 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 		}
 
 
-		//创建管道
-		/*{
-			CreateOverlappedNamedPipePair()
-		}*/
-
 		SysInfo.cb = sizeof(STARTUPINFO);
 
-		BOOL bCreated = CreateLimitedProcessW(ApplicationName, CommandLine, 0, 0, 0, CREATE_SUSPENDED, 0, 0, &SysInfo, &ProcInfo);
+
+		
+		//创建管道
+		{
+			
+			CreateOverlappedNamedPipePair(&hPipeInRead, &hPipeInWrite, PIPEIO_BUFSIZE);
+			CreateOverlappedNamedPipePair(&hPipeOutRead, &hPipeOutWrite, PIPEIO_BUFSIZE);
+			SysInfo.hStdInput = hPipeInRead;
+			SysInfo.hStdOutput = SysInfo.hStdError = hPipeOutWrite;
+			SysInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+			CreateIoCompletionPort(hPipeInWrite, PipeIOCompPort, Sandbox, 0);
+			CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, Sandbox, 0);
+		}
+
+		
+		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		BOOL bCreated;
+		if (bLimitPrivileges)
+		{
+			bCreated = CreateLimitedProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED | CREATE_NEW_CONSOLE, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+		}
+		else
+		{
+			bCreated = CreateProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED | CREATE_NEW_CONSOLE, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+		}
+		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, 0);
+		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, 0);
+
+		CloseHandle(hPipeInRead);
+		CloseHandle(hPipeOutWrite);
+
+		if (!bCreated)
+		{
+			__leave;
+		}
+		Sandbox->hPipeInWrite = hPipeInWrite;
+		Sandbox->hPipeOutRead = hPipeOutRead;
+
 		if (!AssignProcessToJobObject(hJob, ProcInfo.hProcess))
 		{
 			__leave;
@@ -287,18 +335,37 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			{
 				TerminateJobObject(Sandbox->hJob, 1);
 				Sandbox->ExitReason = SANDBOX_ER_ERROR;
+				//这里leave了，那一头Job的IOCP就要遭殃。对象被删了。所以这里当成功处理
 			}
 		}
 		
+
+		//读取Pipe
+		PipeIORead(hPipeOutRead);
 
 		ResumeThread(ProcInfo.hThread);
 		bSuccess = TRUE;
 	}
 	__finally
 	{
-		if ((!bSuccess) && ProcInfo.hProcess)
+		if (!bSuccess)
 		{
-			TerminateProcess(ProcInfo.hProcess, 1);
+			if (ProcInfo.hProcess)
+			{
+				TerminateProcess(ProcInfo.hProcess, 1);
+				CloseHandle(ProcInfo.hProcess);
+			}
+			if (hJob)
+			{
+				CloseHandle(hJob);
+			}
+
+			if (Sandbox)
+			{
+				free(Sandbox);
+				Sandbox = NULL;
+			}
+
 		}
 		if (ProcInfo.hThread)
 		{
@@ -309,7 +376,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	return Sandbox;
 }
 
-int FreeSimpleSandboxW(pSANDBOX Sandbox)
+int FreeSimpleSandbox(pSANDBOX Sandbox)
 {
 	//移除
 	AcquireSRWLockExclusive(&SandboxListLock);
@@ -330,6 +397,8 @@ int FreeSimpleSandboxW(pSANDBOX Sandbox)
 	ReleaseSRWLockExclusive(&SandboxListLock);
 
 	TerminateJobObject(Sandbox->hJob, 1);
+	CloseHandle(Sandbox->hPipeInWrite);
+	CloseHandle(Sandbox->hPipeOutRead);
 	CloseHandle(Sandbox->hProcess);
 	CloseHandle(Sandbox->hJob);
 	return 0;
@@ -397,10 +466,53 @@ unsigned __stdcall PipeIOCompletionPort(LPVOID Args)
 	while (1)
 	{
 		DWORD ByteTrans;
-		LPOVERLAPPED pOverlapped;
-		ULONG_PTR pKey = 0;
-		GetQueuedCompletionStatus(PipeIOCompPort, &ByteTrans, &pKey, (LPOVERLAPPED*)&pOverlapped, INFINITE);
-		Sleep(0);
+		pPIPEIO_PACK PipeIOPack;
+		pSANDBOX  pSandbox;
+		BOOL bResult = GetQueuedCompletionStatus(PipeIOCompPort, &ByteTrans, (PULONG_PTR)(&pSandbox), (LPOVERLAPPED*)&PipeIOPack, INFINITE);
+		if (bResult)
+		{
+			//成功传输
+			switch (PipeIOPack->PackMode)
+			{
+			case PACKMODE_READ:
+			{
+				SANDBOX_CALLBACK Callback;
+				PBYTE pData;
+				AcquireSRWLockShared(&SandboxListLock);
+					Callback = pSandbox->SandboxCallback;
+					pData = pSandbox->pExternalData;
+				ReleaseSRWLockShared(&SandboxListLock);
+				if (Callback)
+				{
+					Callback(pSandbox, pData, SANDBOX_EVENT_STD_OUTPUT, PipeIOPack->pData, ByteTrans);
+				}
+
+				free(PipeIOPack->pData);
+				free(PipeIOPack);
+
+				PipeIORead(pSandbox->hPipeOutRead);
+			}
+				break;
+			case PACKMODE_WRITE:
+				free(PipeIOPack);
+				break;
+			case PACKMODE_CLOSE://结束
+				free(PipeIOPack);
+				return 0;
+			}
+		}
+		else
+		{
+			DWORD dwErr = GetLastError();
+			switch (dwErr)
+			{
+			case ERROR_ABANDONED_WAIT_0:
+				return 0;//完成端口关闭了，继续拆包啥也拆不出来
+			default:
+				//其他类型IO错误
+				break;
+			}
+		}
 	}
 
 }
@@ -542,32 +654,53 @@ BOOL CreateLimitedProcessW(
 }
 
 
-//BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize)
-//{
-//	WCHAR lpszPipename[128] = L"\\\\.\\pipe\\";
-//	for (int i = 9; i < 120; i++)
-//	{
-//		lpszPipename[i] = L'a' + rand() % 26;
-//	}
-//
-//	(*hReadPipe) = CreateNamedPipeW(
-//		lpszPipename,             // pipe name 
-//		PIPE_ACCESS_INBOUND |      // read/write access 
-//		FILE_FLAG_OVERLAPPED,     // overlapped mode 
-//		PIPE_TYPE_BYTE |       // byte-type pipe 
-//		PIPE_READMODE_BYTE |   // byte read mode 
-//		PIPE_WAIT,                // blocking mode 
-//		PIPE_UNLIMITED_INSTANCES, // unlimited instances 
-//		nSize,    // output buffer size 
-//		0,    // input buffer size 
-//		0,             // client time-out 
-//		NULL);
-//
-//	(*hWritePipe) = CreateFile(lpszPipename, GENERIC_WRITE,
-//		0,              // no sharing 
-//		NULL,           // default security attributes
-//		OPEN_EXISTING,  // opens existing pipe 
-//		0,              // default attributes 
-//		NULL);          // no template file 
-//
-//}
+BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize)
+{
+	WCHAR lpszPipename[128] = L"\\\\.\\pipe\\";
+	for (int i = 9; i < 120; i++)
+	{
+		lpszPipename[i] = L'a' + rand() % 26;
+	}
+
+	(*hReadPipe) = CreateNamedPipeW(
+		lpszPipename,             // pipe name 
+		PIPE_ACCESS_INBOUND |      // read/write access 
+		FILE_FLAG_OVERLAPPED,     // overlapped mode 
+		PIPE_TYPE_BYTE |       // byte-type pipe 
+		PIPE_READMODE_BYTE |   // byte read mode 
+		PIPE_WAIT,                // blocking mode 
+		PIPE_UNLIMITED_INSTANCES, // unlimited instances 
+		nSize,    // output buffer size 
+		0,    // input buffer size 
+		0,             // client time-out 
+		NULL);
+
+	(*hWritePipe) = CreateFileW(lpszPipename, GENERIC_WRITE,
+		0,              // no sharing 
+		NULL,           // default security attributes
+		OPEN_EXISTING,  // opens existing pipe 
+		FILE_FLAG_OVERLAPPED,              // default attributes 
+		NULL);          // no template file 
+
+}
+
+BOOL PipeIORead(HANDLE PipeHandle)
+{
+	pPIPEIO_PACK PipeIOPack = malloc(sizeof(PIPEIO_PACK));
+	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
+	PipeIOPack->PackMode = PACKMODE_READ;
+	PipeIOPack->pData = malloc(PIPEIO_BUFSIZE);
+	ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
+	DWORD BytesRead;
+	BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
+	return 0;
+}
+
+BOOL PipeIOSendClose(HANDLE hCompPort)
+{
+	pPIPEIO_PACK PipeIOPack = malloc(sizeof(PIPEIO_PACK));
+	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
+	PipeIOPack->PackMode = PACKMODE_CLOSE;
+	PostQueuedCompletionStatus(hCompPort, 0, 0, PipeIOPack);
+	return 0;
+}

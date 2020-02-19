@@ -84,9 +84,10 @@ pBOIT_COMMAND RegisterCommandEx(WCHAR* CommandName, MSGPROC MessageProc, EVENTPR
 		{
 			if (Command->CommandName[0])free(Command->CommandName[0]);
 			if (Command->ManualMsg)free(Command->ManualMsg);
+			free(Command);
+			Command = 0;
 		}
-		free(Command);
-		Command = 0;
+		
 	}
 
 
