@@ -159,6 +159,9 @@
     <ClCompile Include="VBuffer.c">
       <Filter>源文件\VBuffer</Filter>
     </ClCompile>
+    <ClCompile Include="UserTokenManage.c">
+      <Filter>源文件\目录管理</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">

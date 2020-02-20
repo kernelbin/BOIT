@@ -35,3 +35,7 @@ BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName);
 int GetPerCommandCfgDir(WCHAR* Buffer, pBOIT_COMMAND pCmd);
 
 BOOL PerCommandCfgCreateDirIfNExist(pBOIT_COMMAND pCmd, WCHAR* FolderName);
+
+
+//权限相关目录操作
+BOOL CheckUserToken(long long QQID, WCHAR* TokenStr);

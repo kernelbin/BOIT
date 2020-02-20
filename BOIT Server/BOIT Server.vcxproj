@@ -160,6 +160,7 @@
     <ClCompile Include="ServerState.c" />
     <ClCompile Include="SessionManage.c" />
     <ClCompile Include="SimpleSandbox.c" />
+    <ClCompile Include="UserTokenManage.c" />
     <ClCompile Include="VBuffer.c" />
   </ItemGroup>
   <ItemGroup>
