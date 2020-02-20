@@ -7,7 +7,7 @@
 #include"SessionManage.h"
 #include<wchar.h>
 #include"VBuffer.h"
-
+#include"RemoveCQEscapeChar.h"
 
 #define COMPILECMD_MAXLEN 512
 
@@ -211,6 +211,10 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	PBYTE MultiByteStrCode = 0;
 
 	BOOL bFileCreated = FALSE;
+
+	//去除转义码
+
+	RemoveCQEscapeChar(CodeStr);
 	__try
 	{
 		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
@@ -467,6 +471,12 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 				Session->StdOutBuffer->Length, wcStdout, cchStdout);
 			wcStdout[cchStdout] = 0;
 
+			//实行截断
+			if (cchStdout > BOIT_MAX_TEXTLEN)
+			{
+				wcStdout[BOIT_MAX_TEXTLEN] = 0;
+			}
+
 			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
 
 			free(wcStdout);
@@ -539,7 +549,7 @@ BOOL StartRunSandbox(WCHAR * Application,WCHAR* CommandLine,WCHAR * CuurentDir, 
 	if (RunSession->boitSession.AnonymousName) wcscpy_s(RunSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, boitSession->AnonymousName);
 	if (CreateSimpleSandboxW(Application, CommandLine, CuurentDir,
 		10000000 * 10,		//10秒
-		256 * 1024 * 1024,	//256MB内存
+		512 * 1024 * 1024,	//512MB内存
 		10 * 100,			//10% CPU
 		TRUE, RunSession, RunSandboxCallback) == 0)
 	{

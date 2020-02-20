@@ -46,9 +46,9 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 	__try
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_PRIVATE;
-		int cchWideCharLen = MultiByteToWideChar(CP_ACP, 0, msg, -1, 0, 0);
+		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
-		MultiByteToWideChar(CP_ACP, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
+		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen + 1] = 0;
 
@@ -84,14 +84,14 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 	__try
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_GROUP;
-		int cchWideCharLen = MultiByteToWideChar(CP_ACP, 0, msg, -1, 0, 0);
+		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
-		MultiByteToWideChar(CP_ACP, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);
+		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen + 1] = 0;
 
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_NICKLEN);
-		MultiByteToWideChar(CP_ACP, 0, fromAnonymous, -1, pSharedMemRecv->u.GroupMsg.AnonymousName, cchWideCharLen);
+		MultiByteToWideChar(54936, 0, fromAnonymous, -1, pSharedMemRecv->u.GroupMsg.AnonymousName, cchWideCharLen);
 		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen] = 0;
 		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen + 1] = 0;
 

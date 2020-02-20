@@ -97,6 +97,15 @@
     <Filter Include="头文件\VBuffer">
       <UniqueIdentifier>{db5e04c9-90cf-4244-863e-17b209461514}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\CQ码转义">
+      <UniqueIdentifier>{42086f9b-6ce7-4fa6-bd1a-ee4317a8b75f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\CQ码转义">
+      <UniqueIdentifier>{7a11dbcd-e4c2-4baa-a1a3-3e7055c0f861}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\q&amp;a">
+      <UniqueIdentifier>{05f711d7-19b8-4a22-9e7d-54486fe7a4a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -162,6 +171,12 @@
     <ClCompile Include="UserTokenManage.c">
       <Filter>源文件\目录管理</Filter>
     </ClCompile>
+    <ClCompile Include="RemoveCQEscapeChar.c">
+      <Filter>源文件\CQ码转义</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_q_and_a.c">
+      <Filter>源文件\指令回调\q&amp;a</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -199,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="VBuffer.h">
       <Filter>头文件\VBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoveCQEscapeChar.h">
+      <Filter>头文件\CQ码转义</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

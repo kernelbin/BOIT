@@ -32,9 +32,9 @@ unsigned __stdcall SendEventThread(void *Args)
 			{
 				char* ToSendText;
 				int ccbLen;
-				ccbLen = WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, 0, 0, 0, 0);
+				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, 0, 0, 0, 0);
 				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
-				WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, ToSendText, ccbLen+1, 0, 0);
+				WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, ToSendText, ccbLen+1, 0, 0);
 				SendPrivateMessage(pSharedMemSend->u.PrivateMsg.QQID, ToSendText);
 				free(ToSendText);
 			}
@@ -43,9 +43,9 @@ unsigned __stdcall SendEventThread(void *Args)
 			{
 				char* ToSendText;
 				int ccbLen;
-				ccbLen = WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.GroupMsg.Msg, -1, 0, 0, 0, 0);
+				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, 0, 0, 0, 0);
 				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
-				WideCharToMultiByte(CP_ACP, 0, pSharedMemSend->u.GroupMsg.Msg, -1, ToSendText, (ccbLen + 1), 0, 0);
+				WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, ToSendText, (ccbLen + 1), 0, 0);
 				SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
 				free(ToSendText);
 			}

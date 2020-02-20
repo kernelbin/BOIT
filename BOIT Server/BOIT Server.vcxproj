@@ -146,6 +146,7 @@
     <ClCompile Include="Command_about.c" />
     <ClCompile Include="Command_commingfeature.c" />
     <ClCompile Include="Command_help.c" />
+    <ClCompile Include="Command_q_and_a.c" />
     <ClCompile Include="Command_run.c" />
     <ClCompile Include="Command_stop.c" />
     <ClCompile Include="DirManagement.c" />
@@ -155,6 +156,7 @@
     <ClCompile Include="RecvEventHandler.c" />
     <ClCompile Include="InlineCommand.c" />
     <ClCompile Include="RegisterRW.c" />
+    <ClCompile Include="RemoveCQEscapeChar.c" />
     <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
     <ClCompile Include="ServerState.c" />
@@ -172,6 +174,7 @@
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="RegisterRW.h" />
+    <ClInclude Include="RemoveCQEscapeChar.h" />
     <ClInclude Include="SendEventDispatch.h" />
     <ClInclude Include="SessionManage.h" />
     <ClInclude Include="SimpleSandbox.h" />
