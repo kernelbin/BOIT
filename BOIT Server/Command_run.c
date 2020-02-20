@@ -11,17 +11,25 @@
 
 #define COMPILECMD_MAXLEN 512
 
-#define COMPILE_MAXSUFFIX 8
+#define COMPILE_MAXSUFFIX 9
 
 
 #define COMPILE_TYPE_NULL 0
 #define	COMPILE_TYPE_COMPILE 1
 #define COMPILE_TYPE_SCRIPT 2
+
+#define COMPILE_ENCODE_ANSI 0
+#define COMPILE_ENCODE_UTF8 1
+#define COMPILE_ENCODE_GB18030 2
+
 typedef struct __tagCompileCfg
 {
 	int Type;
 	WCHAR SourceSuffix[COMPILE_MAXSUFFIX];
+	WCHAR Application[MAX_PATH];
 	WCHAR Command[COMPILECMD_MAXLEN];
+	int SourceEncode;
+	int OutputEncode;
 }COMPILE_CFG, * pCOMPILE_CFG;
 
 
@@ -36,6 +44,7 @@ typedef struct __tagCompileSession
 
 typedef struct __tagRunSession
 {
+	UINT Encode;
 	BOIT_SESSION boitSession;
 	pVBUF StdOutBuffer;
 }RUN_SESSION, * pRUN_SESSION;
@@ -75,7 +84,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	WCHAR* lpwcParam = Msg;
 	int ParamCnt = 0;
 	pCOMPILE_CFG CompileCfg = malloc(sizeof(COMPILE_CFG));
-
+	ZeroMemory(CompileCfg, sizeof(COMPILE_CFG));
 	BOOL LanguageMatched = 0, bCodeFound = 0;
 	WCHAR* CodeStr = 0;
 
@@ -199,20 +208,22 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	PathAppendW(SourceCodeFile, SourceFileName);
 
 	HANDLE hSourceFile = CreateFile(SourceCodeFile, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	PBYTE UTF8Code = 0;
+	PBYTE MultiByteStrCode = 0;
 
 	BOOL bFileCreated = FALSE;
 	__try
 	{
+		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
+		
 		int wcCodeLen = wcslen(CodeStr);
-		int UTF8Len = WideCharToMultiByte(CP_UTF8, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
-		UTF8Code = malloc(UTF8Len + 1);
+		int MultiByteStrLen = WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
+		MultiByteStrCode = malloc(MultiByteStrLen + 1);
 		DWORD BytesWritten;
-		ZeroMemory(UTF8Code, UTF8Len + 1);
-		WideCharToMultiByte(CP_UTF8, 0, CodeStr, wcCodeLen, UTF8Code, UTF8Len, 0, 0);
+		ZeroMemory(MultiByteStrCode, MultiByteStrLen + 1);
+		WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, MultiByteStrCode, MultiByteStrLen, 0, 0);
 
-		WriteFile(hSourceFile, (LPCVOID)UTF8Code, UTF8Len, &BytesWritten, 0);
-		if (BytesWritten != UTF8Len)
+		WriteFile(hSourceFile, (LPCVOID)MultiByteStrCode, MultiByteStrLen, &BytesWritten, 0);
+		if (BytesWritten != MultiByteStrLen)
 		{
 			__leave;
 		}
@@ -222,7 +233,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	__finally
 	{
 		CloseHandle(hSourceFile);
-		if (UTF8Code)free(UTF8Code);
+		if (MultiByteStrCode)free(MultiByteStrCode);
 
 		if (!bFileCreated)
 		{
@@ -234,56 +245,81 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 
 	//如果有，移除之前的可执行文件
-	WCHAR ExecutableCodeFile[MAX_PATH];
-	WCHAR ExecutableFileName[16];
-
-
-	GetPerUserDir(ExecutableCodeFile, QQID);
-	PathAppendW(ExecutableCodeFile, L"Compile\\");
-	swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", AllocCompileID);
-	PathAppendW(ExecutableCodeFile, ExecutableFileName);
-
-	if (PathFileExistsW(ExecutableCodeFile))
+	switch (CompileCfg->Type)
 	{
-		DeleteFile(ExecutableCodeFile);
-	}
-
-
-
-	WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
-	GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
-
-	WCHAR WorkDir[MAX_PATH];
-	GetPerUserDir(WorkDir, QQID);
-	PathAppendW(WorkDir, L"Compile\\");
-
-	//TODO; 这个Session是临时瞎写的
-	pCOMPILE_SESSION CompileSession = malloc(sizeof(COMPILE_SESSION));
-	ZeroMemory(CompileSession, sizeof(COMPILE_SESSION));
-	CompileSession->boitSession.QQID = QQID;
-	CompileSession->boitSession.GroupID = GroupID;
-	if (AnonymousName) wcscpy_s(CompileSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
-	CompileSession->StdOutBuffer = AllocVBuf();
-	CompileSession->CompileCfg = CompileCfg;
-	CompileSession->Command = pCmd;
-	CompileSession->AllocCompileID = AllocCompileID;
-
-
-	//TODO:这些限制都是我临时写的
-	if (CreateSimpleSandboxW(NULL,
-		CompileCmd,
-		WorkDir,
-		10000000 * 10,		//10秒
-		256 * 1024 * 1024,	//256MB内存
-		20 * 100,				//10% CPU
-		FALSE,				//不设置权限限制
-		(PBYTE)CompileSession,
-		CompileSandboxCallback) == 0)
+	case COMPILE_TYPE_COMPILE:
 	{
-		SendBackMessage(GroupID, QQID, L"为编译器创建沙盒时出现意外");
-		free(CompileCfg);
-		free(CompileSession);
+		WCHAR ExecutableCodeFile[MAX_PATH];
+		WCHAR ExecutableFileName[16];
+
+
+		GetPerUserDir(ExecutableCodeFile, QQID);
+		PathAppendW(ExecutableCodeFile, L"Compile\\");
+		swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", AllocCompileID);
+		PathAppendW(ExecutableCodeFile, ExecutableFileName);
+
+		if (PathFileExistsW(ExecutableCodeFile))
+		{
+			DeleteFile(ExecutableCodeFile);
+		}
+
+		WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
+		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
+
+		WCHAR WorkDir[MAX_PATH];
+		GetPerUserDir(WorkDir, QQID);
+		PathAppendW(WorkDir, L"Compile\\");
+
+		//TODO; 这个Session是临时瞎写的
+		pCOMPILE_SESSION CompileSession = malloc(sizeof(COMPILE_SESSION));
+		ZeroMemory(CompileSession, sizeof(COMPILE_SESSION));
+		CompileSession->boitSession.QQID = QQID;
+		CompileSession->boitSession.GroupID = GroupID;
+		if (AnonymousName) wcscpy_s(CompileSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+		CompileSession->StdOutBuffer = AllocVBuf();
+		CompileSession->CompileCfg = CompileCfg;
+		CompileSession->Command = pCmd;
+		CompileSession->AllocCompileID = AllocCompileID;
+
+
+		//TODO:这些限制都是我临时写的
+		if (CreateSimpleSandboxW(NULL,
+			CompileCmd,
+			WorkDir,
+			10000000 * 10,		//10秒
+			256 * 1024 * 1024,	//256MB内存
+			20 * 100,				//10% CPU
+			FALSE,				//不设置权限限制
+			(PBYTE)CompileSession,
+			CompileSandboxCallback) == 0)
+		{
+			SendBackMessage(GroupID, QQID, L"为编译器创建沙盒时出现意外");
+			free(CompileCfg);
+			free(CompileSession);
+		}
 	}
+		break;
+	case COMPILE_TYPE_SCRIPT:
+	{
+		WCHAR SandboxDir[MAX_PATH];
+		WCHAR SandboxFile[MAX_PATH];
+		InitSandboxDir(QQID, AllocCompileID, SourceCodeFile, SourceFileName, SandboxDir, SandboxFile);
+
+		WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
+		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
+
+		BOIT_SESSION boitSession = { 0 };
+		boitSession.QQID = QQID;
+		boitSession.GroupID = GroupID;
+		if (AnonymousName) wcscpy_s(boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+		StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL, CompileCmd, SandboxDir, &boitSession, CompileCfg->OutputEncode);
+		
+
+	}
+		
+		break;
+	}
+	
 
 	return 0;
 }
@@ -309,36 +345,44 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 		if (Sandbox->ExitReason == SANDBOX_ER_EXIT && PathFileExistsW(ExecutableCodeFile)) //不对返回值进行检查，有的编译器乱返回
 		{
 			//清理原有的目录
+			//WCHAR SandboxFile[MAX_PATH] = { 0 };
+			WCHAR SandboxDir[MAX_PATH];
+			WCHAR SandboxFile[MAX_PATH];
+			InitSandboxDir(Session->boitSession.QQID,
+				Session->AllocCompileID,
+				ExecutableCodeFile,
+				ExecutableFileName,
+				SandboxDir, SandboxFile);
 
-			WCHAR SandboxFile[MAX_PATH] = { 0 };
-			WCHAR SandboxDirName[16];
-			GetPerUserDir(SandboxFile, Session->boitSession.QQID);
-			PathAppendW(SandboxFile, L"Sandbox\\");
-			swprintf_s(SandboxDirName, _countof(SandboxDirName), L"Sandbox%lld", Session->AllocCompileID);
+			//WCHAR SandboxFile[MAX_PATH] = { 0 };
+			//WCHAR SandboxDirName[16];
+			//GetPerUserDir(SandboxFile, Session->boitSession.QQID);
+			//PathAppendW(SandboxFile, L"Sandbox\\");
+			//swprintf_s(SandboxDirName, _countof(SandboxDirName), L"Sandbox%lld", Session->AllocCompileID);
 
-			PathAppendW(SandboxFile, SandboxDirName);
-			SHFILEOPSTRUCTW FileOp;
-			if (PathIsDirectoryW(SandboxFile))
-			{
-				int FileLen = wcslen(SandboxFile);
-				SandboxFile[FileLen] = 0;
-				SandboxFile[FileLen + 1] = 0;
-				FileOp.fFlags = FOF_NOCONFIRMATION;
-				FileOp.hNameMappings = NULL;
-				FileOp.hwnd = NULL;
-				FileOp.lpszProgressTitle = NULL;
-				FileOp.pFrom = SandboxFile;
-				FileOp.pTo = NULL;
-				FileOp.wFunc = FO_DELETE;
-				int iRet = SHFileOperationW(&FileOp);
-			}
-			CreateDirectoryW(SandboxFile, 0);
-			//我寻思上面这个目录变量也不用了，拿过来直接往后接可执行文件名吧
-			PathAppendW(SandboxFile, ExecutableFileName);
-			
-			CopyFile(ExecutableCodeFile, SandboxFile, TRUE);
+			//PathAppendW(SandboxFile, SandboxDirName);
+			//SHFILEOPSTRUCTW FileOp;
+			//if (PathIsDirectoryW(SandboxFile))
+			//{
+			//	int FileLen = wcslen(SandboxFile);
+			//	SandboxFile[FileLen] = 0;
+			//	SandboxFile[FileLen + 1] = 0;
+			//	FileOp.fFlags = FOF_NOCONFIRMATION;
+			//	FileOp.hNameMappings = NULL;
+			//	FileOp.hwnd = NULL;
+			//	FileOp.lpszProgressTitle = NULL;
+			//	FileOp.pFrom = SandboxFile;
+			//	FileOp.pTo = NULL;
+			//	FileOp.wFunc = FO_DELETE;
+			//	int iRet = SHFileOperationW(&FileOp);
+			//}
+			//CreateDirectoryW(SandboxFile, 0);
+			////我寻思上面这个目录变量也不用了，拿过来直接往后接可执行文件名吧
+			//PathAppendW(SandboxFile, ExecutableFileName);
+			//
+			//CopyFile(ExecutableCodeFile, SandboxFile, TRUE);
 
-			StartRunSandbox(SandboxFile, &(Session->boitSession));
+			StartRunSandbox(NULL, SandboxFile, SandboxDir, &(Session->boitSession), Session->CompileCfg->OutputEncode);
 		}
 		else
 		{
@@ -351,12 +395,15 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"Opps... 编译失败了");
 			}
 			WCHAR* wcStdout;
-			int cchStdout = MultiByteToWideChar(CP_UTF8, 0,
+
+			UINT CodePage = GetEncodeCodePage(Session->CompileCfg->OutputEncode);
+
+			int cchStdout = MultiByteToWideChar(CodePage, 0,
 				Session->StdOutBuffer->Data,
 				Session->StdOutBuffer->Length, 0, 0);
 
 			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CP_UTF8, 0,
+			MultiByteToWideChar(CodePage, 0,
 				Session->StdOutBuffer->Data,
 				Session->StdOutBuffer->Length, wcStdout, cchStdout);
 			wcStdout[cchStdout] = 0;
@@ -409,12 +456,13 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		}
 		else
 		{
+			UINT CodePage = GetEncodeCodePage(Session->Encode);
 			WCHAR* wcStdout;
-			int cchStdout = MultiByteToWideChar(CP_UTF8, 0,
+			int cchStdout = MultiByteToWideChar(CodePage, 0,
 				Session->StdOutBuffer->Data,
 				Session->StdOutBuffer->Length, 0, 0);
 			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CP_UTF8, 0,
+			MultiByteToWideChar(CodePage, 0,
 				Session->StdOutBuffer->Data,
 				Session->StdOutBuffer->Length, wcStdout, cchStdout);
 			wcStdout[cchStdout] = 0;
@@ -429,7 +477,7 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 	break;
 	case SANDBOX_EVENT_STD_OUTPUT:
 	{
-		if (Session->StdOutBuffer->Length + DataLen < BOIT_MAX_TEXTLEN * 4) // UTF8编码在最恶劣情况下一个字符4字节
+		if (Session->StdOutBuffer->Length + DataLen < BOIT_MAX_TEXTLEN * 4) // UTF8编码和GB编码在最恶劣情况下一个字符4字节
 		{
 			int OrgDataLen = Session->StdOutBuffer->Length;
 			AdjustVBuf(Session->StdOutBuffer, Session->StdOutBuffer->Length + DataLen);
@@ -443,14 +491,53 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 }
 
 
-BOOL StartRunSandbox(WCHAR* CommandLine, pBOIT_SESSION boitSession)
+BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile,WCHAR * ToCopyFileName,WCHAR * SandboxDir,WCHAR * SandboxFile)
+{
+	//WCHAR SandboxFile[MAX_PATH] = { 0 };
+	WCHAR SandboxDirName[16];
+	GetPerUserDir(SandboxFile, QQID);
+	PathAppendW(SandboxFile, L"Sandbox\\");
+	swprintf_s(SandboxDirName, _countof(SandboxDirName), L"Sandbox%lld", AllocCompileID);
+
+	PathAppendW(SandboxFile, SandboxDirName);
+
+	wcscpy_s(SandboxDir, MAX_PATH, SandboxFile);
+
+	SHFILEOPSTRUCTW FileOp;
+	if (PathIsDirectoryW(SandboxFile))
+	{
+		int FileLen = wcslen(SandboxFile);
+		SandboxFile[FileLen] = 0;
+		SandboxFile[FileLen + 1] = 0;
+		FileOp.fFlags = FOF_NOCONFIRMATION;
+		FileOp.hNameMappings = NULL;
+		FileOp.hwnd = NULL;
+		FileOp.lpszProgressTitle = NULL;
+		FileOp.pFrom = SandboxFile;
+		FileOp.pTo = NULL;
+		FileOp.wFunc = FO_DELETE;
+		int iRet = SHFileOperationW(&FileOp);
+	}
+	CreateDirectoryW(SandboxFile, 0);
+	//我寻思上面这个目录变量也不用了，拿过来直接往后接可执行文件名吧
+	PathAppendW(SandboxFile, ToCopyFileName);
+
+	CopyFile(ToCopyFile, SandboxFile, TRUE);
+
+
+	return 0;
+}
+
+
+BOOL StartRunSandbox(WCHAR * Application,WCHAR* CommandLine,WCHAR * CuurentDir, pBOIT_SESSION boitSession, int Encode)
 {
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
+	RunSession->Encode = Encode;
 	RunSession->boitSession.GroupID = boitSession->GroupID;
 	RunSession->boitSession.QQID = boitSession->QQID;
 	RunSession->StdOutBuffer = AllocVBuf();
 	if (RunSession->boitSession.AnonymousName) wcscpy_s(RunSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, boitSession->AnonymousName);
-	if (CreateSimpleSandboxW(NULL, CommandLine, NULL,
+	if (CreateSimpleSandboxW(Application, CommandLine, CuurentDir,
 		10000000 * 10,		//10秒
 		256 * 1024 * 1024,	//256MB内存
 		10 * 100,			//10% CPU
@@ -550,6 +637,14 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 		MultiByteToWideChar(CP_ACP, 0, pData, FileSize, pwData, wLen);
 
 
+		//清空配置
+		CompileCfg->Application[0] = 0;
+		CompileCfg->Command[0] = 0;
+		CompileCfg->OutputEncode = 0;
+		CompileCfg->SourceEncode = 0;
+		CompileCfg->SourceSuffix[0] = 0;
+		CompileCfg->Type = COMPILE_TYPE_NULL;
+
 		//解析文件
 		WCHAR* pwParse = pwData;
 
@@ -567,7 +662,7 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 			{
 				if (pwParse[0] != L'#')//注释
 				{
-					WCHAR FieldNameList[][16] = { L"Name",L"Type",L"Suffix",L"Command" };
+					WCHAR FieldNameList[][16] = { L"Name",L"Type",L"Suffix",L"Command",L"SourceEncode",L"OutputEncode", L"Application" };
 
 					WCHAR* LineParse = pwParse;
 					for (int i = 0; i < _countof(FieldNameList); i++)
@@ -625,11 +720,56 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 							break;
 							case 3:
 							{
+								//解析Command
 								int CommandLen = GetLineLen(LineParse);
 								if (CommandLen && CommandLen < COMPILECMD_MAXLEN)
 								{
 									wcsncpy_s(CompileCfg->Command, COMPILECMD_MAXLEN, LineParse, CommandLen);
 									CommandFound = TRUE;
+								}
+							}
+							break;
+							case 4:
+							{
+								if (_wcsnicmp(LineParse, L"GB18030", wcslen(L"GB18030")) == 0)
+								{
+									CompileCfg->SourceEncode = COMPILE_ENCODE_GB18030;
+								}
+								else if (_wcsnicmp(LineParse, L"UTF8", wcslen(L"UTF8")) == 0)
+								{
+									CompileCfg->SourceEncode = COMPILE_ENCODE_UTF8;
+								}
+								else if (_wcsnicmp(LineParse, L"ANSI", wcslen(L"ANSI")) == 0)
+								{
+									CompileCfg->SourceEncode = COMPILE_ENCODE_ANSI;
+								}
+								break;
+							}
+							break;
+							case 5:
+							{
+								if (_wcsnicmp(LineParse, L"GB18030", wcslen(L"GB18030")) == 0)
+								{
+									CompileCfg->OutputEncode = COMPILE_ENCODE_GB18030;
+								}
+								else if (_wcsnicmp(LineParse, L"UTF8", wcslen(L"UTF8")) == 0)
+								{
+									CompileCfg->OutputEncode = COMPILE_ENCODE_UTF8;
+								}
+								else if (_wcsnicmp(LineParse, L"ANSI", wcslen(L"ANSI")) == 0)
+								{
+									CompileCfg->OutputEncode = COMPILE_ENCODE_ANSI;
+								}
+								break;
+							}
+							break;
+							case 6:
+							{
+								//解析Command
+								int ApplicationLen = GetLineLen(LineParse);
+								if (ApplicationLen && ApplicationLen < MAX_PATH)
+								{
+									wcsncpy_s(CompileCfg->Application, MAX_PATH, LineParse, ApplicationLen);
 								}
 							}
 							break;
@@ -758,4 +898,24 @@ BOOL GetCompileCommand(WCHAR* CommandBuffer, pCOMPILE_CFG CompileCfg, LONGLONG A
 	}
 	CommandBuffer[j++] = 0;
 	return 0;
+}
+
+
+UINT GetEncodeCodePage(int Compile_Encode)
+{
+	UINT CodePage = 0;
+	switch (Compile_Encode)
+	{
+	case COMPILE_ENCODE_UTF8:
+		CodePage = CP_UTF8;
+		break;
+	case COMPILE_ENCODE_GB18030:
+		CodePage = 54936; //详见  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
+		break;
+	case COMPILE_ENCODE_ANSI:
+	default:
+		CodePage = CP_ACP;
+		break;
+	}
+	return CodePage;
 }

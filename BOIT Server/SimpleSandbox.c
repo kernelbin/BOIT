@@ -213,7 +213,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			ExtendLimit.BasicLimitInformation.LimitFlags |= JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION | JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
 			bSuccess = SetInformationJobObject(hJob, JobObjectExtendedLimitInformation, &ExtendLimit, sizeof(ExtendLimit));
 			if (!bSuccess)__leave;
-
+			bSuccess = FALSE;
 
 
 			JOBOBJECT_BASIC_UI_RESTRICTIONS UIRestriction = { 0 };
@@ -228,8 +228,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 				JOB_OBJECT_UILIMIT_HANDLES; //阻止作业中的进程使用同一个作业外部的进程所创建的用户对象( 如HWND) 。
 			bSuccess = SetInformationJobObject(hJob, JobObjectBasicUIRestrictions, &UIRestriction, sizeof(UIRestriction));
 			if (!bSuccess)__leave;
-
-
+			bSuccess = FALSE;
 
 			if (CpuRateLimit != -1)
 			{
@@ -238,6 +237,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 				CpuControl.CpuRate = CpuRateLimit;
 				bSuccess = SetInformationJobObject(hJob, JobObjectCpuRateControlInformation, &CpuControl, sizeof(CpuControl));
 				if (!bSuccess)__leave;
+				bSuccess = FALSE;
 			}
 
 			JOBOBJECT_ASSOCIATE_COMPLETION_PORT JobCompletionPort = { 0 };
