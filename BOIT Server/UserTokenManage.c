@@ -6,6 +6,7 @@ BOOL CheckUserToken(long long QQID, WCHAR* TokenStr)
 	if (PerUserCreateDirIfNExist(QQID, L"Token"))
 	{
 		//初始化默认权限
+		PerUserCreateFileIfNExist(QQID,L"Token\\PrivilegeRunCode");
 	}
 
 	WCHAR TokenFile[MAX_PATH];

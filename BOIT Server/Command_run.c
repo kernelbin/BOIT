@@ -10,9 +10,8 @@
 #include"RemoveCQEscapeChar.h"
 
 #define COMPILECMD_MAXLEN 512
-
 #define COMPILE_MAXSUFFIX 9
-
+#define COMPILE_MAXNAME 16
 
 #define COMPILE_TYPE_NULL 0
 #define	COMPILE_TYPE_COMPILE 1
@@ -25,9 +24,10 @@
 typedef struct __tagCompileCfg
 {
 	int Type;
-	WCHAR SourceSuffix[COMPILE_MAXSUFFIX];
-	WCHAR Application[MAX_PATH];
-	WCHAR Command[COMPILECMD_MAXLEN];
+	WCHAR SourceSuffix[COMPILE_MAXSUFFIX + 1];
+	WCHAR Application[MAX_PATH + 1];
+	WCHAR Command[COMPILECMD_MAXLEN + 1];
+	WCHAR Name[COMPILE_MAXNAME + 1];
 	int SourceEncode;
 	int OutputEncode;
 }COMPILE_CFG, * pCOMPILE_CFG;
@@ -66,6 +66,13 @@ LONGLONG CompileID;
 
 int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
+	if (CheckUserToken(QQID, L"PrivilegeRunCode") == 0)
+	{
+		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		return 0;
+	}
+
+
 	//检查用户目录下是否有相应文件夹
 	if (PerUserCreateDirIfNExist(QQID, L"Sandbox"))
 	{
@@ -88,23 +95,29 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	BOOL LanguageMatched = 0, bCodeFound = 0;
 	WCHAR* CodeStr = 0;
 
-	BOOL bFailed = 0, bIsSU = 0;
+	BOOL bFailed = 0, bIsSU = 0, bIsHelp = 0;
 
 	WCHAR FailedReason[128];
+
+	BOIT_SESSION boitSession = { 0 };
+	boitSession.QQID = QQID;
+	boitSession.GroupID = GroupID;
+	if (AnonymousName) wcscpy_s(boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+
 	__try
 	{
-		while (MsgLen > 0)
+		for (;MsgLen > 0;ParamCnt++)
 		{
 			int ParamLen = GetCmdParamLen(lpwcParam);
+
+
 			//处理这个 Param
-			if (ParamCnt == 1)
+			if (ParamCnt == 1 &&
+				FindCompileConfig(pCmd, lpwcParam, ParamLen, L".cfg", CompileCfg) == TRUE)
 			{
-				if (FindCompileConfig(pCmd, lpwcParam, ParamLen, L".cfg", CompileCfg) == TRUE)
-				{
-					LanguageMatched = TRUE;
-				}
+				LanguageMatched = TRUE;
 			}
-			else if (ParamCnt > 1)
+			else if (ParamCnt >= 1)
 			{
 				//解析可能的参数
 				if (lpwcParam[0] == '-' || lpwcParam[0] == '/' || lpwcParam[0] == '\\')
@@ -129,6 +142,10 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 						{
 							bIsSU = TRUE;
 						}
+						if ((ParamLen == wcslen(L"help") + 1) && _wcsnicmp(lpwcParam + 1, L"help", wcslen(L"help")) == 0)
+						{
+							bIsHelp = TRUE;
+						}
 						else
 						{
 							WCHAR ParamBuf[16] = { 0 };
@@ -148,41 +165,55 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 					break;
 				}
 			}
+			
 			lpwcParam += ParamLen;
 			MsgLen -= ParamLen;
 			int SpaceLen = GetCmdSpaceLen(lpwcParam);
 			lpwcParam += SpaceLen;
 			MsgLen -= SpaceLen;
-			ParamCnt++;
 		}
 	}
 	__finally
 	{
 		if (!bFailed)
 		{
-			if (LanguageMatched)
+			if (!bIsHelp)
 			{
-				if (bCodeFound)
+				if (LanguageMatched)
 				{
-					//撒花！
+					if (bCodeFound)
+					{
+						//撒花！
+					}
+					else
+					{
+						SendBackMessage(GroupID, QQID, L"未找到源代码");
+						bFailed = TRUE;
+					}
 				}
 				else
 				{
-					SendBackMessage(GroupID, QQID, L"未找到源代码");
+					SendBackMessage(GroupID, QQID, L"未找到语言类型或该语言不受支持");
 					bFailed = TRUE;
 				}
-			}
-			else
-			{
-				SendBackMessage(GroupID, QQID, L"未找到语言类型或该语言不受支持");
-				bFailed = TRUE;
 			}
 		}
 
 
-		if (bFailed)
+		if (bFailed || bIsHelp)
 		{
-			SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
+			if (bIsHelp)
+			{
+				//显示详细帮助信息
+				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
+
+				ShowSupportLanguageInfo(pCmd, L".cfg", &boitSession);
+			}
+			else
+			{
+				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode\n 输入#run /help 查看详细帮助信息");
+			}
+			
 			free(CompileCfg);
 			return 0;
 		}
@@ -312,10 +343,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
 		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
 
-		BOIT_SESSION boitSession = { 0 };
-		boitSession.QQID = QQID;
-		boitSession.GroupID = GroupID;
-		if (AnonymousName) wcscpy_s(boitSession.AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+		
 		StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL, CompileCmd, SandboxDir, &boitSession, CompileCfg->OutputEncode);
 		
 
@@ -653,6 +681,7 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 		CompileCfg->OutputEncode = 0;
 		CompileCfg->SourceEncode = 0;
 		CompileCfg->SourceSuffix[0] = 0;
+		CompileCfg->Name[0] = 0;
 		CompileCfg->Type = COMPILE_TYPE_NULL;
 
 		//解析文件
@@ -691,10 +720,17 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 							{
 							case 0:
 								//解析Name
+							{
+								int LangLen = GetCmdParamLen(LineParse);
+								if ((!LangLen) || LangLen>COMPILE_MAXNAME)break;
+								wcsncpy_s(CompileCfg->Name, COMPILE_MAXNAME, LineParse, LangLen);
+							}
+							if (LanguageName && LanguageLen)
+							{
 								while (1)
 								{
 									int LangLen = GetCmdParamLen(LineParse);
-									if (!LangLen)break;
+									if ((!LangLen) || LangLen > COMPILE_MAXNAME)break;
 
 									if (LangLen == LanguageLen && (_wcsnicmp(LineParse, LanguageName, LangLen) == 0))
 									{
@@ -703,7 +739,8 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 									LineParse += LangLen;
 									LineParse += GetLineSpaceLen(LineParse);
 								}
-								break;
+							}
+							break;
 							case 1:
 								//解析Type
 								if (_wcsnicmp(LineParse, L"Compile", wcslen(L"Compile")) == 0)
@@ -797,9 +834,22 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 		}
 
 
-		if (NameFound && TypeFound && SuffixFound && CommandFound)
+		if (TypeFound && SuffixFound && CommandFound)
 		{
-			bMatch = TRUE;
+			if (LanguageName)
+			{
+				if (NameFound)
+				{
+					bMatch = TRUE;
+				}
+			}
+			else
+			{
+				if (CompileCfg->Name[0])
+				{
+					bMatch = TRUE;
+				}
+			}
 		}
 
 	}
@@ -819,6 +869,52 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 		}
 	}
 	return bMatch;
+}
+
+
+BOOL ShowSupportLanguageInfo(pBOIT_COMMAND pCmd, WCHAR* ConfigSuffix,pBOIT_SESSION boitSession)
+{
+	COMPILE_CFG CompileCfg;
+	WCHAR CompilerCfgPath[MAX_PATH];
+	GetPerCommandCfgDir(CompilerCfgPath, pCmd);
+	PathAppendW(CompilerCfgPath, L"Compiler\\*");
+
+	WIN32_FIND_DATAW FindData;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	BOOL bNext = TRUE;
+
+	BOOL bMatch = FALSE;
+
+	WCHAR ReplyMessage[256] = L"支持语言如下：\n";
+
+	for (hFind = FindFirstFileW(CompilerCfgPath, &FindData);
+		hFind != INVALID_HANDLE_VALUE && wcslen(FindData.cFileName) > 0;
+		bNext = FindNextFileW(hFind, &FindData))
+	{
+		if (!bNext)break;
+
+		if (!(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		{
+			if (_wcsicmp(FindData.cFileName + wcslen(FindData.cFileName) - wcslen(ConfigSuffix), ConfigSuffix) == 0)
+			{
+				WCHAR CfgFilePath[MAX_PATH];
+				GetPerCommandCfgDir(CfgFilePath, pCmd);
+				PathAppendW(CfgFilePath, L"Compiler");
+				PathAppendW(CfgFilePath, FindData.cFileName);
+				if (MatchCompileConfig(CfgFilePath, &CompileCfg, 0, 0))
+				{
+					wcscat_s(ReplyMessage, _countof(ReplyMessage), CompileCfg.Name);
+					wcscat_s(ReplyMessage, _countof(ReplyMessage), L"  ");
+					
+				}
+			}
+		}
+
+	}
+	if (hFind != INVALID_HANDLE_VALUE) FindClose(hFind);
+
+	SendBackMessage(boitSession->GroupID, boitSession->QQID, ReplyMessage);
+	return 0;
 }
 
 

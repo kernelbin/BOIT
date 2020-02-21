@@ -46,3 +46,22 @@ BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName) //·µ»Ø TRUE ËµÃ
 	return FALSE;
 }
 
+
+BOOL PerUserCreateFileIfNExist(long long QQID, WCHAR* FileName) //·µ»Ø TRUE ËµÃ÷´´½¨ÁË£¬·µ»Ø FALSE ´ú±í±¾À´¾ÍÓÐ
+{
+	WCHAR FilePath[MAX_PATH];
+	GetPerUserDir(FilePath, QQID);
+	PathAppendW(FilePath, FileName);
+	if (PathFileExistsW(FilePath) == 0)
+	{
+		HANDLE hFile = CreateFile(FilePath, GENERIC_READ, 0, 0, CREATE_NEW, 0, 0);
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(hFile);
+			return TRUE;
+		}
+		return FALSE;
+	}
+	return FALSE;
+}
+
