@@ -40,6 +40,7 @@ typedef struct __tagCompileSession
 	pBOIT_COMMAND Command;
 	pCOMPILE_CFG CompileCfg;
 	LONGLONG AllocCompileID;
+	BOOL bIsSU;
 }COMPILE_SESSION, * pCOMPILE_SESSION;
 
 typedef struct __tagRunSession
@@ -138,11 +139,11 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 					}
 					else
 					{
-						if ((ParamLen == wcslen(L"su") + 1) && _wcsnicmp(lpwcParam + 1, L"su", wcslen(L"su")) == 0)
+						if ((ParamLen == wcslen(L"su") + 1) && (_wcsnicmp(lpwcParam + 1, L"su", wcslen(L"su")) == 0))
 						{
 							bIsSU = TRUE;
 						}
-						if ((ParamLen == wcslen(L"help") + 1) && _wcsnicmp(lpwcParam + 1, L"help", wcslen(L"help")) == 0)
+						else if ((ParamLen == wcslen(L"help") + 1) && (_wcsnicmp(lpwcParam + 1, L"help", wcslen(L"help")) == 0))
 						{
 							bIsHelp = TRUE;
 						}
@@ -223,6 +224,12 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 
 	//TODO:校验权限
+
+	if (bIsSU && (CheckUserToken(QQID, L"PrivilegeRunCodeNoRestrict") == 0))
+	{
+		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		return 0;
+	}
 
 	LONGLONG AllocCompileID = InterlockedIncrement64(&CompileID);
 	//写入源代码文件
@@ -315,7 +322,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		CompileSession->CompileCfg = CompileCfg;
 		CompileSession->Command = pCmd;
 		CompileSession->AllocCompileID = AllocCompileID;
-
+		CompileSession->bIsSU = bIsSU;
 
 		//TODO:这些限制都是我临时写的
 		if (CreateSimpleSandboxW(NULL,
@@ -344,7 +351,8 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
 
 		
-		StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL, CompileCmd, SandboxDir, &boitSession, CompileCfg->OutputEncode);
+		StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL,
+			CompileCmd, SandboxDir, !bIsSU ,&boitSession, CompileCfg->OutputEncode);
 		
 
 	}
@@ -414,7 +422,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 			//
 			//CopyFile(ExecutableCodeFile, SandboxFile, TRUE);
 
-			StartRunSandbox(NULL, SandboxFile, SandboxDir, &(Session->boitSession), Session->CompileCfg->OutputEncode);
+			StartRunSandbox(NULL, SandboxFile, SandboxDir,!(Session->bIsSU), &(Session->boitSession), Session->CompileCfg->OutputEncode);
 		}
 		else
 		{
@@ -567,7 +575,7 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile,WC
 }
 
 
-BOOL StartRunSandbox(WCHAR * Application,WCHAR* CommandLine,WCHAR * CuurentDir, pBOIT_SESSION boitSession, int Encode)
+BOOL StartRunSandbox(WCHAR * Application,WCHAR* CommandLine,WCHAR * CuurentDir,BOOL bLimitPrivileges ,pBOIT_SESSION boitSession, int Encode)
 {
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
 	RunSession->Encode = Encode;
@@ -579,7 +587,7 @@ BOOL StartRunSandbox(WCHAR * Application,WCHAR* CommandLine,WCHAR * CuurentDir, 
 		10000000 * 10,		//10秒
 		512 * 1024 * 1024,	//512MB内存
 		10 * 100,			//10% CPU
-		TRUE, RunSession, RunSandboxCallback) == 0)
+		bLimitPrivileges, RunSession, RunSandboxCallback) == 0)
 	{
 		SendBackMessage(RunSession->boitSession.GroupID, RunSession->boitSession.QQID, L"为程序创建沙盒时出现意外");
 		free(RunSession);
