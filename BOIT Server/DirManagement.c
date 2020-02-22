@@ -117,7 +117,10 @@ BOOL RemoveDirIfExist(WCHAR * Dir)
 		FileOp.wFunc = FO_DELETE;
 		iRet = SHFileOperationW(&FileOp);
 	}
-
+	else 
+	{
+		return FALSE;
+	}
 	if(Buffer)free(Buffer);
 
 	if (iRet == 0)
