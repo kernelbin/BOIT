@@ -60,6 +60,10 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 		{
 			__leave;
 		}
+
+		//这里应有返回值处理。但是好像没啥好处理的。那就直接通知对方读取好了8
+		SetEvent(hEventRecvRet);
+
 		//成功
 	}
 	__finally
@@ -105,6 +109,10 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 		{
 			__leave;
 		}
+
+		//这里应有返回值处理。但是好像没啥好处理的。那就直接通知对方读取好了8
+		SetEvent(hEventRecvRet);
+
 		//成功
 	}
 	__finally

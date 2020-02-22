@@ -29,6 +29,11 @@ int SendEventPrivateMsg(long long QQID, WCHAR * Msg)
 		{
 			__leave;
 		}
+		//读取返回值
+		printf("测试消息ID是%d\n", pSharedMemSend->u.PrivateMsg.iRet);
+
+		SetEvent(hEventSendRet);
+
 		//成功
 	}
 	__finally
@@ -58,6 +63,9 @@ int SendEventGroupMsg(long long GroupID, WCHAR* Msg)
 			__leave;
 		}
 		//成功
+		printf("测试消息ID是%d\n", pSharedMemSend->u.GroupMsg.iRet);
+
+		SetEvent(hEventSendRet);
 	}
 	__finally
 	{

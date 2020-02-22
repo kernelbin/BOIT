@@ -42,21 +42,25 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 	{
 		hEventConnect = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_CONNECT));
 		JUDGE_OBJ(hEventConnect, iRet);
-
 		hEventDeconn = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_DECONN));
 		JUDGE_OBJ(hEventDeconn, iRet);
 
+
 		hEventRecvStart = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_RECVSTART));
 		JUDGE_OBJ(hEventRecvStart, iRet);
-
 		hEventRecvEnd = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_RECVEND));
 		JUDGE_OBJ(hEventRecvEnd, iRet);
+		hEventRecvRet = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_RECVRET));
+		JUDGE_OBJ(hEventRecvRet, iRet);
+
 
 		hEventSendStart = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_SENDSTART));
 		JUDGE_OBJ(hEventSendStart, iRet);
-
 		hEventSendEnd = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_SENDEND));
 		JUDGE_OBJ(hEventSendEnd, iRet);
+		hEventSendRet = CreateEvent(0, 0, 0, GET_OBJ_NAME(EVENT_SENDRET));
+		JUDGE_OBJ(hEventSendRet, iRet);
+
 
 		hSharedMemProcess = CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READWRITE, 0, sizeof(SHARED_PROCESS_INFO), GET_OBJ_NAME(SHAREDMEM_PROCESS_INFO));
 		JUDGE_OBJ(hSharedMemProcess, iRet);
@@ -186,23 +190,20 @@ BOOL InitConnVar()
 	hEventConnect = NULL;
 
 	hEventRecvStart = NULL;
-
 	hEventRecvEnd = NULL;
+	hEventRecvRet = NULL;
 
 	hEventSendStart = NULL;
-
 	hEventSendEnd = NULL;
+	hEventSendRet = NULL;
 
 	pSharedMemProcess = NULL;
-
 	hSharedMemProcess = NULL;
 
 	pSharedMemRecv = NULL;
-
 	hSharedMemRecv = NULL;
 
 	pSharedMemSend = NULL;
-	
 	hSharedMemSend = NULL;
 
 	return 0;

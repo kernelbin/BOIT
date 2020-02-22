@@ -35,8 +35,9 @@ unsigned __stdcall SendEventThread(void *Args)
 				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, 0, 0, 0, 0);
 				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
 				WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, ToSendText, ccbLen+1, 0, 0);
-				SendPrivateMessage(pSharedMemSend->u.PrivateMsg.QQID, ToSendText);
+				int iRet = SendPrivateMessage(pSharedMemSend->u.PrivateMsg.QQID, ToSendText);
 				free(ToSendText);
+				pSharedMemSend->u.PrivateMsg.iRet = iRet;
 			}
 				break;
 			case BOIT_EVENT_SEND_GROUP:
@@ -46,13 +47,19 @@ unsigned __stdcall SendEventThread(void *Args)
 				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, 0, 0, 0, 0);
 				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
 				WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, ToSendText, (ccbLen + 1), 0, 0);
-				SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
+				int iRet = SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
 				free(ToSendText);
+				pSharedMemSend->u.GroupMsg.iRet = iRet;
 			}
 				break;
 			}
 			
 			SetEvent(hEventSendEnd);
+
+			if (ConnWaitForObject(hEventSendRet) == 0)
+			{
+				break;
+			}
 		}
 		Sleep(1000);
 	}

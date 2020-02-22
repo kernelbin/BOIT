@@ -16,13 +16,14 @@ typedef struct __tagEventRecvStruct
 			long long GroupID;
 			long long QQID;
 			WCHAR AnonymousName[BOIT_MAX_NICKLEN + 4];
-
+			int iRet;
 		}GroupMsg;
 		 
 		struct
 		{
 			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 			long long QQID;
+			int iRet;
 		}PrivateMsg;
 	}u;
 }EVENT_RECV, *pEVENT_RECV;
@@ -38,12 +39,14 @@ typedef struct __tagEventSendStruct
 		{
 			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 			long long GroupID;
+			int iRet;
 		}GroupMsg;
 
 		struct
 		{
 			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 			long long QQID;
+			int iRet;
 		}PrivateMsg;
 	}u;
 }EVENT_SEND,*pEVENT_SEND;

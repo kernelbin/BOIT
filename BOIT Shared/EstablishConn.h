@@ -8,9 +8,11 @@ HANDLE hEventDeconn;
 
 HANDLE hEventRecvStart;//开始接收 消息/事件 。
 HANDLE hEventRecvEnd;//接收 消息/事件 结束。
+HANDLE hEventRecvRet;//发送结果返回值读取完毕
 
-HANDLE hEventSendStart;//开始接收 消息/事件 。
-HANDLE hEventSendEnd;//接收 消息/事件 结束。
+HANDLE hEventSendStart;//开始发送 消息/事件 。
+HANDLE hEventSendEnd;//发送 消息/事件 结束。
+HANDLE hEventSendRet;//发送结果返回值读取完毕
 
 HANDLE hSharedMemProcess;//Server 和 dll 相关进程信息
 HANDLE hSharedMemRecv;

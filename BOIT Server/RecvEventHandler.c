@@ -50,7 +50,8 @@ unsigned __stdcall RecvEventThread(void *Args)
 				RecvEvent.EventType = BOIT_EVENT_RECV_PRIVATE;
 				RecvEvent.u.PrivateMsg.QQID = pSharedMemRecv->u.PrivateMsg.QQID;
 				StringCchCopyW(RecvEvent.u.PrivateMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.PrivateMsg.Msg);
-
+				RecvEvent.u.PrivateMsg.iRet = 0;
+				//写入返回值。
 				break;
 			case BOIT_EVENT_RECV_GROUP:
 				RecvEvent.EventType = BOIT_EVENT_RECV_GROUP;
@@ -58,12 +59,23 @@ unsigned __stdcall RecvEventThread(void *Args)
 				RecvEvent.u.GroupMsg.GroupID = pSharedMemRecv->u.GroupMsg.GroupID;
 				StringCchCopyW(RecvEvent.u.GroupMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.GroupMsg.Msg);
 				StringCchCopyW(RecvEvent.u.GroupMsg.AnonymousName, BOIT_MAX_NICKLEN, pSharedMemRecv->u.GroupMsg.AnonymousName);
-
+				//写入返回值。
+				RecvEvent.u.GroupMsg.iRet = 0;
 				break;
 			default:
 				break;
 			}
+
+			
 			SetEvent(hEventRecvEnd);
+			//等待对方读取完返回值
+			if (ConnWaitForObject(hEventRecvRet) == 0)
+			{
+				break;
+			}
+
+
+
 			//分发
 			switch (RecvEvent.EventType)
 			{
