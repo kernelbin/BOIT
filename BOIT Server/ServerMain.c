@@ -11,6 +11,13 @@
 #include"DirManagement.h"
 #include<Shlwapi.h>
 #include"SimpleSandbox.h"
+#include<process.h>
+
+
+
+BOOL StartInputThread();
+
+unsigned __stdcall HandleInputThread(LPVOID Args);
 
 
 int main()
@@ -33,7 +40,7 @@ int main()
 		{
 			puts("注册表加载失败，是否清空设置并初始化? (y/n)");
 			char Answer[128] = { 0 };
-			scanf_s("%s", Answer, 127);
+			scanf_s("%[^\n]", &Answer, _countof(Answer) - 1);
 			getchar();//读掉那个换行
 			if (strcmp(Answer,"y") == 0 || 
 				strcmp(Answer, "Y") == 0 ||
@@ -116,7 +123,9 @@ int main()
 	InitEstablishConn();
 	TryEstablishConn();
 
-	printf("连接成功！\n");
+	puts("连接成功！\n");
+	
+	StartInputThread(); // 启动控制台输入线程
 	
 	StartRecvEventHandler();
 
@@ -128,3 +137,35 @@ int main()
 	FinalizeSandbox();
 	return 0;
 }
+
+
+BOOL StartInputThread()
+{
+	_beginthreadex(0, 0, HandleInputThread, 0, 0, 0);
+	return 0;
+}
+
+unsigned __stdcall HandleInputThread(LPVOID Args)
+{
+	while (1)
+	{
+		char InputCommand[128];
+		printf("> ");
+		int bMatch = scanf_s("%[^\n]", InputCommand, _countof(InputCommand));
+		getchar();
+		if (bMatch == 1)
+		{
+			if (_strcmpi(InputCommand, "stop") == 0)
+			{
+				puts("Goodbye");
+				SetEvent(hEventServerStop);
+				return 0;
+			}
+			if (_strcmpi(InputCommand, "help") == 0)
+			{
+				puts("帮助信息：\n\nstop:  关闭BOIT\nhelp:  显示帮助信息");
+			}
+		}
+	}
+}
+

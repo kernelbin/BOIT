@@ -67,9 +67,6 @@
     <Filter Include="源文件\指令回调\help">
       <UniqueIdentifier>{f5c5e421-78b7-4f3d-a2a2-e6877ac63daa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\指令回调\run">
-      <UniqueIdentifier>{e17d422f-60ea-480f-80b1-6485ce9ade16}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\目录管理\用户目录管理">
       <UniqueIdentifier>{f7420c86-4e6f-4124-b9b9-e6ff6a7f8541}</UniqueIdentifier>
     </Filter>
@@ -105,6 +102,9 @@
     </Filter>
     <Filter Include="源文件\指令回调\q&amp;a">
       <UniqueIdentifier>{05f711d7-19b8-4a22-9e7d-54486fe7a4a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\指令回调\run">
+      <UniqueIdentifier>{e17d422f-60ea-480f-80b1-6485ce9ade16}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
