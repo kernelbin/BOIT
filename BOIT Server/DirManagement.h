@@ -23,6 +23,7 @@ BOOL IsPathDirW(WCHAR* Path);
 int PathSimplifyA(CHAR* Path);
 int PathSimplifyW(WCHAR* Path);
 
+BOOL RemoveDirIfExist(WCHAR* Dir);
 
 int CheckPerUserDataExist(long long QQID);
 

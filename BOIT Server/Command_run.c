@@ -551,7 +551,7 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile,WC
 
 	wcscpy_s(SandboxDir, MAX_PATH, SandboxFile);
 
-	SHFILEOPSTRUCTW FileOp;
+	/*SHFILEOPSTRUCTW FileOp;
 	if (PathIsDirectoryW(SandboxFile))
 	{
 		int FileLen = wcslen(SandboxFile);
@@ -565,7 +565,11 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile,WC
 		FileOp.pTo = NULL;
 		FileOp.wFunc = FO_DELETE;
 		int iRet = SHFileOperationW(&FileOp);
-	}
+	}*/
+
+	RemoveDirIfExist(SandboxDir);
+
+
 	CreateDirectoryW(SandboxFile, 0);
 	//我寻思上面这个目录变量也不用了，拿过来直接往后接可执行文件名吧
 	PathAppendW(SandboxFile, ToCopyFileName);

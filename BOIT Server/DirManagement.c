@@ -93,3 +93,40 @@ int PathSimplifyW(WCHAR* Path)
 	return 0;
 }
 
+
+
+BOOL RemoveDirIfExist(WCHAR * Dir)
+{
+	WCHAR* Buffer = 0;
+	int iRet;
+	if (PathIsDirectoryW(Dir))
+	{
+		SHFILEOPSTRUCTW FileOp;
+		int Len = wcslen(Dir);
+		Buffer = malloc(sizeof(WCHAR) * (Len + 2));
+		wcscpy_s(Buffer, (Len + 2), Dir);
+		Buffer[Len] = 0;
+		Buffer[Len + 1] = 0;
+
+		FileOp.fFlags = FOF_NOCONFIRMATION;
+		FileOp.hNameMappings = NULL;
+		FileOp.hwnd = NULL;
+		FileOp.lpszProgressTitle = NULL;
+		FileOp.pFrom = Buffer;
+		FileOp.pTo = NULL;
+		FileOp.wFunc = FO_DELETE;
+		iRet = SHFileOperationW(&FileOp);
+	}
+
+	if(Buffer)free(Buffer);
+
+	if (iRet == 0)
+	{
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
+	//TODO:
+}

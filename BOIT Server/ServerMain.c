@@ -57,7 +57,7 @@ int main()
 		char InBaseDir[MAX_PATH + 4] = { 0 };
 		while (1)
 		{
-			puts("请输入BOIT根目录（无需引号，完整输入一行后换行）");
+			puts("请输入BOIT目录（无需引号，完整输入一行后换行）");
 			scanf_s("%[^\n]", &InBaseDir, MAX_PATH);
 			getchar();//读掉 \n
 			if (IsPathDirA(InBaseDir) == TRUE)
@@ -95,7 +95,8 @@ int main()
 		
 	}
 
-	
+	bBOITRemove = 0;//是否卸载程序标识
+
 	BroadcastCommandEvent(EC_CMDLOAD, 0, 0);
 
 	InitServerState();
@@ -115,6 +116,35 @@ int main()
 	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
 	FinalizeSandbox();
+
+	//检查是否卸载
+	if (bBOITRemove)
+	{
+		puts("清理中qaq");
+		if (ClearSettings() == SETTINGS_ERROR)
+		{
+			puts("清理注册表失败，可能是权限不足导致的。请手动清理注册表项。按任意键退出程序");
+			_getch();
+			return 0;
+		}
+		if (RemoveDirIfExist(GetBOITBaseDir()) == FALSE)
+		{
+			puts("清理BOIT目录失败，可能是权限不足导致的。请手动清理文件夹。按任意键退出程序");
+			_getch();
+			return 0;
+		}
+
+		puts("BOIT注册表项和文件夹已从您的计算机上移除。");
+		puts("CoolQ插件和该程序本身不会自动移除，如果需要请手动删除他们。");
+		puts("感谢使用！按任意键退出程序");
+		_getch();
+		return 0;
+	}
+	else
+	{
+		puts("按任意键退出程序");
+		_getch();
+	}
 	return 0;
 }
 
@@ -169,9 +199,20 @@ unsigned __stdcall HandleInputThread(LPVOID Args)
 				SetEvent(hEventServerStop);
 				return 0;
 			}
-			if (_strcmpi(InputCommand, "help") == 0)
+			else if (_strcmpi(InputCommand, "help") == 0)
 			{
-				puts("帮助信息：\n\nstop:  关闭BOIT\nhelp:  显示帮助信息");
+				puts("帮助信息：\n\nstop:  关闭BOIT\nremove:  卸载BOIT\nhelp:  显示帮助信息");
+			}
+			else if (_strcmpi(InputCommand, "remove") == 0)
+			{
+				if (ConsoleQueryYesNo("这将关闭BOIT从注册表中清除所有BOIT配置项，并移除BOIT目录。确定吗？") == TRUE)
+				{
+					bBOITRemove = TRUE;
+					SetEvent(hEventServerStop);
+					puts("关闭BOIT中");
+					return 0;
+					//main函数退出的时候会检测bBOITRemove
+				}
 			}
 		}
 	}

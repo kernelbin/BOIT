@@ -117,7 +117,6 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 	AcquireSRWLockExclusive(&ConnStateLock);
 	ConnState = 1;
 	ReleaseSRWLockExclusive(&ConnStateLock);
-	MessageBox(NULL, TEXT("Conn!"), TEXT("Conn!"), 0);
 	return iRet;
 }
 
@@ -138,7 +137,6 @@ int TryReConn()
 	ConnState = 1;
 	ReleaseSRWLockExclusive(&ConnStateLock);
 
-	MessageBox(NULL, TEXT("REConn!"), TEXT("REConn!"), 0);
 	return 0;
 }
 
