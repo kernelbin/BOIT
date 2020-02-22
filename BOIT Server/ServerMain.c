@@ -64,9 +64,9 @@ int main()
 			{
 				PathSimplifyA(InBaseDir);
 				PathAddBackslashA(InBaseDir);
-				//if(InBaseDir[strlen(InBaseDir) - 1] != \)
 				break;
 			}
+			puts("这真的是一个目录吗？");
 		}
 
 		printf("将在目录 %s 初始化BOIT\n", InBaseDir);
@@ -89,9 +89,6 @@ int main()
 			InitBOITDirVar();
 
 			InitBOITDir();
-
-			
-
 		}
 		break;
 	}

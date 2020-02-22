@@ -17,9 +17,10 @@
 #define	COMPILE_TYPE_COMPILE 1
 #define COMPILE_TYPE_SCRIPT 2
 
-#define COMPILE_ENCODE_ANSI 0
-#define COMPILE_ENCODE_UTF8 1
-#define COMPILE_ENCODE_GB18030 2
+#define COMPILE_ENCODE_GB18030 0
+#define COMPILE_ENCODE_ANSI 1
+#define COMPILE_ENCODE_UTF8 2
+
 
 typedef struct __tagCompileCfg
 {
@@ -222,9 +223,12 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 
 
+	//去除转义码
+	RemoveCQEscapeChar(CodeStr);
 
-	//TODO:校验权限
 
+
+	//校验权限
 	if (bIsSU && (CheckUserToken(QQID, L"PrivilegeRunCodeNoRestrict") == 0))
 	{
 		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
@@ -250,9 +254,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 	BOOL bFileCreated = FALSE;
 
-	//去除转义码
-
-	RemoveCQEscapeChar(CodeStr);
+	
 	__try
 	{
 		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
@@ -1023,12 +1025,14 @@ UINT GetEncodeCodePage(int Compile_Encode)
 	case COMPILE_ENCODE_UTF8:
 		CodePage = CP_UTF8;
 		break;
-	case COMPILE_ENCODE_GB18030:
-		CodePage = 54936; //详见  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
-		break;
+	
 	case COMPILE_ENCODE_ANSI:
-	default:
 		CodePage = CP_ACP;
+		break;
+
+	case COMPILE_ENCODE_GB18030:
+	default:
+		CodePage = 54936; //详见  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
 		break;
 	}
 	return CodePage;
