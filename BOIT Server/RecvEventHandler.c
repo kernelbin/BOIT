@@ -65,17 +65,17 @@ unsigned __stdcall RecvEventThread(void *Args)
 			}
 			SetEvent(hEventRecvEnd);
 			//·Ö·¢
-			switch (pSharedMemRecv->EventType)
+			switch (RecvEvent.EventType)
 			{
 			case BOIT_EVENT_RECV_PRIVATE:
-				RecvPrivateMessage(pSharedMemRecv->u.PrivateMsg.QQID,
-					pSharedMemRecv->u.PrivateMsg.Msg);
+				RecvPrivateMessage(RecvEvent.u.PrivateMsg.QQID,
+					RecvEvent.u.PrivateMsg.Msg);
 				break;
 			case BOIT_EVENT_RECV_GROUP:
-				RecvGroupMessage(pSharedMemRecv->u.GroupMsg.GroupID,
-					pSharedMemRecv->u.GroupMsg.QQID,
-					pSharedMemRecv->u.GroupMsg.AnonymousName,
-					pSharedMemRecv->u.GroupMsg.Msg);
+				RecvGroupMessage(RecvEvent.u.GroupMsg.GroupID,
+					RecvEvent.u.GroupMsg.QQID,
+					RecvEvent.u.GroupMsg.AnonymousName,
+					RecvEvent.u.GroupMsg.Msg);
 				break;
 			}
 		}

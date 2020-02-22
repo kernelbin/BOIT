@@ -46,7 +46,6 @@ CQEVENT(int, __eventExit, 0)() {
 		AppDisabled();
 	}
 	AppFinialize();
-	MessageBox(NULL, TEXT("1"), TEXT("2"), 0);
 	return 0;
 }
 
