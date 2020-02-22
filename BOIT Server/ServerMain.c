@@ -26,7 +26,8 @@ int main()
 
 	InitializeSandbox(2, 2);
 	InitializeCommandManager();
-	RegisterInlineCommand();//注册所有指令
+
+	RegisterInlineCommand();//注册所有内置指令
 
 	//读取注册表，检查配置
 	switch (RegisterRead(GetBOITBaseDir()))
@@ -36,28 +37,11 @@ int main()
 		InitBOITDirVar();
 		break;
 	case SETTINGS_ERROR:
-		while (1)
+		if (ConsoleQueryYesNo("注册表加载失败，是否清空设置并初始化 ?") == FALSE)
 		{
-			puts("注册表加载失败，是否清空设置并初始化? (y/n)");
-			char Answer[128] = { 0 };
-			scanf_s("%[^\n]", &Answer, _countof(Answer) - 1);
-			getchar();//读掉那个换行
-			if (strcmp(Answer,"y") == 0 || 
-				strcmp(Answer, "Y") == 0 ||
-				strcmp(Answer, "yes") == 0 ||
-				strcmp(Answer, "Yes") == 0
-				)
-			{
-				break;
-			}
-			else if (strcmp(Answer, "n") == 0 ||
-				strcmp(Answer, "N") == 0 ||
-				strcmp(Answer, "no") == 0 ||
-				strcmp(Answer, "No") == 0
-				)
-			{
-				return 0;
-			}
+			puts("按任意键退出程序");
+			_getch();
+			return 0;
 		}
 		//清理注册表
 		if (ClearSettings() == SETTINGS_ERROR)
@@ -74,7 +58,6 @@ int main()
 		while (1)
 		{
 			puts("请输入BOIT根目录（无需引号，完整输入一行后换行）");
-
 			scanf_s("%[^\n]", &InBaseDir, MAX_PATH);
 			getchar();//读掉 \n
 			if (IsPathDirA(InBaseDir) == TRUE)
@@ -138,6 +121,34 @@ int main()
 	return 0;
 }
 
+BOOL ConsoleQueryYesNo(char * QueryText)
+{
+	while (1)
+	{
+		printf(QueryText);
+		printf(" (y/n)\n");
+		char Answer[128] = { 0 };
+		scanf_s("%[^\n]", &Answer, _countof(Answer) - 1);
+		getchar();//读掉那个换行
+		if (strcmp(Answer, "y") == 0 ||
+			strcmp(Answer, "Y") == 0 ||
+			strcmp(Answer, "yes") == 0 ||
+			strcmp(Answer, "Yes") == 0
+			)
+		{
+			return TRUE;
+		}
+		else if (strcmp(Answer, "n") == 0 ||
+			strcmp(Answer, "N") == 0 ||
+			strcmp(Answer, "no") == 0 ||
+			strcmp(Answer, "No") == 0
+			)
+		{
+			return FALSE;
+		}
+	}
+	return FALSE;
+}
 
 BOOL StartInputThread()
 {
