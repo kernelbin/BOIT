@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\BOIT Server\Base64.c" />
     <ClCompile Include="..\BOIT Server\WaitForConnThread.c" />
     <ClCompile Include="AppLifeRoutine.c" />
     <ClCompile Include="CoolQ_API_Entry.c" />
@@ -161,6 +162,7 @@
     <Library Include="CQP.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Base64.h" />
     <ClInclude Include="CoolQDef.h" />
     <ClInclude Include="CoolQ_State.h" />
     <ClInclude Include="CQAPITransfer.h" />

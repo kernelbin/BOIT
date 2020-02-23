@@ -18,6 +18,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)BOITEventType.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)BOITInfoMaxDef.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EstablishConn.c">

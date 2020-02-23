@@ -39,6 +39,9 @@
     <ClCompile Include="SendEventHandler.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\BOIT Server\Base64.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.json">
@@ -61,6 +64,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CQAPITransfer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Base64.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

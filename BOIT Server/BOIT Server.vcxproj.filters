@@ -106,6 +106,9 @@
     <Filter Include="源文件\指令回调\run">
       <UniqueIdentifier>{e17d422f-60ea-480f-80b1-6485ce9ade16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\猫猫">
+      <UniqueIdentifier>{a910fb7a-664d-4868-a854-8f155f0197b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -176,6 +179,9 @@
     </ClCompile>
     <ClCompile Include="Command_q_and_a.c">
       <Filter>源文件\指令回调\q&amp;a</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_cat.c">
+      <Filter>源文件\指令回调\猫猫</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

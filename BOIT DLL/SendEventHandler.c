@@ -3,6 +3,8 @@
 #include"CQAPITransfer.h"
 #include"BOITEventType.h"
 #include<process.h>
+#include"SharedMemStruct.h"
+#include"Base64.h"
 
 unsigned __stdcall SendEventThread(void* Args);
 
@@ -52,6 +54,23 @@ unsigned __stdcall SendEventThread(void *Args)
 				pSharedMemSend->u.GroupMsg.iRet = iRet;
 			}
 				break;
+			case BOIT_EVENT_SEND_GET_GROUPMEMBER_INFO:
+			{
+				int iRet = RetrieveGroupMemberInfo(pSharedMemSend->u.GroupMemberInfo.GroupID,
+					pSharedMemSend->u.GroupMemberInfo.QQID,
+					pSharedMemSend->u.GroupMemberInfo.NoCache,
+					&(pSharedMemSend->u.GroupMemberInfo.GroupMemberInfo));
+				pSharedMemSend->u.GroupMemberInfo.iRet = iRet;
+			}
+				break;
+			case BOIT_EVENT_SEND_GET_STRANGER_INFO:
+			{
+				int iRet = RetrieveStrangerInfo(pSharedMemSend->u.StrangerInfo.QQID,
+					pSharedMemSend->u.StrangerInfo.NoCache,
+					&(pSharedMemSend->u.StrangerInfo.StrangerInfo));
+				pSharedMemSend->u.StrangerInfo.iRet = iRet;
+			}
+			break;
 			}
 			
 			SetEvent(hEventSendEnd);
@@ -65,4 +84,261 @@ unsigned __stdcall SendEventThread(void *Args)
 	}
 	
 }
+
+
+long long RetrieveNumber(char* Data, int* offset, int len)
+{
+	long long ret = 0;
+	Data += (*offset);
+	for (int i = 0; i < len; i++)
+	{
+		ret <<= 8;
+		ret |= (unsigned char)Data[i];
+	}
+	(*offset) += len;
+	return ret;
+}
+
+char* RetrieveString(char* Data, int* offset, int* len)
+{
+	int StringLen = RetrieveNumber(Data, offset,2);
+	char* RetStr = Data + (*offset);
+	(*len) = StringLen;
+	(*offset) +=  StringLen;
+	
+	if (StringLen == 0)
+	{
+		return 0;
+	}
+	
+	return RetStr;
+}
+
+int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
+{
+	char * InfoStr = GetGroupMemberInfo(GroupID, QQID, NoCache);
+	if (!InfoStr)
+	{
+		return 0;
+	}
+	int DataLen = 3 * ((strlen(InfoStr) + 3) / 4) + 6;//加6保险，我心虚
+	PBYTE DecodeData;
+	DecodeData = malloc(DataLen);
+	ZeroMemory(DecodeData, DataLen);
+	Base64Decode(InfoStr, DecodeData);
+
+	int offset = 0;
+	int StringLen;
+
+
+	long long RetrGroupID = RetrieveNumber(DecodeData, &offset, 8);
+	GroupMemberInfo->GroupID = RetrGroupID;//赋值
+
+	long long RetrQQID = RetrieveNumber(DecodeData, &offset, 8);
+	GroupMemberInfo->QQID = RetrQQID;//赋值
+
+
+	char* RetrNickName = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrNickName, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_NICKLEN)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrNickName, StringLen, GroupMemberInfo->NickName, wcStrlen);
+			GroupMemberInfo->NickName[wcStrlen] = 0;
+		}
+	}
+	else
+	{
+		GroupMemberInfo->NickName[0] = 0;
+	}
+
+	char* RetrCardName = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrCardName, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_NICKLEN)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrCardName, StringLen, GroupMemberInfo->CardName, wcStrlen);
+			GroupMemberInfo->CardName[wcStrlen] = 0;
+		}
+
+	}
+	else
+	{
+		GroupMemberInfo->CardName[0] = 0;
+	}
+
+
+	int RetrGender = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->Gender = RetrGender;
+
+
+	int RetrAge = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->Age = RetrAge;
+
+
+	char* RetrLocation = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrLocation, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_LOCATION)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrLocation, StringLen, GroupMemberInfo->Location, wcStrlen);
+			GroupMemberInfo->Location[wcStrlen] = 0;
+		}
+
+	}
+	else
+	{
+		GroupMemberInfo->Location[0] = 0;
+	}
+
+
+	int RetrEnterGroupTime = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->EnterGroupTime = RetrEnterGroupTime;
+
+
+	int RetrLastActive = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->LastActive = RetrLastActive;
+
+
+	char* RetrLevelName = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrLevelName, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_LEVELNAME)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrLevelName, StringLen, GroupMemberInfo->LevelName, wcStrlen);
+			GroupMemberInfo->LevelName[wcStrlen] = 0;
+		}
+
+	}
+	else
+	{
+		GroupMemberInfo->LevelName[0] = 0;
+	}
+
+
+	int RetrManageLevel = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->ManageLevel = RetrManageLevel;
+
+
+	int RetrBadRecord = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->bBadRecord = RetrBadRecord;
+
+
+	char* RetrSpecialTitle = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrSpecialTitle, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_NICKLEN)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrSpecialTitle, StringLen, GroupMemberInfo->SpecialTitle, wcStrlen);
+			GroupMemberInfo->SpecialTitle[wcStrlen] = 0;
+		}
+
+	}
+	else
+	{
+		GroupMemberInfo->SpecialTitle[0] = 0;
+	}
+
+
+	int RetrSpecTitExpire = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->SpecTitExpire = RetrSpecTitExpire;
+
+
+	int RetrAlloEditCard = RetrieveNumber(DecodeData, &offset, 4);
+	GroupMemberInfo->bAllowEditCard = RetrAlloEditCard;
+
+		
+	free(DecodeData);
+	return 1;
+}
+
+int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
+{
+	char* InfoStr = GetStrangerInfo(QQID, NoCache);
+	if (!InfoStr)
+	{
+		return 0;
+	}
+	int DataLen = 3 * ((strlen(InfoStr) + 3) / 4) + 6;//加6保险，我心虚
+	PBYTE DecodeData;
+	DecodeData = malloc(DataLen);
+	ZeroMemory(DecodeData, DataLen);
+	Base64Decode(InfoStr, DecodeData);
+
+	int offset = 0;
+	int StringLen;
+
+	long long RetrQQID = RetrieveNumber(DecodeData, &offset, 8);
+	StrangerInfo->QQID = RetrQQID;//赋值
+
+
+	char* RetrNickName = RetrieveString(DecodeData, &offset, &StringLen);
+	//赋值
+	if (StringLen)
+	{
+		int wcStrlen = MultiByteToWideChar(54936, 0, RetrNickName, StringLen, 0, 0);
+		if (wcStrlen >= BOIT_MAX_NICKLEN)
+		{
+			//nmd????
+			//TODO:异常处理
+		}
+		else
+		{
+			MultiByteToWideChar(54936, 0, RetrNickName, StringLen, StrangerInfo->NickName, wcStrlen);
+			StrangerInfo->NickName[wcStrlen] = 0;
+		}
+	}
+	else
+	{
+		StrangerInfo->NickName[0] = 0;
+	}
+
+
+	int RetrGender = RetrieveNumber(DecodeData, &offset, 4);
+	StrangerInfo->Gender = RetrGender;
+
+
+	int RetrAge = RetrieveNumber(DecodeData, &offset, 4);
+	StrangerInfo->Age = RetrAge;
+
+
+	free(DecodeData);
+	return 1;
+}
+
 

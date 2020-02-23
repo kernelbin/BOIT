@@ -2,6 +2,7 @@
 #include<Windows.h>
 #include"CoolQDef.h"
 #include"CoolQ_State.h"
+#include "CQAPITransfer.h"
 
 int SendPrivateMessage(long long QQID, const char* msg)
 {
@@ -12,4 +13,16 @@ int SendPrivateMessage(long long QQID, const char* msg)
 int SendGroupMessage(long long GroupID, const char* msg)
 {
 	return CQ_sendGroupMsg(CQAuthCode, GroupID, msg);
+}
+
+
+char * GetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache)
+{
+	return CQ_getGroupMemberInfoV2(CQAuthCode, GroupID, QQID, NoCache);
+}
+
+
+char* GetStrangerInfo(long long QQID, BOOL NoCache)
+{
+	return CQ_getStrangerInfo(CQAuthCode, QQID, NoCache);
 }
