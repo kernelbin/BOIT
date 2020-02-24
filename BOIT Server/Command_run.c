@@ -71,12 +71,6 @@ LONGLONG CompileID;
 
 int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
-	if (CheckPrivilegeRunCode(GroupID,QQID) == 0)
-	{
-		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
-		return 0;
-	}
-	
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 	
@@ -86,6 +80,11 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg) 
 {
+	if (CheckPrivilegeRunCode(GroupID, QQID) == 0)
+	{
+		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		return 0;
+	}
 
 	//检查用户目录下是否有相应文件夹
 	if (PerUserCreateDirIfNExist(QQID, L"Sandbox"))

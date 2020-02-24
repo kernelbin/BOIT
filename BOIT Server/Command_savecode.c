@@ -50,6 +50,7 @@ int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, 
 	if (bSuccessSave == TRUE)
 	{
 		SendBackMessage(GroupID, QQID, L"保存代码成功！");
+		SendBackMessage(GroupID, QQID, L"非常抱歉bot还在开发周期中，您的代码不一定会被始终保存！");
 	}
 	else
 	{
