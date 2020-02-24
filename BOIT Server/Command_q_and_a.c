@@ -11,7 +11,7 @@ int CmdMsg_q_and_a_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, W
 		L"Q:bot什么时候出新功能？\n\nA:取决于 kernel.bin 有多鸽子",
 		L"Q:为什么突然减少了好多功能？\n\nA:因为我对整个 bot 进行了重写以提升运行速度和安全性",
 		L"Q:为什么不能运行 xxx 语言？\n\nA:如果想要新加语言，请联系 kernel.bin",
-		L"Q:bot开源吗？\n\nA:开源的，输入#about查看详情，欢迎 star (o゜▽゜)o☆",
+		L"Q:bot开源吗？\n\nA:开源的，输入#about查看详情，欢迎 star (*≧▽≦)o☆",
 		L"Q:运行代码是什么原理？\n\nA:在本地编译，并且通过管道重定向实现获取输出数据，并且通过一些手段限制进程权限" };
 
 	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);

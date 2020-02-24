@@ -13,7 +13,7 @@ int CmdMsg_qwq_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		L"/qwq\\",
 		L"©d(¨R¨Œ¨Q*)o",
 		L"`(*>©n<*)¡ä",
-		L"(o©b¨Œ©b)o¡î" ,
+		L"(*¨R¨Œ¨Q)o¡î" ,
 		L"(*/¦Ø£Ü*)"};
 	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
 	return 0;

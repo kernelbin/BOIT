@@ -24,6 +24,10 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", GroupMemberInfo.NickName);
 			}
+			else if (QQID == 1976658142)
+			{
+				swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", GroupMemberInfo.NickName);
+			}
 			else
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是猫猫啊", GroupMemberInfo.NickName);
@@ -39,6 +43,10 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		if (QQID == 693511570)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", StrangerInfo.NickName);
+		}
+		else if (QQID == 1976658142)
+		{
+			swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", StrangerInfo.NickName);
 		}
 		else
 		{
