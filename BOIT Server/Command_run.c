@@ -68,7 +68,7 @@ LONGLONG CompileID;
 
 int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
-	if (CheckUserToken(QQID, L"PrivilegeRunCode") == 0)
+	if (CheckPrivilegeRunCode(GroupID,QQID) == 0)
 	{
 		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
 		return 0;
@@ -364,6 +364,16 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 	
 
 	return 0;
+}
+
+
+BOOL CheckPrivilegeRunCode(long long GroupID, long long QQID)
+{
+	if (CheckUserToken(QQID, L"PrivilegeRunCode") == 0 || CheckGroupToken(GroupID, L"PrivilegeRunCode") == 0)
+	{
+		return FALSE;
+	}
+	return TRUE;
 }
 
 

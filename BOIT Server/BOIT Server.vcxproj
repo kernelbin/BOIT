@@ -153,6 +153,7 @@
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="PerCommandData.c" />
+    <ClCompile Include="PerGroupData.c" />
     <ClCompile Include="PerUserData.c" />
     <ClCompile Include="RecvEventHandler.c" />
     <ClCompile Include="InlineCommand.c" />
@@ -163,7 +164,7 @@
     <ClCompile Include="ServerState.c" />
     <ClCompile Include="SessionManage.c" />
     <ClCompile Include="SimpleSandbox.c" />
-    <ClCompile Include="UserTokenManage.c" />
+    <ClCompile Include="TokenManage.c" />
     <ClCompile Include="VBuffer.c" />
   </ItemGroup>
   <ItemGroup>

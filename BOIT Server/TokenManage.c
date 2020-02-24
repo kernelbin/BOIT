@@ -15,7 +15,28 @@ BOOL CheckUserToken(long long QQID, WCHAR* TokenStr)
 	PathAppendW(TokenFile, TokenStr);
 	if (PathFileExistsW(TokenFile))
 	{
-		//TODO: 校验组权限
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+
+BOOL CheckGroupToken(long long GroupID, WCHAR* TokenStr)
+{
+	if (PerGroupCreateDirIfNExist(GroupID, L"Token"))
+	{
+		//初始化默认权限
+		PerGroupCreateFileIfNExist(GroupID, L"Token\\PrivilegeRunCode");
+	}
+
+	WCHAR TokenFile[MAX_PATH];
+	GetPerGroupDir(TokenFile, GroupID);
+	PathAppendW(TokenFile, L"Token");
+	PathAppendW(TokenFile, TokenStr);
+	if (PathFileExistsW(TokenFile))
+	{
 		return TRUE;
 	}
 

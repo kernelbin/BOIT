@@ -70,9 +70,6 @@
     <Filter Include="源文件\目录管理\用户目录管理">
       <UniqueIdentifier>{f7420c86-4e6f-4124-b9b9-e6ff6a7f8541}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\目录管理\指令目录管理">
-      <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\简易沙盒">
       <UniqueIdentifier>{7c7c0bb6-fe90-40c8-8680-b9a3b21e623e}</UniqueIdentifier>
     </Filter>
@@ -108,6 +105,12 @@
     </Filter>
     <Filter Include="源文件\指令回调\猫猫">
       <UniqueIdentifier>{a910fb7a-664d-4868-a854-8f155f0197b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\目录管理\群目录管理">
+      <UniqueIdentifier>{92c2e432-2c2c-4141-b1cd-95a10e661ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\目录管理\指令目录管理">
+      <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -171,9 +174,6 @@
     <ClCompile Include="VBuffer.c">
       <Filter>源文件\VBuffer</Filter>
     </ClCompile>
-    <ClCompile Include="UserTokenManage.c">
-      <Filter>源文件\目录管理</Filter>
-    </ClCompile>
     <ClCompile Include="RemoveCQEscapeChar.c">
       <Filter>源文件\CQ码转义</Filter>
     </ClCompile>
@@ -182,6 +182,12 @@
     </ClCompile>
     <ClCompile Include="Command_cat.c">
       <Filter>源文件\指令回调\猫猫</Filter>
+    </ClCompile>
+    <ClCompile Include="PerGroupData.c">
+      <Filter>源文件\目录管理\群目录管理</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenManage.c">
+      <Filter>源文件\目录管理</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

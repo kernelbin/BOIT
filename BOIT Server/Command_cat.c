@@ -22,7 +22,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 			SendEventGetGroupMemberInfo(GroupID, QQID, TRUE, &GroupMemberInfo);
 			if (QQID == 693511570)
 			{
-				swprintf_s(CatMessage, _countof(CatMessage), L"噗呼噗呼， %ls 你也是兔子啊", GroupMemberInfo.NickName);
+				swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", GroupMemberInfo.NickName);
 			}
 			else
 			{
@@ -38,7 +38,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 		if (QQID == 693511570)
 		{
-			swprintf_s(CatMessage, _countof(CatMessage), L"噗呼噗呼， %ls 你也是兔子啊", StrangerInfo.NickName);
+			swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", StrangerInfo.NickName);
 		}
 		else
 		{

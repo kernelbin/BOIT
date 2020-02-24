@@ -239,6 +239,8 @@ int GetCmdSpaceLen(WCHAR* String)
 
 int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHAR* Msg)
 {
+	CheckPerUserDataExist(QQID);
+	CheckPerGroupDataExist(GroupID);
 	AcquireSRWLockShared(&CommandChainLock);
 	if (!RootCommand)
 	{
@@ -286,7 +288,6 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 
 			if (bMatch)
 			{
-				CheckPerUserDataExist(QQID);
 				pList->MessageProc(pList, GroupID, QQID, AnonymousName, Msg);
 			}
 		}
