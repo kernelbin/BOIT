@@ -52,6 +52,9 @@ typedef struct __tagRunSession
 }RUN_SESSION, * pRUN_SESSION;
 
 
+
+pBOIT_COMMAND pRunCmd;// 存下来给savecode什么的用
+
 BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen, WCHAR* ConfigSuffix, pCOMPILE_CFG CompileCfg);
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen);
@@ -73,7 +76,16 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
 		return 0;
 	}
+	
+	int ParamLen = GetCmdParamLen(Msg);
+	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
+	
+	return RunCode(GroupID, QQID, AnonymousName, Msg + ParamLen + SpaceLen);
+}
 
+
+int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg) 
+{
 
 	//检查用户目录下是否有相应文件夹
 	if (PerUserCreateDirIfNExist(QQID, L"Sandbox"))
@@ -85,10 +97,10 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		//创建相应文件
 	}
 
+
+	pBOIT_COMMAND pCmd = pRunCmd;
 	//TODO:在这里读取用户信息，是否有权限执行程序，是否有权限以su执行程序
-
-
-		//usage: #run language [/su] sourcecode
+	
 	int MsgLen = wcslen(Msg);
 	WCHAR* lpwcParam = Msg;
 	int ParamCnt = 0;
@@ -108,18 +120,18 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 	__try
 	{
-		for (;MsgLen > 0;ParamCnt++)
+		for (; MsgLen > 0; ParamCnt++)
 		{
 			int ParamLen = GetCmdParamLen(lpwcParam);
 
 
 			//处理这个 Param
-			if (ParamCnt == 1 &&
+			if (ParamCnt == 0 &&
 				FindCompileConfig(pCmd, lpwcParam, ParamLen, L".cfg", CompileCfg) == TRUE)
 			{
 				LanguageMatched = TRUE;
 			}
-			else if (ParamCnt >= 1)
+			else if (ParamCnt >= 0)
 			{
 				//解析可能的参数
 				if (lpwcParam[0] == '-' || lpwcParam[0] == '/' || lpwcParam[0] == '\\')
@@ -167,7 +179,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 					break;
 				}
 			}
-			
+
 			lpwcParam += ParamLen;
 			MsgLen -= ParamLen;
 			int SpaceLen = GetCmdSpaceLen(lpwcParam);
@@ -215,7 +227,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 			{
 				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode\n 输入#run /help 查看详细帮助信息");
 			}
-			
+
 			free(CompileCfg);
 			return 0;
 		}
@@ -254,11 +266,11 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 
 	BOOL bFileCreated = FALSE;
 
-	
+
 	__try
 	{
 		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
-		
+
 		int wcCodeLen = wcslen(CodeStr);
 		int MultiByteStrLen = WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
 		MultiByteStrCode = malloc(MultiByteStrLen + 1);
@@ -342,7 +354,7 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 			free(CompileSession);
 		}
 	}
-		break;
+	break;
 	case COMPILE_TYPE_SCRIPT:
 	{
 		WCHAR SandboxDir[MAX_PATH];
@@ -352,18 +364,16 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR
 		WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
 		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
 
-		
+
 		StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL,
-			CompileCmd, SandboxDir, !bIsSU ,&boitSession, CompileCfg->OutputEncode);
-		
+			CompileCmd, SandboxDir, !bIsSU, &boitSession, CompileCfg->OutputEncode);
+
 
 	}
-		
-		break;
-	}
-	
 
-	return 0;
+	break;
+	}
+
 }
 
 
@@ -623,6 +633,7 @@ int CmdEvent_run_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB Para
 		//创建说明文件
 		break;
 	case EC_CMDLOAD:
+		pRunCmd = pCmd; // 存下来以备后用
 		CompileID = 0;
 		break;
 	}

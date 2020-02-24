@@ -149,6 +149,7 @@
     <ClCompile Include="Command_help.c" />
     <ClCompile Include="Command_q_and_a.c" />
     <ClCompile Include="Command_run.c" />
+    <ClCompile Include="Command_runcode.c" />
     <ClCompile Include="Command_stop.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
@@ -159,6 +160,7 @@
     <ClCompile Include="InlineCommand.c" />
     <ClCompile Include="RegisterRW.c" />
     <ClCompile Include="RemoveCQEscapeChar.c" />
+    <ClCompile Include="Command_savecode.c" />
     <ClCompile Include="SendEventDispatch.c" />
     <ClCompile Include="ServerMain.c" />
     <ClCompile Include="ServerState.c" />

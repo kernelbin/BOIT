@@ -189,6 +189,12 @@
     <ClCompile Include="TokenManage.c">
       <Filter>源文件\目录管理</Filter>
     </ClCompile>
+    <ClCompile Include="Command_savecode.c">
+      <Filter>源文件\指令回调\run</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_runcode.c">
+      <Filter>源文件\指令回调\run</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">

@@ -34,7 +34,11 @@ int CreatePerUserData(WCHAR* Path);
 
 int GetPerUserDir(WCHAR* Buffer, long long QQID);
 
+int GetPerUserStorageDir(WCHAR* Buffer, long long QQID);
+
 BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName);
+
+HANDLE PerUserCreateStorageFile(long long QQID, WCHAR* FileName, DWORD DesiredAccess, DWORD dwShareMode, DWORD CreationDisposition);
 
 int CheckPerGroupDataExist(long long GroupID);
 
