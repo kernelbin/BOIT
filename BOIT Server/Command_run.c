@@ -8,6 +8,7 @@
 #include<wchar.h>
 #include"VBuffer.h"
 #include"RemoveCQEscapeChar.h"
+#include"HandleBOITCode.h"
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -534,7 +535,9 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 				wcStdout[BOIT_MAX_TEXTLEN] = 0;
 			}
 
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+
+			SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+		//	SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
 
 			free(wcStdout);
 		}

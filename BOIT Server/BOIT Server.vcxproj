@@ -153,6 +153,7 @@
     <ClCompile Include="Command_stop.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
+    <ClCompile Include="HandleBOITCode.c" />
     <ClCompile Include="PerCommandData.c" />
     <ClCompile Include="PerGroupData.c" />
     <ClCompile Include="PerUserData.c" />
@@ -174,6 +175,7 @@
     <ClInclude Include="CommandEvent.h" />
     <ClInclude Include="CommandManager.h" />
     <ClInclude Include="DirManagement.h" />
+    <ClInclude Include="HandleBOITCode.h" />
     <ClInclude Include="InlineCommand.h" />
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />

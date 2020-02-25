@@ -112,6 +112,12 @@
     <Filter Include="源文件\目录管理\指令目录管理">
       <UniqueIdentifier>{da54d1dc-da21-4d5f-9341-7be33e2e514b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\BOIT码转义">
+      <UniqueIdentifier>{b0e802f9-8b38-42e3-b07e-ac6dac3b7d48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\BOIT码转义">
+      <UniqueIdentifier>{f55079db-7fb3-442a-9988-bbb2f1bf37f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -195,6 +201,9 @@
     <ClCompile Include="Command_runcode.c">
       <Filter>源文件\指令回调\run</Filter>
     </ClCompile>
+    <ClCompile Include="HandleBOITCode.c">
+      <Filter>源文件\BOIT码转义</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -235,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="RemoveCQEscapeChar.h">
       <Filter>头文件\CQ码转义</Filter>
+    </ClInclude>
+    <ClInclude Include="HandleBOITCode.h">
+      <Filter>头文件\BOIT码转义</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
