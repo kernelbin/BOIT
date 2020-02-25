@@ -98,9 +98,8 @@ int SendEventGetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache,
 			__leave;
 		}
 		//³É¹¦
-		GroupMemberInfo->GroupID = pSharedMemSend->u.GroupMemberInfo.GroupID;
-		GroupMemberInfo->QQID = pSharedMemSend->u.GroupMemberInfo.QQID;
-		wcscpy_s(GroupMemberInfo->NickName, BOIT_MAX_NICKLEN, pSharedMemSend->u.GroupMemberInfo.GroupMemberInfo.NickName);
+		memcpy(GroupMemberInfo, &(pSharedMemSend->u.GroupMemberInfo.GroupMemberInfo), sizeof(BOIT_GROUPMEMBER_INFO));
+		
 
 		SetEvent(hEventSendRet);
 	}
