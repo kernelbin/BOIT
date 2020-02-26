@@ -14,7 +14,7 @@ int CmdMsg_stop_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHA
 	}
 	else
 	{
-		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		SendBackMessage(GroupID, QQID, L"Oops... 您没有适当的权限进行操作");
 	}
 	
 	return 0;

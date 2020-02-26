@@ -83,7 +83,7 @@ int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	if (CheckPrivilegeRunCode(GroupID, QQID) == 0)
 	{
-		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		SendBackMessage(GroupID, QQID, L"Oops... 您没有适当的权限进行操作");
 		return 0;
 	}
 
@@ -243,7 +243,7 @@ int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
 	//校验权限
 	if (bIsSU && (CheckUserToken(QQID, L"PrivilegeRunCodeNoRestrict") == 0))
 	{
-		SendBackMessage(GroupID, QQID, L"Opps... 您没有适当的权限进行操作");
+		SendBackMessage(GroupID, QQID, L"Oops... 您没有适当的权限进行操作");
 		return 0;
 	}
 
@@ -454,7 +454,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 			}
 			else
 			{
-				SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"Opps... 编译失败了");
+				SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"Oops... 编译失败了");
 			}
 			WCHAR* wcStdout;
 

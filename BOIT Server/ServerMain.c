@@ -77,7 +77,7 @@ int main()
 		
 		if (InitializeSettings(GetBOITBaseDir()) != SETTINGS_INITIALIZED)
 		{
-			//Opps
+			//Oops
 			puts("初始化注册表失败，按任意键退出程序");
 			_getch();
 			return 0;
