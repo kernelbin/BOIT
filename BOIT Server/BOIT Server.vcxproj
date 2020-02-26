@@ -178,6 +178,7 @@
     <ClInclude Include="DirManagement.h" />
     <ClInclude Include="HandleBOITCode.h" />
     <ClInclude Include="InlineCommand.h" />
+    <ClInclude Include="MessageWatch.h" />
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="RegisterRW.h" />

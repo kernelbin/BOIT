@@ -8,11 +8,10 @@
 #include"Settings.h"
 #include<conio.h>
 #include"CommandManager.h"
-#include"DirManagement.h"
 #include<Shlwapi.h>
 #include"SimpleSandbox.h"
 #include<process.h>
-
+#include"MessageWatch.h"
 
 
 BOOL StartInputThread();
@@ -25,6 +24,8 @@ int main()
 	puts("BOIT Server正在启动\n");
 
 	InitializeSandbox(2, 2);
+
+	InitializeMessageWatch();
 	InitializeCommandManager();
 
 	RegisterInlineCommand();//注册所有内置指令
@@ -115,6 +116,7 @@ int main()
 	//清理工作
 	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
+	FinalizeMessageWatch();
 	FinalizeSandbox();
 
 	//检查是否卸载
