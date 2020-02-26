@@ -7,7 +7,7 @@
 int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
 
 
-int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	HANDLE hSavedFile = PerUserCreateStorageFile(QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
 	if (hSavedFile == INVALID_HANDLE_VALUE)

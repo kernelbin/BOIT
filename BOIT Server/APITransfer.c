@@ -12,12 +12,12 @@ int SendPrivateMessage(long long QQID, WCHAR * Msg)
 	return 0;
 }
 
-int RecvPrivateMessage(long long QQID, WCHAR* Msg)
+int RecvPrivateMessage(long long QQID, int SubType, WCHAR* Msg)
 {
 	int PrefixLen;
 	if (CheckIsCommand(Msg, &PrefixLen))
 	{
-		CommandHandler(0, QQID, 0, Msg + PrefixLen);
+		CommandHandler(0, QQID, SubType, 0, Msg + PrefixLen);
 	}
 	return 0;
 }
@@ -28,12 +28,12 @@ int SendGroupMessage(long long GroupID, WCHAR* Msg)
 	return 0;
 }
 
-int RecvGroupMessage(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg)
+int RecvGroupMessage(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	int PrefixLen;
 	if (CheckIsCommand(Msg, &PrefixLen))
 	{
-		CommandHandler(GroupID, QQID, AnonymousName, Msg + PrefixLen);
+		CommandHandler(GroupID, QQID, SubType, AnonymousName, Msg + PrefixLen);
 	}
 	return 0;
 }

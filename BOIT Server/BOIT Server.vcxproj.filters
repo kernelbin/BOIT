@@ -118,6 +118,9 @@
     <Filter Include="头文件\BOIT码转义">
       <UniqueIdentifier>{f55079db-7fb3-442a-9988-bbb2f1bf37f9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\消息监视">
+      <UniqueIdentifier>{924ff8f0-2e3c-4436-8dc0-699379eab0bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -203,6 +206,9 @@
     </ClCompile>
     <ClCompile Include="HandleBOITCode.c">
       <Filter>源文件\BOIT码转义</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageWatch.c">
+      <Filter>源文件\消息监视</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

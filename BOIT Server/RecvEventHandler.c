@@ -48,6 +48,7 @@ unsigned __stdcall RecvEventThread(void *Args)
 			{
 			case BOIT_EVENT_RECV_PRIVATE:
 				RecvEvent.EventType = BOIT_EVENT_RECV_PRIVATE;
+				RecvEvent.u.PrivateMsg.SubType = pSharedMemRecv->u.PrivateMsg.SubType;
 				RecvEvent.u.PrivateMsg.QQID = pSharedMemRecv->u.PrivateMsg.QQID;
 				StringCchCopyW(RecvEvent.u.PrivateMsg.Msg, BOIT_MAX_TEXTLEN, pSharedMemRecv->u.PrivateMsg.Msg);
 				RecvEvent.u.PrivateMsg.iRet = 0;
@@ -81,13 +82,14 @@ unsigned __stdcall RecvEventThread(void *Args)
 			{
 			case BOIT_EVENT_RECV_PRIVATE:
 				RecvPrivateMessage(RecvEvent.u.PrivateMsg.QQID,
+					RecvEvent.u.PrivateMsg.SubType,
 					RecvEvent.u.PrivateMsg.Msg);
 				break;
 			case BOIT_EVENT_RECV_GROUP:
 				RecvGroupMessage(RecvEvent.u.GroupMsg.GroupID,
-					RecvEvent.u.GroupMsg.QQID,
-					RecvEvent.u.GroupMsg.AnonymousName,
-					RecvEvent.u.GroupMsg.Msg);
+					RecvEvent.u.GroupMsg.QQID, 
+					RecvEvent.u.GroupMsg.SubType,
+					RecvEvent.u.GroupMsg.AnonymousName, RecvEvent.u.GroupMsg.Msg);
 				break;
 			}
 		}

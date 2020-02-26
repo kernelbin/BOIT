@@ -46,6 +46,7 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 	__try
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_PRIVATE;
+		pSharedMemRecv->u.PrivateMsg.SubType = subType;
 		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
 		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
@@ -88,6 +89,7 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 	__try
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_GROUP;
+		pSharedMemRecv->u.GroupMsg.SubType = subType;
 		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
 		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);

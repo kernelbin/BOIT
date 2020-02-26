@@ -41,6 +41,7 @@ typedef struct __tagEventRecvStruct
 	{
 		struct
 		{
+			int SubType;
 			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 			long long GroupID;
 			long long QQID;
@@ -51,6 +52,7 @@ typedef struct __tagEventRecvStruct
 		 
 		struct
 		{
+			int SubType;
 			WCHAR Msg[BOIT_MAX_TEXTLEN + 4];
 			long long QQID;
 

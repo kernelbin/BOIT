@@ -237,7 +237,7 @@ int GetCmdSpaceLen(WCHAR* String)
 
 
 
-int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHAR* Msg)
+int CommandHandler(long long GroupID, long long QQID, int SubType, WCHAR *AnonymousName, WCHAR* Msg)
 {
 	CheckPerUserDataExist(QQID);
 	CheckPerGroupDataExist(GroupID);
@@ -288,7 +288,7 @@ int CommandHandler(long long GroupID, long long QQID, WCHAR *AnonymousName, WCHA
 
 			if (bMatch)
 			{
-				pList->MessageProc(pList, GroupID, QQID, AnonymousName, Msg);
+				pList->MessageProc(pList, GroupID, QQID, SubType, AnonymousName, Msg);
 			}
 		}
 	}

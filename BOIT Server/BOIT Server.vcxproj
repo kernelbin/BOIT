@@ -154,6 +154,7 @@
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="HandleBOITCode.c" />
+    <ClCompile Include="MessageWatch.c" />
     <ClCompile Include="PerCommandData.c" />
     <ClCompile Include="PerGroupData.c" />
     <ClCompile Include="PerUserData.c" />
