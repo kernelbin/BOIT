@@ -20,6 +20,7 @@ typedef struct __tagSandbox
 	HANDLE hWaitableTimer;
 
 	UINT ExitReason;
+	BOOL bMemoryExceed;
 
 	SANDBOX_CALLBACK SandboxCallback;
 	PBYTE pExternalData;

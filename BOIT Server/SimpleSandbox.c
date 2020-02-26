@@ -452,6 +452,10 @@ unsigned __stdcall JobObjCompletionPort(LPVOID Args)
 				pSandbox->ExitReason = SANDBOX_ER_ABNORMAL;
 			}
 			break;
+		case JOB_OBJECT_MSG_JOB_MEMORY_LIMIT:
+			//内存超出上限，记录下来
+			pSandbox->bMemoryExceed = TRUE;
+			break;
 		case JOB_OBJECT_MSG_MY_CLEANUP:
 			free(lpOverlapped);//释放申请的Overlapped结构
 			return 0;

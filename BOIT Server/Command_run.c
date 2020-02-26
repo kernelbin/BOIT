@@ -512,6 +512,11 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 	{
 	case SANDBOX_EVTNT_PROCESS_ZERO:
 	{
+		if (Sandbox->bMemoryExceed)
+		{
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序超出内存上限了qaq");
+		}
+
 		if (Session->StdOutBuffer->Length == 0)
 		{
 			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序莫得输出诶");
@@ -535,7 +540,8 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 				wcStdout[BOIT_MAX_TEXTLEN] = 0;
 			}
 
-
+			
+			
 			SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
 		//	SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
 
