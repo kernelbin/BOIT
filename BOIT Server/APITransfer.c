@@ -38,6 +38,18 @@ int RecvGroupMessage(long long GroupID, long long QQID, WCHAR* AnonymousName, WC
 	return 0;
 }
 
+int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
+{
+	return SendEventGetGroupMemberInfo(GroupID, QQID, NoCache, GroupMemberInfo);
+}
+
+int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
+{
+	return SendEventGetStrangerInfo(QQID, NoCache, StrangerInfo);
+}
+
+
+
 
 
 int SendBackMessage(long long GroupID, long long QQID, WCHAR* Msg)

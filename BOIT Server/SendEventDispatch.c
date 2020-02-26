@@ -132,8 +132,7 @@ int SendEventGetStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO S
 			__leave;
 		}
 		//³É¹¦
-		StrangerInfo->QQID = pSharedMemSend->u.StrangerInfo.QQID;
-		wcscpy_s(StrangerInfo->NickName, BOIT_MAX_NICKLEN, pSharedMemSend->u.StrangerInfo.StrangerInfo.NickName);
+		memcpy(StrangerInfo, &(pSharedMemSend->u.StrangerInfo.StrangerInfo), sizeof(BOIT_STRANGER_INFO));
 
 		SetEvent(hEventSendRet);
 	}
