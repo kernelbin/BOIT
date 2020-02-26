@@ -516,6 +516,19 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		{
 			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序超出内存上限了qaq");
 		}
+		switch (Sandbox->ExitReason)
+		{
+		case SANDBOX_ER_ABNORMAL:
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序异常终止了！qaq");
+			break;
+		case SANDBOX_ER_TIMEOUT:
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"超出运行时间限制了！qaq");
+			break;
+		case SANDBOX_ER_KILLED:
+			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序被强行中断了！qaq");
+			break;
+		}
+
 
 		if (Session->StdOutBuffer->Length == 0)
 		{
