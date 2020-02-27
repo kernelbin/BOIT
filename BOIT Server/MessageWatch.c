@@ -261,7 +261,7 @@ void __stdcall MsgWatchTimerCallback(
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
 		{
-			if (pList->MsgWatchID == lpArgToCompletionRoutine)
+			if (pList->MsgWatchID == (long long)lpArgToCompletionRoutine)
 			{
 				CallbackFunc = pList->Callback;
 				pData = pList->pData;
@@ -273,7 +273,7 @@ void __stdcall MsgWatchTimerCallback(
 
 	if (CallbackFunc)
 	{
-		CallbackFunc(lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
+		CallbackFunc((long long)lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
 	}
 	return;
 }

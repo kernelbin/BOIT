@@ -86,6 +86,7 @@ int InputCallback(int MsgWatchID, PBYTE pData, UINT Event,
 
 pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
 
+
 LONGLONG CompileID;
 
 int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
@@ -327,6 +328,8 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 	}
 
 
+	
+
 	switch (CompileCfg->Type)
 	{
 	case COMPILE_TYPE_COMPILE:
@@ -434,6 +437,7 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 
 
+
 BOOL CheckPrivilegeRunCode(long long GroupID, long long QQID)
 {
 	if (CheckUserToken(QQID, L"PrivilegeRunCode") == 0 || CheckGroupToken(GroupID, L"PrivilegeRunCode") == 0)
@@ -486,13 +490,13 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				if (Session->boitSession->GroupID)
 				{
 					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, Session->boitSession->GroupID,
-						Session->boitSession->QQID, Session->boitSession->SubType, Session->boitSession->AnonymousName, InputCallback, InputSession);
+						Session->boitSession->QQID, Session->boitSession->SubType, Session->boitSession->AnonymousName, InputCallback, (PBYTE)InputSession);
 				}
 				else
 				{
 					RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20,
 						Session->boitSession->GroupID, Session->boitSession->QQID, Session->boitSession->SubType,
-						Session->boitSession->AnonymousName, InputCallback, InputSession);
+						Session->boitSession->AnonymousName, InputCallback, (PBYTE)InputSession);
 				}
 				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, L"请输入输入数据：");
 
@@ -654,7 +658,7 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, W
 
 	wcscpy_s(SandboxDir, MAX_PATH, SandboxFile);
 
-
+	
 	RemoveDirIfExist(SandboxDir);
 
 
@@ -682,7 +686,7 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 		10000000 * 10,		//10秒
 		512 * 1024 * 1024,	//512MB内存
 		10 * 100,			//10% CPU
-		bLimitPrivileges, RunSession, RunSandboxCallback)) == 0)
+		bLimitPrivileges, (PBYTE)RunSession, RunSandboxCallback)) == 0)
 	{
 		SendBackMessage(RunSession->boitSession.GroupID, RunSession->boitSession.QQID, L"为程序创建沙盒时出现意外");
 		free(RunSession);
@@ -1096,7 +1100,7 @@ BOOL GetCompileCommand(WCHAR* CommandBuffer, pCOMPILE_CFG CompileCfg, LONGLONG A
 			i += 4;
 			j += wcslen(ExecutableFile);
 		}
-		else if (_wcsnicmp(CompileCfg->Command + i, L"%%", wcslen("%%")) == 0)
+		else if (_wcsnicmp(CompileCfg->Command + i, L"%%", wcslen(L"%%")) == 0)
 		{
 			CommandBuffer[j++] = CompileCfg->Command[i++];
 			i++;

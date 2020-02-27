@@ -8,6 +8,10 @@
 
 unsigned __stdcall SendEventThread(void* Args);
 
+BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo);
+
+BOOL RetrieveStrangerInfoFromCQ(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo);
+
 int StartSendEventHandler()
 {
 	_beginthreadex(NULL, 0, SendEventThread, (LPVOID)0, 0, NULL);
@@ -56,7 +60,7 @@ unsigned __stdcall SendEventThread(void *Args)
 				break;
 			case BOIT_EVENT_SEND_GET_GROUPMEMBER_INFO:
 			{
-				int iRet = RetrieveGroupMemberInfo(pSharedMemSend->u.GroupMemberInfo.GroupID,
+				int iRet = RetrieveGroupMemberInfoFromCQ(pSharedMemSend->u.GroupMemberInfo.GroupID,
 					pSharedMemSend->u.GroupMemberInfo.QQID,
 					pSharedMemSend->u.GroupMemberInfo.NoCache,
 					&(pSharedMemSend->u.GroupMemberInfo.GroupMemberInfo));
@@ -65,7 +69,7 @@ unsigned __stdcall SendEventThread(void *Args)
 				break;
 			case BOIT_EVENT_SEND_GET_STRANGER_INFO:
 			{
-				int iRet = RetrieveStrangerInfo(pSharedMemSend->u.StrangerInfo.QQID,
+				int iRet = RetrieveStrangerInfoFromCQ(pSharedMemSend->u.StrangerInfo.QQID,
 					pSharedMemSend->u.StrangerInfo.NoCache,
 					&(pSharedMemSend->u.StrangerInfo.StrangerInfo));
 				pSharedMemSend->u.StrangerInfo.iRet = iRet;
@@ -101,7 +105,7 @@ long long RetrieveNumber(char* Data, int* offset, int len)
 
 char* RetrieveString(char* Data, int* offset, int* len)
 {
-	int StringLen = RetrieveNumber(Data, offset,2);
+	int StringLen = (int)RetrieveNumber(Data, offset,2);
 	char* RetStr = Data + (*offset);
 	(*len) = StringLen;
 	(*offset) +=  StringLen;
@@ -114,16 +118,20 @@ char* RetrieveString(char* Data, int* offset, int* len)
 	return RetStr;
 }
 
-int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
+BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
 {
-	char * InfoStr = GetGroupMemberInfo(GroupID, QQID, NoCache);
+	const char * InfoStr = GetGroupMemberInfo(GroupID, QQID, NoCache);
 	if (!InfoStr)
 	{
-		return 0;
+		return FALSE;
 	}
 	int DataLen = 3 * ((strlen(InfoStr) + 3) / 4) + 6;//加6保险，我心虚
 	PBYTE DecodeData;
 	DecodeData = malloc(DataLen);
+	if (!DecodeData)
+	{
+		return FALSE;
+	}
 	ZeroMemory(DecodeData, DataLen);
 	Base64Decode(InfoStr, DecodeData);
 
@@ -182,11 +190,11 @@ int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBO
 	}
 
 
-	int RetrGender = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrGender = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->Gender = RetrGender;
 
 
-	int RetrAge = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrAge = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->Age = RetrAge;
 
 
@@ -213,11 +221,11 @@ int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBO
 	}
 
 
-	int RetrEnterGroupTime = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrEnterGroupTime = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->EnterGroupTime = RetrEnterGroupTime;
 
 
-	int RetrLastActive = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrLastActive = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->LastActive = RetrLastActive;
 
 
@@ -244,11 +252,11 @@ int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBO
 	}
 
 
-	int RetrManageLevel = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrManageLevel = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->ManageLevel = RetrManageLevel;
 
 
-	int RetrBadRecord = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrBadRecord = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->bBadRecord = RetrBadRecord;
 
 
@@ -275,28 +283,32 @@ int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBO
 	}
 
 
-	int RetrSpecTitExpire = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrSpecTitExpire = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->SpecTitExpire = RetrSpecTitExpire;
 
 
-	int RetrAlloEditCard = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrAlloEditCard = (int)RetrieveNumber(DecodeData, &offset, 4);
 	GroupMemberInfo->bAllowEditCard = RetrAlloEditCard;
 
 		
 	free(DecodeData);
-	return 1;
+	return TRUE;
 }
 
-int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
+BOOL RetrieveStrangerInfoFromCQ(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
 {
-	char* InfoStr = GetStrangerInfo(QQID, NoCache);
+	const char* InfoStr = GetStrangerInfo(QQID, NoCache);
 	if (!InfoStr)
 	{
-		return 0;
+		return FALSE;
 	}
 	int DataLen = 3 * ((strlen(InfoStr) + 3) / 4) + 6;//加6保险，我心虚
 	PBYTE DecodeData;
 	DecodeData = malloc(DataLen);
+	if (!DecodeData)
+	{
+		return FALSE;
+	}
 	ZeroMemory(DecodeData, DataLen);
 	Base64Decode(InfoStr, DecodeData);
 
@@ -329,16 +341,16 @@ int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO Stran
 	}
 
 
-	int RetrGender = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrGender = (int)RetrieveNumber(DecodeData, &offset, 4);
 	StrangerInfo->Gender = RetrGender;
 
 
-	int RetrAge = RetrieveNumber(DecodeData, &offset, 4);
+	int RetrAge = (int)RetrieveNumber(DecodeData, &offset, 4);
 	StrangerInfo->Age = RetrAge;
 
 
 	free(DecodeData);
-	return 1;
+	return TRUE;
 }
 
 

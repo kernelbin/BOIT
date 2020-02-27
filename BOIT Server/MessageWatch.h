@@ -18,7 +18,7 @@
 #define BOIT_MSGWATCH_PASS 0	// 放行消息
 #define BOIT_MSGWATCH_BLOCK 1	// 截断消息
 
-typedef INT(*MSGWATCH_CALLBACK)(int MsgWatchID, PBYTE pData, UINT Event,
+typedef INT(*MSGWATCH_CALLBACK)(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
 

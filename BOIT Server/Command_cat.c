@@ -18,7 +18,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int S
 		else
 		{
 			BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-			SendEventGetGroupMemberInfo(GroupID, QQID, TRUE, &GroupMemberInfo);
+			RetrieveGroupMemberInfo(GroupID, QQID, TRUE, &GroupMemberInfo);
 			if (QQID == 693511570)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"‡€ﬂ¥‡€ﬂ¥£¨ %ls ƒ„“≤ «Õ√◊”∞°", GroupMemberInfo.NickName);
@@ -37,7 +37,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int S
 	else
 	{
 		BOIT_STRANGER_INFO StrangerInfo;
-		SendEventGetStrangerInfo(QQID, TRUE, &StrangerInfo);
+		RetrieveStrangerInfo(QQID, TRUE, &StrangerInfo);
 
 		if (QQID == 693511570)
 		{

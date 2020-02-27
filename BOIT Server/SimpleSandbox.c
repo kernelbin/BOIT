@@ -691,20 +691,28 @@ BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD 
 BOOL PipeIORead(HANDLE PipeHandle)
 {
 	pPIPEIO_PACK PipeIOPack = malloc(sizeof(PIPEIO_PACK));
+	if (!PipeIOPack)
+	{
+		return FALSE;
+	}
 	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
 	PipeIOPack->PackMode = PACKMODE_READ;
 	PipeIOPack->pData = malloc(PIPEIO_BUFSIZE);
 	ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
 	DWORD BytesRead;
 	BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
-	return 0;
+	return TRUE;
 }
 
 BOOL PipeIOSendClose(HANDLE hCompPort)
 {
 	pPIPEIO_PACK PipeIOPack = malloc(sizeof(PIPEIO_PACK));
+	if (!PipeIOPack)
+	{
+		return FALSE;
+	}
 	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
 	PipeIOPack->PackMode = PACKMODE_CLOSE;
 	PostQueuedCompletionStatus(hCompPort, 0, 0, PipeIOPack);
-	return 0;
+	return TRUE;
 }
