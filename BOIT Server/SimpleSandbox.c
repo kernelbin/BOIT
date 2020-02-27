@@ -44,16 +44,16 @@ HANDLE SandboxCleaning;
 
 
 BOOL CreateLimitedProcessW(
-	_In_opt_ WCHAR lpApplicationName[],
-	_Inout_opt_ WCHAR lpCommandLine[],
-	_In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
-	_In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
-	_In_ BOOL bInheritHandles,
-	_In_ DWORD dwCreationFlags,
-	_In_opt_ LPVOID lpEnvironment,
-	_In_opt_ WCHAR lpCurrentDirectory[],
-	_In_ LPSTARTUPINFOW lpStartupInfo,
-	_Out_ LPPROCESS_INFORMATION lpProcessInformation);
+	WCHAR lpApplicationName[],
+	WCHAR lpCommandLine[],
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL bInheritHandles,
+	DWORD dwCreationFlags,
+	LPVOID lpEnvironment,
+	WCHAR lpCurrentDirectory[],
+	LPSTARTUPINFOW lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation);
 
 void __stdcall TerminateJobTimerRoutine(
 	_In_opt_ LPVOID lpArgToCompletionRoutine,
@@ -63,6 +63,10 @@ void __stdcall TerminateJobTimerRoutine(
 
 
 BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize);
+
+BOOL PipeIORead(HANDLE PipeHandle);
+
+BOOL PipeIOSendClose(HANDLE hCompPort);
 
 
 
@@ -722,7 +726,7 @@ BOOL PipeIORead(HANDLE PipeHandle)
 		}
 		ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
 		DWORD BytesRead;
-		BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, PipeIOPack);
+		BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
 		if ((!bResult) && (GetLastError()!= ERROR_IO_PENDING))//失败了，失败码还不是ERROR_IO_PENDING
 		{
 			__leave;

@@ -199,31 +199,6 @@ int RemoveMessageWatchByID(long long MsgWatchAllocID)
 }
 
 
-//int MarkFreeMessageWatchByID(long long MsgWatchAllocID)
-//{
-//	EnterCriticalSection(&MsgWatchChainLock);
-//	__try
-//	{
-//		if (RootMsgWatch)
-//		{
-//			for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
-//			{
-//				if (pList->MsgWatchID == MsgWatchAllocID)
-//				{
-//					pList->ToBeFree = TRUE;
-//					__leave;
-//				}
-//			}
-//		}
-//	}
-//	__finally
-//	{
-//		LeaveCriticalSection(&MsgWatchChainLock);
-//	}
-//
-//	return 0;
-//}
-
 
 unsigned __stdcall MsgWatchTimerThread(void* Args)
 {
@@ -239,6 +214,11 @@ unsigned __stdcall MsgWatchTimerThread(void* Args)
 		case WAIT_OBJECT_0 + 1:
 		{
 			HANDLE hTimer = CreateWaitableTimer(0, 0, 0);
+			if (hTimer == 0) //Oops
+			{
+				ArgWaitableTimer = 0;
+				break;
+			}
 			LARGE_INTEGER LiTimeOut;
 			LiTimeOut.QuadPart = -ArgTimeOut;
 			SetWaitableTimer(hTimer, &LiTimeOut, 0, MsgWatchTimerCallback, (LPVOID)ArgAllocID, FALSE);

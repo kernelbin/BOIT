@@ -72,11 +72,17 @@ BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen,
 
 BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* LanguageName, int LanguageLen);
 
+BOOL ShowSupportLanguageInfo(pBOIT_COMMAND pCmd, WCHAR* ConfigSuffix, pBOIT_SESSION boitSession);
+
+BOOL CheckPrivilegeRunCode(long long GroupID, long long QQID);
+
 int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
 
 int GetLineLen(WCHAR* String);
 
 int GetLineFeedLen(WCHAR* String);
+
+BOOL GetCompileCommand(WCHAR* CommandBuffer, pCOMPILE_CFG CompileCfg, LONGLONG AllocCompileID);
 
 int GetLineSpaceLen(WCHAR* String);
 
@@ -85,6 +91,9 @@ UINT GetEncodeCodePage(int Compile_Encode);
 int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
+
+
+BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, WCHAR* ToCopyFileName, WCHAR* SandboxDir, WCHAR* SandboxFile);
 
 pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
 
@@ -645,6 +654,8 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 	}
 	break;
 	}
+
+	return 0;
 }
 
 
@@ -679,6 +690,10 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 {
 	pSANDBOX Sandbox = 0;
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
+	if (!RunSession)
+	{
+		return 0;
+	}
 	RunSession->Encode = Encode;
 	RunSession->boitSession.GroupID = boitSession->GroupID;
 	RunSession->boitSession.QQID = boitSession->QQID;
@@ -1143,7 +1158,7 @@ UINT GetEncodeCodePage(int Compile_Encode)
 int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
-	pINPUT_SESSION InputSession = pData;
+	pINPUT_SESSION InputSession = (pINPUT_SESSION)pData;
 	int iRet = BOIT_MSGWATCH_PASS;
 	switch (Event)
 	{
