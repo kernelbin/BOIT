@@ -80,6 +80,8 @@ int GetLineFeedLen(WCHAR* String);
 
 int GetLineSpaceLen(WCHAR* String);
 
+UINT GetEncodeCodePage(int Compile_Encode);
+
 int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
@@ -407,11 +409,11 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 			InputSession->boitSession = boitSession;
 			if (GroupID)
 			{
-				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, InputSession);
+				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, (PBYTE)InputSession);
 			}
 			else
 			{
-				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, InputSession);
+				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, (PBYTE)InputSession);
 			}
 			SendBackMessage(GroupID, QQID, L"请输入输入数据：");
 

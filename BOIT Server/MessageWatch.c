@@ -45,7 +45,7 @@ int InitializeMessageWatch()
 	hEventPassArgEnd = CreateEvent(0, 0, 0, 0);
 
 	//启动计时器线程
-	hMsgWatchTimerThread = _beginthreadex(0, 0, MsgWatchTimerThread, 0, 0, 0);
+	hMsgWatchTimerThread = (HANDLE)_beginthreadex(0, 0, MsgWatchTimerThread, 0, 0, 0);
 	return 0;
 }
 
@@ -85,11 +85,12 @@ int RegisterMessageWatch(int WatchType,
 	PBYTE pData)
 {
 	pBOIT_MSGWATCH MsgWatch = malloc(sizeof(BOIT_MSGWATCH));
-	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
+	
 	if (!MsgWatch)
 	{
 		return 0;
 	}
+	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
 	MsgWatch->GroupID = GroupID;
 	MsgWatch->QQID = QQID;
 	MsgWatch->WatchType = WatchType;
@@ -264,7 +265,7 @@ void __stdcall MsgWatchTimerCallback(
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
 		{
-			if (pList->MsgWatchID == lpArgToCompletionRoutine)
+			if (pList->MsgWatchID == (long long)lpArgToCompletionRoutine)
 			{
 				CallbackFunc = pList->Callback;
 				pData = pList->pData;
@@ -276,7 +277,7 @@ void __stdcall MsgWatchTimerCallback(
 
 	if (CallbackFunc)
 	{
-		CallbackFunc(lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
+		CallbackFunc((long long)lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
 	}
 	return;
 }

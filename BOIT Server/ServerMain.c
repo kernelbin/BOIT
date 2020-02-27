@@ -23,6 +23,7 @@ BOOL ConsoleQueryYesNo(char* QueryText);
 
 int main()
 {
+	int ch_ret;
 	puts("BOIT Server正在启动\n");
 
 	InitializeSandbox(2, 2);
@@ -43,14 +44,14 @@ int main()
 		if (ConsoleQueryYesNo("注册表加载失败，是否清空设置并初始化 ?") == FALSE)
 		{
 			puts("按任意键退出程序");
-			_getch();
+			ch_ret = _getch();
 			return 0;
 		}
 		//清理注册表
 		if (ClearSettings() == SETTINGS_ERROR)
 		{
 			puts("清空设置失败，按任意键退出程序");
-			_getch();
+			ch_ret = _getch();
 			return 0;
 		}
 		//fall
@@ -62,7 +63,7 @@ int main()
 		{
 			puts("请输入BOIT目录（无需引号，完整输入一行后换行）");
 			scanf_s("%[^\n]", &InBaseDir, MAX_PATH);
-			getchar();//读掉 \n
+			ch_ret = getchar();//读掉 \n
 			if (IsPathDirA(InBaseDir) == TRUE)
 			{
 				PathSimplifyA(InBaseDir);
@@ -82,7 +83,7 @@ int main()
 		{
 			//Oops
 			puts("初始化注册表失败，按任意键退出程序");
-			_getch();
+			ch_ret = _getch();
 			return 0;
 		}
 		else
@@ -128,39 +129,40 @@ int main()
 		if (ClearSettings() == SETTINGS_ERROR)
 		{
 			puts("清理注册表失败，可能是权限不足导致的。请手动清理注册表项。按任意键退出程序");
-			_getch();
+			ch_ret = _getch();
 			return 0;
 		}
 		if (RemoveDirIfExist(GetBOITBaseDir()) == FALSE)
 		{
 			puts("清理BOIT目录失败，可能是权限不足导致的。请手动清理文件夹。按任意键退出程序");
-			_getch();
+			ch_ret = _getch();
 			return 0;
 		}
 
 		puts("BOIT注册表项和文件夹已从您的计算机上移除。");
 		puts("CoolQ插件和该程序本身不会自动移除，如果需要请手动删除他们。");
 		puts("感谢使用！按任意键退出程序");
-		_getch();
+		ch_ret = _getch();
 		return 0;
 	}
 	else
 	{
 		puts("按任意键退出程序");
-		_getch();
+		ch_ret = _getch();
 	}
 	return 0;
 }
 
 BOOL ConsoleQueryYesNo(char * QueryText)
 {
+	int ch_ret;
 	while (1)
 	{
 		printf(QueryText);
 		printf(" (y/n)\n");
 		char Answer[128] = { 0 };
 		scanf_s("%[^\n]", &Answer, _countof(Answer) - 1);
-		getchar();//读掉那个换行
+		ch_ret = getchar();//读掉那个换行
 		if (strcmp(Answer, "y") == 0 ||
 			strcmp(Answer, "Y") == 0 ||
 			strcmp(Answer, "yes") == 0 ||
@@ -189,12 +191,13 @@ BOOL StartInputThread()
 
 unsigned __stdcall HandleInputThread(LPVOID Args)
 {
+	int ch_ret;
 	while (1)
 	{
 		char InputCommand[128];
 		printf("> ");
 		int bMatch = scanf_s("%[^\n]", InputCommand, _countof(InputCommand));
-		getchar();
+		ch_ret = getchar();
 		if (bMatch == 1)
 		{
 			if (_strcmpi(InputCommand, "stop") == 0)

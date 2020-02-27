@@ -269,8 +269,8 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			SysInfo.hStdOutput = SysInfo.hStdError = hPipeOutWrite;
 			SysInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-			CreateIoCompletionPort(hPipeInWrite, PipeIOCompPort, Sandbox, 0);
-			CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, Sandbox, 0);
+			CreateIoCompletionPort(hPipeInWrite, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
+			CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
 		}
 
 		
@@ -593,16 +593,16 @@ void __stdcall TerminateJobTimerRoutine(
 
 
 BOOL CreateLimitedProcessW(
-	_In_opt_ WCHAR lpApplicationName[],
-	_Inout_opt_ WCHAR lpCommandLine[],
-	_In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
-	_In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
-	_In_ BOOL bInheritHandles,
-	_In_ DWORD dwCreationFlags,
-	_In_opt_ LPVOID lpEnvironment,
-	_In_opt_ WCHAR lpCurrentDirectory[],
-	_In_ LPSTARTUPINFOW lpStartupInfo,
-	_Out_ LPPROCESS_INFORMATION lpProcessInformation)
+	 WCHAR lpApplicationName[],
+	 WCHAR lpCommandLine[],
+	 LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	 LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	 BOOL bInheritHandles,
+	 DWORD dwCreationFlags,
+	 LPVOID lpEnvironment,
+	 WCHAR lpCurrentDirectory[],
+	 LPSTARTUPINFOW lpStartupInfo,
+	 LPPROCESS_INFORMATION lpProcessInformation)
 {
 	BOOL bSuccess = FALSE;
 	BOOL bRet = FALSE;
@@ -706,23 +706,44 @@ BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD 
 BOOL PipeIORead(HANDLE PipeHandle)
 {
 	pPIPEIO_PACK PipeIOPack = malloc(sizeof(PIPEIO_PACK));
+	BOOL bSuccess = FALSE;
 	if (!PipeIOPack)
 	{
 		return FALSE;
 	}
-	
-	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
-	PipeIOPack->PackMode = PACKMODE_READ;
-	PipeIOPack->pData = malloc(PIPEIO_BUFSIZE);
-	if (!PipeIOPack->pData)
+	__try
 	{
-		free(PipeIOPack);
-		return FALSE;
+		ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
+		PipeIOPack->PackMode = PACKMODE_READ;
+		PipeIOPack->pData = malloc(PIPEIO_BUFSIZE);
+		if (!PipeIOPack->pData)
+		{
+			__leave;
+		}
+		ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
+		DWORD BytesRead;
+		BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, PipeIOPack);
+		if ((!bResult) && (GetLastError()!= ERROR_IO_PENDING))//失败了，失败码还不是ERROR_IO_PENDING
+		{
+			__leave;
+		}
+		bSuccess = TRUE;
 	}
-	ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
-	DWORD BytesRead;
-	BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
-	return TRUE;
+	__finally
+	{
+		if (!bSuccess)
+		{
+			if (PipeIOPack)
+			{
+				if (PipeIOPack->pData);
+				{
+					free(PipeIOPack->pData);
+				}
+				free(PipeIOPack);
+			}
+		}
+	}
+	return bSuccess;
 }
 
 BOOL PipeIOSendClose(HANDLE hCompPort)
@@ -734,6 +755,6 @@ BOOL PipeIOSendClose(HANDLE hCompPort)
 	}
 	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
 	PipeIOPack->PackMode = PACKMODE_CLOSE;
-	PostQueuedCompletionStatus(hCompPort, 0, 0, PipeIOPack);
+	PostQueuedCompletionStatus(hCompPort, 0, 0, (LPOVERLAPPED)PipeIOPack);
 	return TRUE;
 }
