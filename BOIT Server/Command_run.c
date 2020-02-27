@@ -251,7 +251,7 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 				//œ‘ æœÍœ∏∞Ô÷˙–≈œ¢
 				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] [/input] sourcecode");
 
-				ShowSupportLanguageInfo(pCmd, L".cfg", &boitSession);
+				ShowSupportLanguageInfo(pCmd, L".cfg", boitSession);
 			}
 			else
 			{
