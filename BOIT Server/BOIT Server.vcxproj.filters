@@ -124,6 +124,9 @@
     <Filter Include="头文件\消息监视">
       <UniqueIdentifier>{75dbdbb1-2a53-446d-92b3-5040d696a55b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\version">
+      <UniqueIdentifier>{fe5041df-9da0-4e80-84bf-26e06b2d83fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -212,6 +215,9 @@
     </ClCompile>
     <ClCompile Include="MessageWatch.c">
       <Filter>源文件\消息监视</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_version.c">
+      <Filter>源文件\指令回调\version</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
