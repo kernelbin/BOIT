@@ -397,8 +397,8 @@ int FreeSimpleSandbox(pSANDBOX Sandbox)
 	ReleaseSRWLockExclusive(&SandboxListLock);
 
 	TerminateJobObject(Sandbox->hJob, 1);
-	CloseHandle(Sandbox->hPipeInWrite);
-	CloseHandle(Sandbox->hPipeOutRead);
+	if (Sandbox->hPipeInWrite) CloseHandle(Sandbox->hPipeInWrite);
+	if (Sandbox->hPipeOutRead) CloseHandle(Sandbox->hPipeOutRead);
 	CloseHandle(Sandbox->hProcess);
 	CloseHandle(Sandbox->hJob);
 	return 0;

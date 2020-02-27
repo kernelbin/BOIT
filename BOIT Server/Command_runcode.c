@@ -4,7 +4,7 @@
 #include"DirManagement.h"
 
 
-int RunCode(long long GroupID, long long QQID, WCHAR* AnonymousName, WCHAR* Msg);
+int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
 
 int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
@@ -79,7 +79,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 
 	if (bSuccess)
 	{
-		RunCode(GroupID, QQID, AnonymousName, WideCharStr);
+		RunCode(GroupID, QQID, SubType, AnonymousName, WideCharStr);
 		free(WideCharStr);
 	}
 	return 0;

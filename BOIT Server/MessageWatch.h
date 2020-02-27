@@ -9,7 +9,17 @@
 #define BOIT_MW_QQ_PRIVATE 5 // 来自某个人的私聊消息
 
 
-typedef INT(*MSGWATCH_CALLBACK)(int MsgWatchID, PBYTE pData, UINT Event);
+
+#define BOIT_MW_EVENT_TIMEOUT 1 // 等待超时
+#define BOIT_MW_EVENT_MESSAGE 2
+
+
+
+#define BOIT_MSGWATCH_PASS 0	// 放行消息
+#define BOIT_MSGWATCH_BLOCK 1	// 截断消息
+
+typedef INT(*MSGWATCH_CALLBACK)(int MsgWatchID, PBYTE pData, UINT Event,
+	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
 
 typedef struct __tagMessageWatch BOIT_MSGWATCH, * pBOIT_MSGWATCH;
@@ -20,6 +30,7 @@ typedef struct __tagMessageWatch
 	long long MsgWatchID;
 	long long GroupID;
 	long long QQID;
+	BOOL ToBeFree;
 	HANDLE hTimer;
 	MSGWATCH_CALLBACK Callback;
 	PBYTE pData;
@@ -28,7 +39,7 @@ typedef struct __tagMessageWatch
 }BOIT_MSGWATCH,* pBOIT_MSGWATCH;
 
 
-SRWLOCK MsgWatchChainLock;
+CRITICAL_SECTION MsgWatchChainLock;
 
 pBOIT_MSGWATCH RootMsgWatch;
 
@@ -48,3 +59,9 @@ int RegisterMessageWatch(int WatchType,
 
 int RemoveMessageWatch(pBOIT_MSGWATCH MsgWatch);
 
+int RemoveMessageWatchByID(long long MsgWatchAllocID);
+
+//int MarkFreeMessageWatchByID(long long MsgWatchAllocID);
+
+
+int MessageWatchFilter(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);

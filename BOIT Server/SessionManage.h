@@ -8,5 +8,6 @@ typedef struct __tagSession
 	//sessionµÄ¼òµ¥Ìæ´ú
 	long long QQID;
 	long long GroupID;
+	int SubType;
 	WCHAR AnonymousName[BOIT_MAX_NICKLEN];
 }BOIT_SESSION, * pBOIT_SESSION;

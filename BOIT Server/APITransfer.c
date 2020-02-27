@@ -3,6 +3,7 @@
 #include "APITransfer.h"
 #include"SendEventDispatch.h"
 #include"CommandManager.h"
+#include"MessageWatch.h"
 
 //从这里开始消息流正式进入应用层
 
@@ -14,6 +15,10 @@ int SendPrivateMessage(long long QQID, WCHAR * Msg)
 
 int RecvPrivateMessage(long long QQID, int SubType, WCHAR* Msg)
 {
+	if (MessageWatchFilter(0, QQID, SubType, 0, Msg) == BOIT_MSGWATCH_BLOCK)
+	{
+		return 0;
+	}
 	int PrefixLen;
 	if (CheckIsCommand(Msg, &PrefixLen))
 	{
@@ -30,6 +35,10 @@ int SendGroupMessage(long long GroupID, WCHAR* Msg)
 
 int RecvGroupMessage(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
+	if (MessageWatchFilter(GroupID, QQID, SubType, AnonymousName, Msg) == BOIT_MSGWATCH_BLOCK)
+	{
+		return 0;
+	}
 	int PrefixLen;
 	if (CheckIsCommand(Msg, &PrefixLen))
 	{

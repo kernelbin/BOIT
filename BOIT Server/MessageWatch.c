@@ -33,7 +33,7 @@ HANDLE ArgWaitableTimer;	// Out
 
 int InitializeMessageWatch()
 {
-	InitializeSRWLock(&MsgWatchChainLock);
+	InitializeCriticalSection(&MsgWatchChainLock);
 	InitializeSRWLock(&PassArgLock);
 	MsgWatchAllocID = 0;
 
@@ -52,7 +52,7 @@ int InitializeMessageWatch()
 
 int FinalizeMessageWatch()
 {
-	AcquireSRWLockExclusive(&MsgWatchChainLock);
+	EnterCriticalSection(&MsgWatchChainLock);
 	if (RootMsgWatch)
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
@@ -60,7 +60,7 @@ int FinalizeMessageWatch()
 			free(pList);
 		}
 	}
-	ReleaseSRWLockExclusive(&MsgWatchChainLock);
+	LeaveCriticalSection(&MsgWatchChainLock);
 	RootMsgWatch = 0;
 
 	SetEvent(hEventMsgWatchCleaning);
@@ -70,6 +70,8 @@ int FinalizeMessageWatch()
 	CloseHandle(hEventMsgWatchCleaning);
 	CloseHandle(hEventPassArgStart);
 	CloseHandle(hEventPassArgEnd);
+
+	DeleteCriticalSection(&MsgWatchChainLock);
 	return 0;
 }
 
@@ -92,7 +94,7 @@ int RegisterMessageWatch(int WatchType,
 	MsgWatch->Callback = CallbackFunc;
 	MsgWatch->pData = pData;
 
-	AcquireSRWLockExclusive(&MsgWatchChainLock);
+	EnterCriticalSection(&MsgWatchChainLock);
 	__try
 	{
 		pBOIT_MSGWATCH OrgHead = RootMsgWatch;
@@ -105,7 +107,7 @@ int RegisterMessageWatch(int WatchType,
 	}
 	__finally
 	{
-		ReleaseSRWLockExclusive(&MsgWatchChainLock);
+		LeaveCriticalSection(&MsgWatchChainLock);
 	}
 
 	if (TimeOutInterval != -1)
@@ -147,14 +149,14 @@ int RemoveMessageWatchFromListUnSafe(pBOIT_MSGWATCH MsgWatch)
 
 int RemoveMessageWatch(pBOIT_MSGWATCH MsgWatch)
 {
-	AcquireSRWLockExclusive(&MsgWatchChainLock);
+	EnterCriticalSection(&MsgWatchChainLock);
 	__try
 	{
 		RemoveMessageWatchFromListUnSafe(MsgWatch);
 	}
 	__finally
 	{
-		ReleaseSRWLockExclusive(&MsgWatchChainLock);
+		LeaveCriticalSection(&MsgWatchChainLock);
 	}
 
 	free(MsgWatch);
@@ -164,7 +166,7 @@ int RemoveMessageWatch(pBOIT_MSGWATCH MsgWatch)
 
 int RemoveMessageWatchByID(long long MsgWatchAllocID)
 {
-	AcquireSRWLockExclusive(&MsgWatchChainLock);
+	EnterCriticalSection(&MsgWatchChainLock);
 	__try
 	{
 		if (RootMsgWatch)
@@ -174,6 +176,10 @@ int RemoveMessageWatchByID(long long MsgWatchAllocID)
 				if (pList->MsgWatchID == MsgWatchAllocID)
 				{
 					RemoveMessageWatchFromListUnSafe(pList);
+					if (pList->hTimer)
+					{
+						CloseHandle(pList->hTimer);
+					}
 					free(pList);
 					__leave;
 				}
@@ -182,11 +188,37 @@ int RemoveMessageWatchByID(long long MsgWatchAllocID)
 	}
 	__finally
 	{
-		ReleaseSRWLockExclusive(&MsgWatchChainLock);
+		LeaveCriticalSection(&MsgWatchChainLock);
 	}
 	
 	return 0;
 }
+
+
+//int MarkFreeMessageWatchByID(long long MsgWatchAllocID)
+//{
+//	EnterCriticalSection(&MsgWatchChainLock);
+//	__try
+//	{
+//		if (RootMsgWatch)
+//		{
+//			for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
+//			{
+//				if (pList->MsgWatchID == MsgWatchAllocID)
+//				{
+//					pList->ToBeFree = TRUE;
+//					__leave;
+//				}
+//			}
+//		}
+//	}
+//	__finally
+//	{
+//		LeaveCriticalSection(&MsgWatchChainLock);
+//	}
+//
+//	return 0;
+//}
 
 
 unsigned __stdcall MsgWatchTimerThread(void* Args)
@@ -224,7 +256,7 @@ void __stdcall MsgWatchTimerCallback(
 {
 	MSGWATCH_CALLBACK CallbackFunc = 0;
 	PBYTE pData = 0;
-	AcquireSRWLockExclusive(&MsgWatchChainLock);
+	EnterCriticalSection(&MsgWatchChainLock);
 	if (RootMsgWatch)
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
@@ -237,11 +269,128 @@ void __stdcall MsgWatchTimerCallback(
 		}
 	}
 	//RemoveMessageWatchByID(lpArgToCompletionRoutine,);
-	ReleaseSRWLockExclusive(&MsgWatchChainLock);
+	LeaveCriticalSection(&MsgWatchChainLock);
 
 	if (CallbackFunc)
 	{
-		CallbackFunc(lpArgToCompletionRoutine, pData, 0);
+		CallbackFunc(lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
 	}
 	return;
 }
+
+
+int MessageWatchFilter(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+{
+	BOOL bPass = TRUE;
+	int iRet;
+	EnterCriticalSection(&MsgWatchChainLock);
+
+	__try
+	{
+		if (RootMsgWatch)
+		{
+			for (pBOIT_MSGWATCH pList = RootMsgWatch; pList;)
+			{
+				pBOIT_MSGWATCH Next = pList->Next;
+
+				switch (pList->WatchType)
+				{
+				case BOIT_MW_ALL:			// 来自任何人，任何途径的消息
+					if (pList->Callback)
+					{
+						iRet = pList->Callback(pList->MsgWatchID, pList->pData, BOIT_MW_EVENT_MESSAGE, GroupID, QQID, SubType, AnonymousName, Msg);
+						if (iRet == BOIT_MSGWATCH_BLOCK)
+						{
+							bPass = FALSE;
+						}
+					}
+					break;
+				case BOIT_MW_GROUP:			// 来自指定群的所有消息
+					if (pList->Callback && pList->GroupID == GroupID)
+					{
+						iRet = pList->Callback(pList->MsgWatchID, pList->pData, BOIT_MW_EVENT_MESSAGE, GroupID, QQID, SubType, AnonymousName, Msg);
+						if (iRet == BOIT_MSGWATCH_BLOCK)
+						{
+							bPass = FALSE;
+						}
+					}
+					break;
+				case BOIT_MW_QQ:			// 来自指定某个人，但可以是任何渠道的消息
+					if (pList->Callback && pList->QQID == QQID)
+					{
+						iRet = pList->Callback(pList->MsgWatchID, pList->pData, BOIT_MW_EVENT_MESSAGE, GroupID, QQID, SubType, AnonymousName, Msg);
+						if (iRet == BOIT_MSGWATCH_BLOCK)
+						{
+							bPass = FALSE;
+						}
+					}
+					break;
+				case BOIT_MW_GROUP_QQ:		// 来自某个群里某个人的消息
+					if (pList->Callback && pList->GroupID == GroupID && pList->QQID == QQID)
+					{
+						iRet = pList->Callback(pList->MsgWatchID, pList->pData, BOIT_MW_EVENT_MESSAGE, GroupID, QQID, SubType, AnonymousName, Msg);
+						if (iRet == BOIT_MSGWATCH_BLOCK)
+						{
+							bPass = FALSE;
+						}
+					}
+					break;
+				case BOIT_MW_QQ_PRIVATE:	// 来自某个人的私聊消息
+					if (pList->Callback && pList->GroupID == 0 && pList->QQID == QQID)
+					{
+						iRet = pList->Callback(pList->MsgWatchID, pList->pData, BOIT_MW_EVENT_MESSAGE, GroupID, QQID, SubType, AnonymousName, Msg);
+						if (iRet == BOIT_MSGWATCH_BLOCK)
+						{
+							bPass = FALSE;
+						}
+					}
+					break;
+				}
+
+				if (bPass == FALSE)
+				{
+					__leave;
+				}
+
+				pList = Next;
+			}
+		}
+	}
+	__finally
+	{
+		LeaveCriticalSection(&MsgWatchChainLock);
+
+	}
+	
+
+
+
+	////检查标记释放
+	//if (RootMsgWatch)
+	//{
+	//	for (pBOIT_MSGWATCH pList = RootMsgWatch; pList;)
+	//	{
+	//		pBOIT_MSGWATCH Next = pList->Next;
+	//		if (pList->ToBeFree)
+	//		{
+	//			RemoveMessageWatch(pList);
+	//		}
+	//		pList = Next;
+	//	}
+	//}
+
+
+	
+
+	if (bPass)
+	{
+		return BOIT_MSGWATCH_PASS;
+	}
+	else
+	{
+		return BOIT_MSGWATCH_BLOCK;
+	}
+	
+}
+
+
