@@ -18,6 +18,8 @@ BOOL StartInputThread();
 
 unsigned __stdcall HandleInputThread(LPVOID Args);
 
+BOOL ConsoleQueryYesNo(char* QueryText);
+
 
 int main()
 {

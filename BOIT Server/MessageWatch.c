@@ -86,7 +86,10 @@ int RegisterMessageWatch(int WatchType,
 {
 	pBOIT_MSGWATCH MsgWatch = malloc(sizeof(BOIT_MSGWATCH));
 	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
-
+	if (!MsgWatch)
+	{
+		return 0;
+	}
 	MsgWatch->GroupID = GroupID;
 	MsgWatch->QQID = QQID;
 	MsgWatch->WatchType = WatchType;
@@ -123,7 +126,7 @@ int RegisterMessageWatch(int WatchType,
 	}
 	
 
-	return 0;
+	return MsgWatch->MsgWatchID;
 }
 
 
@@ -261,7 +264,7 @@ void __stdcall MsgWatchTimerCallback(
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
 		{
-			if (pList->MsgWatchID == (long long)lpArgToCompletionRoutine)
+			if (pList->MsgWatchID == lpArgToCompletionRoutine)
 			{
 				CallbackFunc = pList->Callback;
 				pData = pList->pData;
@@ -273,7 +276,7 @@ void __stdcall MsgWatchTimerCallback(
 
 	if (CallbackFunc)
 	{
-		CallbackFunc((long long)lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
+		CallbackFunc(lpArgToCompletionRoutine, pData, BOIT_MW_EVENT_TIMEOUT, 0, 0, 0, 0, 0);
 	}
 	return;
 }

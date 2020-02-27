@@ -80,7 +80,7 @@ int GetLineFeedLen(WCHAR* String);
 
 int GetLineSpaceLen(WCHAR* String);
 
-int InputCallback(int MsgWatchID, PBYTE pData, UINT Event,
+int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
 
@@ -1138,7 +1138,7 @@ UINT GetEncodeCodePage(int Compile_Encode)
 
 
 
-int InputCallback(int MsgWatchID, PBYTE pData, UINT Event,
+int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
 	pINPUT_SESSION InputSession = pData;

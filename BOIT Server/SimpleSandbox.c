@@ -61,6 +61,11 @@ void __stdcall TerminateJobTimerRoutine(
 	_In_     DWORD dwTimerHighValue
 );
 
+
+BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize);
+
+
+
 int InitializeSandbox(int JobObjCompThreadNum, int PipeIOCompThreadNum)
 {
 	//创建一个完成端口，启动线程处理。
@@ -678,14 +683,24 @@ BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD 
 		0,    // input buffer size 
 		0,             // client time-out 
 		NULL);
-
+	if ((!(*hReadPipe)) || ((*hReadPipe) == INVALID_HANDLE_VALUE))
+	{
+		(*hReadPipe) = (*hWritePipe) = 0;
+		return FALSE;
+	}
 	(*hWritePipe) = CreateFileW(lpszPipename, GENERIC_WRITE,
 		0,              // no sharing 
 		NULL,           // default security attributes
 		OPEN_EXISTING,  // opens existing pipe 
 		FILE_FLAG_OVERLAPPED,              // default attributes 
 		NULL);          // no template file 
-
+	if ((!(*hWritePipe))||((*hWritePipe) == INVALID_HANDLE_VALUE))
+	{
+		CloseHandle((*hReadPipe));
+		(*hReadPipe) = (*hWritePipe) = 0;
+		return FALSE;
+	}
+	return TRUE;
 }
 
 BOOL PipeIORead(HANDLE PipeHandle)
@@ -695,9 +710,15 @@ BOOL PipeIORead(HANDLE PipeHandle)
 	{
 		return FALSE;
 	}
+	
 	ZeroMemory(PipeIOPack, sizeof(PIPEIO_PACK));
 	PipeIOPack->PackMode = PACKMODE_READ;
 	PipeIOPack->pData = malloc(PIPEIO_BUFSIZE);
+	if (!PipeIOPack->pData)
+	{
+		free(PipeIOPack);
+		return FALSE;
+	}
 	ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
 	DWORD BytesRead;
 	BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
