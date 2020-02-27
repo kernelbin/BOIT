@@ -85,12 +85,6 @@ int InputCallback(int MsgWatchID, PBYTE pData, UINT Event,
 
 
 pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
-//pSANDBOX CompileAndRun(pCOMPILE_CFG CompileCfg,
-//	pBOIT_SESSION boitSession,
-//	long long AllocCompileID,
-//	BOOL bIsSU,
-//	WCHAR SourceCodeFile[],
-//	WCHAR SourceFileName[]);
 
 LONGLONG CompileID;
 
@@ -333,32 +327,6 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 	}
 
 
-	/*if (bNeedInput)
-	{
-		pINPUT_SESSION InputSession = malloc(sizeof(INPUT_SESSION));
-		ZeroMemory(InputSession, sizeof(INPUT_SESSION));
-		InputSession->boitSession = boitSession;
-		InputSession->CompileCfg = CompileCfg;
-		InputSession->AllocCompileID = AllocCompileID;
-		InputSession->bIsSU = bIsSU;
-		wcscpy_s(InputSession->SourceCodeFile, MAX_PATH, SourceCodeFile);
-		wcscpy_s(InputSession->SourceFileName, MAX_PATH, SourceFileName);
-
-		if (GroupID)
-		{
-			RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, InputSession);
-		}
-		else
-		{
-			RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, InputSession);
-		}
-		SendBackMessage(GroupID, QQID, L"请输入输入数据：");
-	}
-	else
-	{
-		CompileAndRun(CompileCfg, boitSession, AllocCompileID, bIsSU, SourceCodeFile, SourceFileName);
-	}*/
-
 	switch (CompileCfg->Type)
 	{
 	case COMPILE_TYPE_COMPILE:
@@ -463,21 +431,6 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 	return 0;
 }
-
-
-
-//pSANDBOX CompileAndRun(pCOMPILE_CFG CompileCfg,
-//	pBOIT_SESSION boitSession,
-//	long long AllocCompileID,
-//	BOOL bIsSU,
-//	WCHAR SourceCodeFile[],
-//	WCHAR SourceFileName[])
-//{
-//	pSANDBOX Sandbox = 0;
-//	
-//
-//	return Sandbox;
-//}
 
 
 
@@ -701,21 +654,6 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, W
 
 	wcscpy_s(SandboxDir, MAX_PATH, SandboxFile);
 
-	/*SHFILEOPSTRUCTW FileOp;
-	if (PathIsDirectoryW(SandboxFile))
-	{
-		int FileLen = wcslen(SandboxFile);
-		SandboxFile[FileLen] = 0;
-		SandboxFile[FileLen + 1] = 0;
-		FileOp.fFlags = FOF_NOCONFIRMATION;
-		FileOp.hNameMappings = NULL;
-		FileOp.hwnd = NULL;
-		FileOp.lpszProgressTitle = NULL;
-		FileOp.pFrom = SandboxFile;
-		FileOp.pTo = NULL;
-		FileOp.wFunc = FO_DELETE;
-		int iRet = SHFileOperationW(&FileOp);
-	}*/
 
 	RemoveDirIfExist(SandboxDir);
 
