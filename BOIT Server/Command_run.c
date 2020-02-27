@@ -249,13 +249,13 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 			if (bIsHelp)
 			{
 				//显示详细帮助信息
-				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode");
+				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] [/input] sourcecode");
 
 				ShowSupportLanguageInfo(pCmd, L".cfg", &boitSession);
 			}
 			else
 			{
-				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] sourcecode\n 输入#run /help 查看详细帮助信息");
+				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] [/input] sourcecode\n 输入#run /help 查看详细帮助信息");
 			}
 			free(boitSession);
 			free(CompileCfg);
