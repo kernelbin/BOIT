@@ -47,10 +47,18 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 		}
 
 		FileData = malloc(FileSizeLow + 1);
-		ZeroMemory(FileData, FileSizeLow + 1);
+		if (!FileData)
+		{
+			__leave;
+		}
+		ZeroMemory(FileData, (unsigned long long)FileSizeLow + 1);
 
 		DWORD BytesRead;
-		ReadFile(hSavedFile, FileData, FileSizeLow, &BytesRead, 0);
+		if (!ReadFile(hSavedFile, FileData, FileSizeLow, &BytesRead, 0))
+		{
+			__leave;
+		}
+
 		if (FileSizeLow != BytesRead)
 		{
 			SendBackMessage(GroupID, QQID, L"读取文件的时候出错了orz");
