@@ -124,6 +124,9 @@
     <Filter Include="源文件\指令回调\boast">
       <UniqueIdentifier>{dac781c0-6a22-4ace-9f68-6ed0d353d23e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\version">
+      <UniqueIdentifier>{32a30a85-1b8d-4d5c-b123-e39d77d1ddc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -212,6 +215,9 @@
     </ClCompile>
     <ClCompile Include="Command_boast.c">
       <Filter>源文件\指令回调\boast</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_version.c">
+      <Filter>源文件\指令回调\version</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
