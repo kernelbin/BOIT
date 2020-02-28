@@ -4,7 +4,7 @@
 #include"SendEventDispatch.h"
 #include"CommandManager.h"
 #include"MessageWatch.h"
-
+#include"SessionManage.h"
 //从这里开始消息流正式进入应用层
 
 int SendPrivateMessage(long long QQID, WCHAR * Msg)
@@ -15,14 +15,27 @@ int SendPrivateMessage(long long QQID, WCHAR * Msg)
 
 int RecvPrivateMessage(long long QQID, int SubType, WCHAR* Msg)
 {
-	if (MessageWatchFilter(0, QQID, SubType, 0, Msg) == BOIT_MSGWATCH_BLOCK)
+	pBOIT_SESSION boitSession = InitBOITSession(0, QQID, 0, SubType);
+	if (!boitSession)
 	{
 		return 0;
 	}
-	int PrefixLen;
-	if (CheckIsCommand(Msg, &PrefixLen))
+	__try
 	{
-		CommandHandler(0, QQID, SubType, 0, Msg + PrefixLen);
+		if (MessageWatchFilter(0, QQID, SubType, 0, Msg) == BOIT_MSGWATCH_BLOCK)
+		{
+			__leave;
+		}
+		int PrefixLen;
+		if (CheckIsCommand(Msg, &PrefixLen))
+		{
+			CommandHandler(boitSession, Msg + PrefixLen);
+		}
+		__leave;
+	}
+	__finally
+	{
+		FreeBOITSession(boitSession);
 	}
 	return 0;
 }
@@ -35,14 +48,27 @@ int SendGroupMessage(long long GroupID, WCHAR* Msg)
 
 int RecvGroupMessage(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
-	if (MessageWatchFilter(GroupID, QQID, SubType, AnonymousName, Msg) == BOIT_MSGWATCH_BLOCK)
+	pBOIT_SESSION boitSession = InitBOITSession(GroupID, QQID, AnonymousName, SubType);
+	if (!boitSession)
 	{
 		return 0;
 	}
-	int PrefixLen;
-	if (CheckIsCommand(Msg, &PrefixLen))
+	__try
 	{
-		CommandHandler(GroupID, QQID, SubType, AnonymousName, Msg + PrefixLen);
+		if (MessageWatchFilter(GroupID, QQID, SubType, AnonymousName, Msg) == BOIT_MSGWATCH_BLOCK)
+		{
+			__leave;
+		}
+		int PrefixLen;
+		if (CheckIsCommand(Msg, &PrefixLen))
+		{
+			CommandHandler(boitSession, Msg + PrefixLen);
+		}
+		__leave;
+	}
+	__finally
+	{
+		FreeBOITSession(boitSession);
 	}
 	return 0;
 }
@@ -61,15 +87,15 @@ int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO Stran
 
 
 
-int SendBackMessage(long long GroupID, long long QQID, WCHAR* Msg)
+int SendBackMessage(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	if (GroupID)
+	if (boitSession->GroupID)
 	{
-		SendGroupMessage(GroupID, Msg);
+		SendGroupMessage(boitSession->GroupID, Msg);
 	}
 	else
 	{
-		SendPrivateMessage(QQID, Msg);
+		SendPrivateMessage(boitSession->QQID, Msg);
 	}
 	return 0;
 }
