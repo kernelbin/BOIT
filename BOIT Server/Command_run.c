@@ -10,7 +10,7 @@
 #include"RemoveCQEscapeChar.h"
 #include"HandleBOITCode.h"
 #include"MessageWatch.h"
-
+#include"EncodeConvert.h"
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -309,13 +309,15 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 	{
 		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
 
-		int wcCodeLen = wcslen(CodeStr);
-		int MultiByteStrLen = WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
-		MultiByteStrCode = malloc(MultiByteStrLen + 1);
-		DWORD BytesWritten;
-		ZeroMemory(MultiByteStrCode, MultiByteStrLen + 1);
-		WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, MultiByteStrCode, MultiByteStrLen, 0, 0);
+		int MultiByteStrLen;
+		MultiByteStrCode = StrConvWC2MB(CodePage, CodeStr, -1, &MultiByteStrLen);
 
+		if (!MultiByteStrCode)
+		{
+			__leave;
+		}
+		
+		DWORD BytesWritten;
 		WriteFile(hSourceFile, (LPCVOID)MultiByteStrCode, MultiByteStrLen, &BytesWritten, 0);
 		if (BytesWritten != MultiByteStrLen)
 		{
@@ -535,27 +537,26 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 
 			UINT CodePage = GetEncodeCodePage(Session->CompileCfg->OutputEncode);
 
-			int cchStdout = MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, 0, 0);
-
-			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, wcStdout, cchStdout);
-			wcStdout[cchStdout] = 0;
-
-			//ÊµÐÐ½Ø¶Ï
-			if (cchStdout > BOIT_MAX_TEXTLEN)
+			int cchStdout;
+			wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, &cchStdout);
+			if (wcStdout)
 			{
-				wcStdout[BOIT_MAX_TEXTLEN] = 0;
-			}
+				if (cchStdout > BOIT_MAX_TEXTLEN)
+				{
+					wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				}
 
-			WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
-			swprintf_s(ShowMessage, cchStdout + 32, L"±àÒëÆ÷Êä³ö£º\n%ls\n±àÒëÆ÷·µ»ØÖµ£º%ld", wcStdout, CompileExitCode);
-			free(wcStdout);
-			SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, ShowMessage);
-			free(ShowMessage);
+				WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
+				swprintf_s(ShowMessage, cchStdout + 32, L"±àÒëÆ÷Êä³ö£º\n%ls\n±àÒëÆ÷·µ»ØÖµ£º%ld", wcStdout, CompileExitCode);
+				free(wcStdout);
+				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, ShowMessage);
+				free(ShowMessage);
+			}
+			else
+			{
+				//TODO: ×ª»»×Ö·û´® or ÄÚ´æÉêÇëÊ§°Ü
+			}
 
 			free(Session->boitSession);
 		}
@@ -615,27 +616,22 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		{
 			UINT CodePage = GetEncodeCodePage(Session->Encode);
 			WCHAR* wcStdout;
-			int cchStdout = MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, 0, 0);
-			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, wcStdout, cchStdout);
-			wcStdout[cchStdout] = 0;
+			int cchStdout;
+			
+			wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, &cchStdout);
 
-			//ÊµÐÐ½Ø¶Ï
-			if (cchStdout > BOIT_MAX_TEXTLEN)
+			if (wcStdout)
 			{
-				wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				//ÊµÐÐ½Ø¶Ï
+				if (cchStdout > BOIT_MAX_TEXTLEN)
+				{
+					wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				}
+				SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+				free(wcStdout);
 			}
-
-
-
-			SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
-			//	SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
-
-			free(wcStdout);
+		
 		}
 		FreeVBuf(Session->StdOutBuffer);
 		free(Session);
@@ -793,12 +789,12 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 			__leave;
 		}
 
-		int wLen = MultiByteToWideChar(CP_ACP, 0, pData, FileSize, 0, 0);
-
-		pwData = (WCHAR*)malloc(sizeof(WCHAR) * (wLen + 1));
-		ZeroMemory(pwData, sizeof(WCHAR) * (wLen + 1));
-		MultiByteToWideChar(CP_ACP, 0, pData, FileSize, pwData, wLen);
-
+		int wLen;
+		pwData = StrConvMB2WC(CP_ACP, pData, FileSize, &wLen);
+		if (!pwData)
+		{
+			__leave;
+		}
 
 		//Çå¿ÕÅäÖÃ
 		CompileCfg->Application[0] = 0;
@@ -1147,7 +1143,7 @@ UINT GetEncodeCodePage(int Compile_Encode)
 
 	case COMPILE_ENCODE_GB18030:
 	default:
-		CodePage = 54936; //Ïê¼û  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
+		CodePage = CP_GB18030; //Ïê¼û  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
 		break;
 	}
 	return CodePage;
@@ -1176,17 +1172,24 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 		{
 			UINT CodePage = GetEncodeCodePage(InputSession->Encode);
 			PBYTE mbStr;
-			int wcStrlen = wcslen(Msg);
-			int mbStrlen = WideCharToMultiByte(CodePage, 0, Msg, wcStrlen, 0, 0, 0, 0);
-			mbStr = malloc(mbStrlen);
-			ZeroMemory(mbStr, mbStrlen);
-			WideCharToMultiByte(CodePage, 0, Msg, wcStrlen, mbStr, mbStrlen, 0, 0);
+			
 
-			DWORD BytesWritten;
-			WriteFile(Sandbox->hPipeInWrite, mbStr, mbStrlen, &BytesWritten, 0);
-			CloseHandle(Sandbox->hPipeInWrite);
-			Sandbox->hPipeInWrite = 0;
-			free(mbStr);
+			int mbStrlen;
+			mbStr = StrConvWC2MB(CodePage, Msg, -1, &mbStrlen);
+			if(mbStr)
+			{
+				DWORD BytesWritten;
+				WriteFile(Sandbox->hPipeInWrite, mbStr, mbStrlen, &BytesWritten, 0);
+				CloseHandle(Sandbox->hPipeInWrite);
+				Sandbox->hPipeInWrite = 0;
+				free(mbStr);
+			}
+			else
+			{
+				//StrConvWC2MBÊ§°Ü
+			}
+
+			
 			iRet = BOIT_MSGWATCH_BLOCK;
 		}
 	}

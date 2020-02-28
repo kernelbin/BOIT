@@ -2,7 +2,7 @@
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"DirManagement.h"
-
+#include"EncodeConvert.h"
 
 int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
@@ -47,25 +47,32 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 		}
 
 		FileData = malloc(FileSizeLow + 1);
-		ZeroMemory(FileData, FileSizeLow + 1);
+		if (!FileData)
+		{
+			__leave;
+		}
+		ZeroMemory(FileData, (unsigned long long)FileSizeLow + 1);
 
 		DWORD BytesRead;
-		ReadFile(hSavedFile, FileData, FileSizeLow, &BytesRead, 0);
+		if (!ReadFile(hSavedFile, FileData, FileSizeLow, &BytesRead, 0))
+		{
+			__leave;
+		}
+
 		if (FileSizeLow != BytesRead)
 		{
 			SendBackMessage(GroupID, QQID, L"读取文件的时候出错了orz");
 			__leave;
 		}
 
+		int cchWcLen;
+		WideCharStr = StrConvMB2WC(CP_GB18030, FileData, FileSizeLow, &cchWcLen);
+
 		
-		int cchWcLen = MultiByteToWideChar(54936, 0, FileData, FileSizeLow, 0, 0);
-		WideCharStr = malloc(sizeof(WCHAR) * (cchWcLen + 1));
-		ZeroMemory(WideCharStr, sizeof(WCHAR) * (cchWcLen + 1));
-
-		MultiByteToWideChar(54936, 0, FileData, FileSizeLow, WideCharStr, cchWcLen);
-		WideCharStr[cchWcLen] = 0;
-
-		bSuccess = TRUE;
+		if (WideCharStr)
+		{
+			bSuccess = TRUE;
+		}
 	}
 	__finally
 	{

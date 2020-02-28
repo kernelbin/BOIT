@@ -5,6 +5,7 @@
 #include<process.h>
 #include"SharedMemStruct.h"
 #include"Base64.h"
+#include"EncodeConvert.h"
 
 unsigned __stdcall SendEventThread(void* Args);
 
@@ -38,11 +39,15 @@ unsigned __stdcall SendEventThread(void *Args)
 			{
 				char* ToSendText;
 				int ccbLen;
-				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, 0, 0, 0, 0);
-				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
-				WideCharToMultiByte(54936, 0, pSharedMemSend->u.PrivateMsg.Msg, -1, ToSendText, ccbLen+1, 0, 0);
-				int iRet = SendPrivateMessage(pSharedMemSend->u.PrivateMsg.QQID, ToSendText);
-				free(ToSendText);
+				int iRet = 0;
+
+				ToSendText = StrConvWC2MB(CP_GB18030, pSharedMemSend->u.PrivateMsg.Msg, -1, &ccbLen);
+				
+				if (ToSendText)
+				{
+					iRet = SendPrivateMessage(pSharedMemSend->u.PrivateMsg.QQID, ToSendText);
+					free(ToSendText);
+				}
 				pSharedMemSend->u.PrivateMsg.iRet = iRet;
 			}
 				break;
@@ -50,11 +55,15 @@ unsigned __stdcall SendEventThread(void *Args)
 			{
 				char* ToSendText;
 				int ccbLen;
-				ccbLen = WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, 0, 0, 0, 0);
-				ToSendText = malloc(sizeof(char) * (ccbLen + 1));
-				WideCharToMultiByte(54936, 0, pSharedMemSend->u.GroupMsg.Msg, -1, ToSendText, (ccbLen + 1), 0, 0);
-				int iRet = SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
-				free(ToSendText);
+				int iRet = 0;
+
+				ToSendText = StrConvWC2MB(CP_GB18030, pSharedMemSend->u.GroupMsg.Msg, -1, &ccbLen);
+
+				if (ToSendText)
+				{
+					iRet = SendGroupMessage(pSharedMemSend->u.GroupMsg.GroupID, ToSendText);
+					free(ToSendText);
+				}
 				pSharedMemSend->u.GroupMsg.iRet = iRet;
 			}
 				break;
@@ -150,7 +159,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrNickName, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrNickName, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_NICKLEN)
 		{
 			//nmd????
@@ -158,7 +167,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrNickName, StringLen, GroupMemberInfo->NickName, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrNickName, StringLen, GroupMemberInfo->NickName, wcStrlen);
 			GroupMemberInfo->NickName[wcStrlen] = 0;
 		}
 	}
@@ -171,7 +180,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrCardName, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrCardName, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_NICKLEN)
 		{
 			//nmd????
@@ -179,7 +188,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrCardName, StringLen, GroupMemberInfo->CardName, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrCardName, StringLen, GroupMemberInfo->CardName, wcStrlen);
 			GroupMemberInfo->CardName[wcStrlen] = 0;
 		}
 
@@ -202,7 +211,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrLocation, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrLocation, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_LOCATION)
 		{
 			//nmd????
@@ -210,7 +219,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrLocation, StringLen, GroupMemberInfo->Location, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrLocation, StringLen, GroupMemberInfo->Location, wcStrlen);
 			GroupMemberInfo->Location[wcStrlen] = 0;
 		}
 
@@ -233,7 +242,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrLevelName, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrLevelName, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_LEVELNAME)
 		{
 			//nmd????
@@ -241,7 +250,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrLevelName, StringLen, GroupMemberInfo->LevelName, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrLevelName, StringLen, GroupMemberInfo->LevelName, wcStrlen);
 			GroupMemberInfo->LevelName[wcStrlen] = 0;
 		}
 
@@ -264,7 +273,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrSpecialTitle, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrSpecialTitle, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_NICKLEN)
 		{
 			//nmd????
@@ -272,7 +281,7 @@ BOOL RetrieveGroupMemberInfoFromCQ(long long GroupID, long long QQID, BOOL NoCac
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrSpecialTitle, StringLen, GroupMemberInfo->SpecialTitle, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrSpecialTitle, StringLen, GroupMemberInfo->SpecialTitle, wcStrlen);
 			GroupMemberInfo->SpecialTitle[wcStrlen] = 0;
 		}
 
@@ -323,7 +332,7 @@ BOOL RetrieveStrangerInfoFromCQ(long long QQID, BOOL NoCache, pBOIT_STRANGER_INF
 	//赋值
 	if (StringLen)
 	{
-		int wcStrlen = MultiByteToWideChar(54936, 0, RetrNickName, StringLen, 0, 0);
+		int wcStrlen = MultiByteToWideChar(CP_GB18030, 0, RetrNickName, StringLen, 0, 0);
 		if (wcStrlen >= BOIT_MAX_NICKLEN)
 		{
 			//nmd????
@@ -331,7 +340,7 @@ BOOL RetrieveStrangerInfoFromCQ(long long QQID, BOOL NoCache, pBOIT_STRANGER_INF
 		}
 		else
 		{
-			MultiByteToWideChar(54936, 0, RetrNickName, StringLen, StrangerInfo->NickName, wcStrlen);
+			MultiByteToWideChar(CP_GB18030, 0, RetrNickName, StringLen, StrangerInfo->NickName, wcStrlen);
 			StrangerInfo->NickName[wcStrlen] = 0;
 		}
 	}
