@@ -17,9 +17,7 @@ int RegisterInlineCommand()
 	RegisterCommand(L"runcode", CmdMsg_runcode_Proc, L"运行之前保存的代码", BOIT_MATCH_FULL);
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
 	RegisterCommand(L"q&amp;a", CmdMsg_q_and_a_Proc, L"常见问答", BOIT_MATCH_FULL);
-	RegisterCommand(L"version", CmdMsg_version_Proc, L"查看BOIT版本", BOIT_MATCH_FULL);
 	RegisterCommand(L"stop", CmdMsg_stop_Proc, L"关闭BOIT", BOIT_MATCH_FULL);
-	
 
 	return 0;
 }

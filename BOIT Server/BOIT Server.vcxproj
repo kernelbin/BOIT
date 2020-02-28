@@ -154,7 +154,6 @@
     <ClCompile Include="Command_run.c" />
     <ClCompile Include="Command_runcode.c" />
     <ClCompile Include="Command_stop.c" />
-    <ClCompile Include="Command_version.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="HandleBOITCode.c" />

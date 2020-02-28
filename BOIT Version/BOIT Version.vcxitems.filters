@@ -9,6 +9,5 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Settings.h">
       <Filter>设置相关</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)BOITVersion.h" />
   </ItemGroup>
 </Project>

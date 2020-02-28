@@ -1,6 +1,9 @@
 #pragma once
 #include<Windows.h>
-#include"BOITVersion.h"
+
+//版本定义
+#define VERSION_MAJOR 2
+#define VERSION_MINOR 0
 
 //返回值定义
 #define SETTINGS_LOADED 0			//找到设置并加载成功
