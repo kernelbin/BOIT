@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-int CmdMsg_q_and_a_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_q_and_a_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR ReplyMessage[][128] = {
 		L"Q:我可以对bot做下流之事吗？\n\nA:除了 quine 和让 bot 发表不当言论以外的方式尝试对 bot 进行 CTF 或者攻击是允许的。\n（bot 被封号了没得玩的是你们哦）\n如果有发现安全漏洞，非常欢迎与作者交流。",
@@ -16,6 +16,6 @@ int CmdMsg_q_and_a_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 		L"Q:运行代码是什么原理？\n\nA:在本地编译，并且通过管道重定向实现获取输出数据，并且通过一些手段限制进程权限",
 		L"Q:还有什么问题吗？\n\nA:直接去找kernel.bin问吧！", };
 
-	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
+	SendBackMessage(boitSession, ReplyMessage[rand() % _countof(ReplyMessage)]);
 	return 0;
 }

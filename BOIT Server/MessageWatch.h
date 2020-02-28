@@ -1,4 +1,5 @@
 #include<Windows.h>
+#include"SessionManage.h"
 
 //监视消息类型
 //MW 是 MessageWatch 的缩写
@@ -50,10 +51,7 @@ int FinalizeMessageWatch();
 
 int RegisterMessageWatch(int WatchType,
 	long long TimeOutInterval,
-	long long GroupID,
-	long long QQID,
-	int SubType,
-	WCHAR* AnonymousName,
+	pBOIT_SESSION boitSession,
 	MSGWATCH_CALLBACK CallbackFunc,
 	PBYTE pData);
 

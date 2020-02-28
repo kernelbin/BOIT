@@ -51,7 +51,7 @@ typedef struct __tagCompileSession
 typedef struct __tagRunSession
 {
 	UINT Encode;
-	BOIT_SESSION boitSession;
+	pBOIT_SESSION boitSession;
 	pVBUF StdOutBuffer;
 }RUN_SESSION, * pRUN_SESSION;
 
@@ -100,29 +100,29 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 
 LONGLONG CompileID;
 
-int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 
-	return RunCode(GroupID, QQID, SubType, AnonymousName, Msg + ParamLen + SpaceLen);
+	return RunCode(boitSession, Msg + ParamLen + SpaceLen);
 }
 
 
-int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 {
-	if (CheckPrivilegeRunCode(GroupID, QQID) == 0)
+	if (CheckPrivilegeRunCode(orgboitSession->GroupID, orgboitSession->QQID) == 0)
 	{
-		SendBackMessage(GroupID, QQID, L"Oops... 您没有适当的权限进行操作");
+		SendBackMessage(orgboitSession, L"Oops... 您没有适当的权限进行操作");
 		return 0;
 	}
 
 	//检查用户目录下是否有相应文件夹
-	if (PerUserCreateDirIfNExist(QQID, L"Sandbox"))
+	if (PerUserCreateDirIfNExist(orgboitSession->QQID, L"Sandbox"))
 	{
 		//创建相应文件
 	}
-	if (PerUserCreateDirIfNExist(QQID, L"Compile"))
+	if (PerUserCreateDirIfNExist(orgboitSession->QQID, L"Compile"))
 	{
 		//创建相应文件
 	}
@@ -143,12 +143,9 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 	WCHAR FailedReason[128];
 
-	pBOIT_SESSION boitSession = malloc(sizeof(BOIT_SESSION));
-	ZeroMemory(boitSession, sizeof(BOIT_SESSION));
-	boitSession->QQID = QQID;
-	boitSession->GroupID = GroupID;
-	boitSession->SubType = SubType;
-	if (AnonymousName) wcscpy_s(boitSession->AnonymousName, BOIT_MAX_NICKLEN, AnonymousName);
+	pBOIT_SESSION boitSession;
+
+	boitSession = DuplicateBOITSession(orgboitSession);
 
 	__try
 	{
@@ -172,13 +169,13 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 					if (ParamLen == 1)
 					{
 						swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %lc", lpwcParam[0]);
-						SendBackMessage(GroupID, QQID, FailedReason);
+						SendBackMessage(boitSession, FailedReason);
 						bFailed = 1;
 						break;
 					}
 					else if (ParamLen >= 16)
 					{
-						SendBackMessage(GroupID, QQID, L"参数名称过长");
+						SendBackMessage(boitSession, L"参数名称过长");
 						bFailed = 1;
 						break;
 					}
@@ -201,7 +198,7 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 							WCHAR ParamBuf[16] = { 0 };
 							wcsncpy_s(ParamBuf, _countof(ParamBuf), lpwcParam, ParamLen);
 							swprintf_s(FailedReason, _countof(FailedReason), L"无法解析参数 %ls", ParamBuf);
-							SendBackMessage(GroupID, QQID, FailedReason);
+							SendBackMessage(boitSession, FailedReason);
 							bFailed = 1;
 							break;
 						}
@@ -237,13 +234,13 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 					}
 					else
 					{
-						SendBackMessage(GroupID, QQID, L"未找到源代码");
+						SendBackMessage(boitSession, L"未找到源代码");
 						bFailed = TRUE;
 					}
 				}
 				else
 				{
-					SendBackMessage(GroupID, QQID, L"未找到语言类型或该语言不受支持");
+					SendBackMessage(boitSession, L"未找到语言类型或该语言不受支持");
 					bFailed = TRUE;
 				}
 			}
@@ -255,15 +252,15 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 			if (bIsHelp)
 			{
 				//显示详细帮助信息
-				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] [/input] sourcecode");
+				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] sourcecode");
 
 				ShowSupportLanguageInfo(pCmd, L".cfg", boitSession);
 			}
 			else
 			{
-				SendBackMessage(GroupID, QQID, L"usage: #run language [/su] [/input] sourcecode\n 输入#run /help 查看详细帮助信息");
+				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] sourcecode\n 输入#run /help 查看详细帮助信息");
 			}
-			free(boitSession);
+			FreeBOITSession(boitSession);
 			free(CompileCfg);
 			return 0;
 		}
@@ -277,11 +274,11 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 
 	//校验权限
-	if (bIsSU && (CheckUserToken(QQID, L"PrivilegeRunCodeNoRestrict") == 0))
+	if (bIsSU && (CheckUserToken(boitSession->QQID, L"PrivilegeRunCodeNoRestrict") == 0))
 	{
-		free(boitSession);
+		SendBackMessage(boitSession, L"Oops... 您没有适当的权限进行操作");
+		FreeBOITSession(boitSession);
 		free(CompileCfg);
-		SendBackMessage(GroupID, QQID, L"Oops... 您没有适当的权限进行操作");
 		return 0;
 	}
 
@@ -290,7 +287,7 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 	WCHAR SourceCodeFile[MAX_PATH];
 
-	GetPerUserDir(SourceCodeFile, QQID);
+	GetPerUserDir(SourceCodeFile, boitSession->QQID);
 	PathAppendW(SourceCodeFile, L"Compile\\");
 
 	WCHAR SourceFileName[16];
@@ -333,8 +330,8 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 
 		if (!bFileCreated)
 		{
-			SendBackMessage(GroupID, QQID, L"写入文件时出现错误");
-			free(boitSession);
+			SendBackMessage(boitSession, L"写入文件时出现错误");
+			FreeBOITSession(boitSession);
 			free(CompileCfg);
 			return 0;
 		}
@@ -390,9 +387,9 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 			(PBYTE)CompileSession,
 			CompileSandboxCallback) == 0)
 		{
-			SendBackMessage(boitSession->GroupID, boitSession->QQID, L"为编译器创建沙盒时出现意外");
+			SendBackMessage(boitSession, L"为编译器创建沙盒时出现意外");
 			free(CompileCfg);
-			free(boitSession);
+			FreeBOITSession(boitSession);
 			free(CompileSession);
 		}
 	}
@@ -418,26 +415,29 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 			InputSession->bLimitPrivileges = !bIsSU;
 			InputSession->Encode = CompileCfg->OutputEncode;
 			InputSession->boitSession = boitSession;
-			if (GroupID)
+			if (boitSession->GroupID)
 			{
-				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, (PBYTE)InputSession);
+				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, boitSession, InputCallback, (PBYTE)InputSession);
 			}
 			else
 			{
-				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, GroupID, QQID, SubType, AnonymousName, InputCallback, (PBYTE)InputSession);
+				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, boitSession, InputCallback, (PBYTE)InputSession);
 			}
-			SendBackMessage(GroupID, QQID, L"请输入输入数据：");
+			SendBackMessage(boitSession, L"请输入输入数据：");
 
 			free(CompileCfg);
 			// boitSess仍在使用中
 		}
 		else
 		{
-			StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL,
-				CompileCmd, SandboxDir, !bIsSU, boitSession, CompileCfg->OutputEncode, 0);
+			if (!StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL,
+				CompileCmd, SandboxDir, !bIsSU, boitSession, CompileCfg->OutputEncode, 0))
+			{
+				FreeBOITSession(boitSession);//如果成功的话，这个session会继续传递下去
+			}
 
 			free(CompileCfg);
-			free(boitSession);
+
 		}
 
 	}
@@ -502,24 +502,24 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				InputSession->boitSession = Session->boitSession;
 				if (Session->boitSession->GroupID)
 				{
-					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, Session->boitSession->GroupID,
-						Session->boitSession->QQID, Session->boitSession->SubType, Session->boitSession->AnonymousName, InputCallback, (PBYTE)InputSession);
+					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20,
+						Session->boitSession, InputCallback, (PBYTE)InputSession);
 				}
 				else
 				{
 					RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20,
-						Session->boitSession->GroupID, Session->boitSession->QQID, Session->boitSession->SubType,
-						Session->boitSession->AnonymousName, InputCallback, (PBYTE)InputSession);
+						Session->boitSession, InputCallback, (PBYTE)InputSession);
 				}
-				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, L"请输入输入数据：");
+				SendBackMessage(Session->boitSession, L"请输入输入数据：");
 
 
 			}
 			else
 			{
-				StartRunSandbox(NULL, SandboxFile, SandboxDir, !(Session->bIsSU), (Session->boitSession), Session->CompileCfg->OutputEncode, 0);
-				//StartRunSandbox目前的设计是duplicate一份boitSession
-				free(Session->boitSession);
+				if (!StartRunSandbox(NULL, SandboxFile, SandboxDir, !(Session->bIsSU), (Session->boitSession), Session->CompileCfg->OutputEncode, 0))
+				{
+					free(Session->boitSession);
+				}
 			}
 			
 		}
@@ -527,11 +527,11 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 		{
 			if (Sandbox->ExitReason == SANDBOX_ER_TIMEOUT)
 			{
-				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, L"Oh... 编译超时了");
+				SendBackMessage(Session->boitSession, L"Oh... 编译超时了");
 			}
 			else
 			{
-				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, L"Oops... 编译失败了");
+				SendBackMessage(Session->boitSession, L"Oops... 编译失败了");
 			}
 			WCHAR* wcStdout;
 
@@ -550,7 +550,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
 				swprintf_s(ShowMessage, cchStdout + 32, L"编译器输出：\n%ls\n编译器返回值：%ld", wcStdout, CompileExitCode);
 				free(wcStdout);
-				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, ShowMessage);
+				SendBackMessage(Session->boitSession, ShowMessage);
 				free(ShowMessage);
 			}
 			else
@@ -592,25 +592,25 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 	{
 		if (Sandbox->bMemoryExceed)
 		{
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序超出内存上限了qaq");
+			SendBackMessage(Session->boitSession, L"程序超出内存上限了qaq");
 		}
 		switch (Sandbox->ExitReason)
 		{
 		case SANDBOX_ER_ABNORMAL:
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序异常终止了！qaq");
+			SendBackMessage(Session->boitSession, L"程序异常终止了！qaq");
 			break;
 		case SANDBOX_ER_TIMEOUT:
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"超出运行时间限制了！qaq");
+			SendBackMessage(Session->boitSession, L"超出运行时间限制了！qaq");
 			break;
 		case SANDBOX_ER_KILLED:
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序被强行中断了！qaq");
+			SendBackMessage(Session->boitSession, L"程序被强行中断了！qaq");
 			break;
 		}
 
 
 		if (Session->StdOutBuffer->Length == 0)
 		{
-			SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, L"程序莫得输出诶");
+			SendBackMessage(Session->boitSession, L"程序莫得输出诶");
 		}
 		else
 		{
@@ -628,11 +628,12 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 				{
 					wcStdout[BOIT_MAX_TEXTLEN] = 0;
 				}
-				SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+				SendTextWithBOITCode(Session->boitSession, wcStdout);
 				free(wcStdout);
 			}
 		
 		}
+		FreeBOITSession(Session->boitSession);
 		FreeVBuf(Session->StdOutBuffer);
 		free(Session);
 	}
@@ -691,17 +692,18 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 		return 0;
 	}
 	RunSession->Encode = Encode;
-	RunSession->boitSession.GroupID = boitSession->GroupID;
-	RunSession->boitSession.QQID = boitSession->QQID;
+
+	RunSession->boitSession = boitSession;
+	
 	RunSession->StdOutBuffer = AllocVBuf();
-	if (RunSession->boitSession.AnonymousName) wcscpy_s(RunSession->boitSession.AnonymousName, BOIT_MAX_NICKLEN, boitSession->AnonymousName);
+	
 	if ((Sandbox = CreateSimpleSandboxW(Application, CommandLine, CuurentDir,
 		10000000 * 10,		//10秒
 		512 * 1024 * 1024,	//512MB内存
 		10 * 100,			//10% CPU
 		bLimitPrivileges, (PBYTE)RunSession, RunSandboxCallback)) == 0)
 	{
-		SendBackMessage(RunSession->boitSession.GroupID, RunSession->boitSession.QQID, L"为程序创建沙盒时出现意外");
+		SendBackMessage(RunSession->boitSession, L"为程序创建沙盒时出现意外");
 		free(RunSession);
 	}
 	return Sandbox;
@@ -1034,7 +1036,7 @@ BOOL ShowSupportLanguageInfo(pBOIT_COMMAND pCmd, WCHAR* ConfigSuffix, pBOIT_SESS
 	}
 	if (hFind != INVALID_HANDLE_VALUE) FindClose(hFind);
 
-	SendBackMessage(boitSession->GroupID, boitSession->QQID, ReplyMessage);
+	SendBackMessage(boitSession, ReplyMessage);
 	return 0;
 }
 
@@ -1159,7 +1161,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	switch (Event)
 	{
 	case BOIT_MW_EVENT_TIMEOUT:
-		SendBackMessage(InputSession->boitSession->GroupID, InputSession->boitSession->QQID, L"我好饿，喂给我的输入数据去哪里了qaq");
+		SendBackMessage(InputSession->boitSession, L"我好饿，喂给我的输入数据去哪里了qaq");
 		free(InputSession->boitSession);
 		break;
 	case BOIT_MW_EVENT_MESSAGE:
@@ -1167,7 +1169,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 		pSANDBOX Sandbox = StartRunSandbox(InputSession->Application[0] ? InputSession->Application : NULL,
 			InputSession->Command, InputSession->CuurentDir, InputSession->bLimitPrivileges, InputSession->boitSession, InputSession->Encode, 0);
 
-		free(InputSession->boitSession);
+		
 		if (Sandbox)
 		{
 			UINT CodePage = GetEncodeCodePage(InputSession->Encode);
@@ -1191,6 +1193,10 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 
 			
 			iRet = BOIT_MSGWATCH_BLOCK;
+		}
+		else
+		{
+			free(InputSession->boitSession);
 		}
 	}
 	break;
