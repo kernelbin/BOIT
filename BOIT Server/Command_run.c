@@ -10,7 +10,7 @@
 #include"RemoveCQEscapeChar.h"
 #include"HandleBOITCode.h"
 #include"MessageWatch.h"
-
+#include"EncodeConvert.h"
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -535,27 +535,26 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 
 			UINT CodePage = GetEncodeCodePage(Session->CompileCfg->OutputEncode);
 
-			int cchStdout = MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, 0, 0);
-
-			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, wcStdout, cchStdout);
-			wcStdout[cchStdout] = 0;
-
-			//ÊµÐÐ½Ø¶Ï
-			if (cchStdout > BOIT_MAX_TEXTLEN)
+			int cchStdout;
+			wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, &cchStdout);
+			if (wcStdout)
 			{
-				wcStdout[BOIT_MAX_TEXTLEN] = 0;
-			}
+				if (cchStdout > BOIT_MAX_TEXTLEN)
+				{
+					wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				}
 
-			WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
-			swprintf_s(ShowMessage, cchStdout + 32, L"±àÒëÆ÷Êä³ö£º\n%ls\n±àÒëÆ÷·µ»ØÖµ£º%ld", wcStdout, CompileExitCode);
-			free(wcStdout);
-			SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, ShowMessage);
-			free(ShowMessage);
+				WCHAR* ShowMessage = malloc(sizeof(WCHAR) * (cchStdout + 32));
+				swprintf_s(ShowMessage, cchStdout + 32, L"±àÒëÆ÷Êä³ö£º\n%ls\n±àÒëÆ÷·µ»ØÖµ£º%ld", wcStdout, CompileExitCode);
+				free(wcStdout);
+				SendBackMessage(Session->boitSession->GroupID, Session->boitSession->QQID, ShowMessage);
+				free(ShowMessage);
+			}
+			else
+			{
+				//TODO: ×ª»»×Ö·û´® or ÄÚ´æÉêÇëÊ§°Ü
+			}
 
 			free(Session->boitSession);
 		}
@@ -615,27 +614,22 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		{
 			UINT CodePage = GetEncodeCodePage(Session->Encode);
 			WCHAR* wcStdout;
-			int cchStdout = MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, 0, 0);
-			wcStdout = malloc(sizeof(WCHAR) * (cchStdout + 1));
-			MultiByteToWideChar(CodePage, 0,
-				Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, wcStdout, cchStdout);
-			wcStdout[cchStdout] = 0;
+			int cchStdout;
+			
+			wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
+				Session->StdOutBuffer->Length, &cchStdout);
 
-			//ÊµÐÐ½Ø¶Ï
-			if (cchStdout > BOIT_MAX_TEXTLEN)
+			if (wcStdout)
 			{
-				wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				//ÊµÐÐ½Ø¶Ï
+				if (cchStdout > BOIT_MAX_TEXTLEN)
+				{
+					wcStdout[BOIT_MAX_TEXTLEN] = 0;
+				}
+				SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
+				free(wcStdout);
 			}
-
-
-
-			SendTextWithBOITCode(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
-			//	SendBackMessage(Session->boitSession.GroupID, Session->boitSession.QQID, wcStdout);
-
-			free(wcStdout);
+		
 		}
 		FreeVBuf(Session->StdOutBuffer);
 		free(Session);
