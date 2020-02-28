@@ -61,9 +61,6 @@
     <Filter Include="源文件\指令回调\about">
       <UniqueIdentifier>{da5508af-109d-4ecc-940b-296bfb3abac4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\指令回调\coming_feature">
-      <UniqueIdentifier>{dac781c0-6a22-4ace-9f68-6ed0d353d23e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="源文件\指令回调\help">
       <UniqueIdentifier>{f5c5e421-78b7-4f3d-a2a2-e6877ac63daa}</UniqueIdentifier>
     </Filter>
@@ -124,6 +121,9 @@
     <Filter Include="头文件\消息监视">
       <UniqueIdentifier>{75dbdbb1-2a53-446d-92b3-5040d696a55b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\boast">
+      <UniqueIdentifier>{dac781c0-6a22-4ace-9f68-6ed0d353d23e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -158,9 +158,6 @@
     </ClCompile>
     <ClCompile Include="Command_about.c">
       <Filter>源文件\指令回调\about</Filter>
-    </ClCompile>
-    <ClCompile Include="Command_commingfeature.c">
-      <Filter>源文件\指令回调\coming_feature</Filter>
     </ClCompile>
     <ClCompile Include="Command_help.c">
       <Filter>源文件\指令回调\help</Filter>
@@ -212,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="MessageWatch.c">
       <Filter>源文件\消息监视</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_boast.c">
+      <Filter>源文件\指令回调\boast</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

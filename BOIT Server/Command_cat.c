@@ -5,25 +5,25 @@
 #include"SharedMemStruct.h"
 #include<wchar.h>
 
-int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR CatMessage[128];
 	
-	if (GroupID)
+	if (boitSession->GroupID)
 	{
-		if (QQID == 80000000)
+		if (boitSession->QQID == 80000000)
 		{
 			return 0;
 		}
 		else
 		{
 			BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-			RetrieveGroupMemberInfo(GroupID, QQID, TRUE, &GroupMemberInfo);
-			if (QQID == 693511570)
+			RetrieveGroupMemberInfo(boitSession->GroupID, boitSession->QQID, TRUE, &GroupMemberInfo);
+			if (boitSession->QQID == 693511570)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"àÛß´àÛß´£¬ %ls ÄãÒ²ÊÇÍÃ×Ó°¡", GroupMemberInfo.NickName);
 			}
-			else if (QQID == 1976658142)
+			else if (boitSession->QQID == 1976658142)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"ß÷ß÷ß÷£¬ %ls ÄãÒ²ÊÇºÓÀê°¡", GroupMemberInfo.NickName);
 			}
@@ -37,13 +37,13 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int S
 	else
 	{
 		BOIT_STRANGER_INFO StrangerInfo;
-		RetrieveStrangerInfo(QQID, TRUE, &StrangerInfo);
+		RetrieveStrangerInfo(boitSession->QQID, TRUE, &StrangerInfo);
 
-		if (QQID == 693511570)
+		if (boitSession->QQID == 693511570)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"àÛß´àÛß´£¬ %ls ÄãÒ²ÊÇÍÃ×Ó°¡", StrangerInfo.NickName);
 		}
-		else if (QQID == 1976658142)
+		else if (boitSession->QQID == 1976658142)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"ß÷ß÷ß÷£¬ %ls ÄãÒ²ÊÇºÓÀê°¡", StrangerInfo.NickName);
 		}
@@ -53,27 +53,27 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int S
 		}
 		
 	}
-	SendBackMessage(GroupID, QQID, CatMessage);
+	SendBackMessage(boitSession, CatMessage);
 	return 0;
 }
 
 
 
 
-int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR CatMessage[128];
 
-	if (GroupID)
+	if (boitSession->GroupID)
 	{
-		if (QQID == 80000000)
+		if (boitSession->QQID == 80000000)
 		{
 			return 0;
 		}
 		else
 		{
 			BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-			RetrieveGroupMemberInfo(GroupID, QQID, TRUE, &GroupMemberInfo);
+			RetrieveGroupMemberInfo(boitSession->GroupID, boitSession->QQID, TRUE, &GroupMemberInfo);
 			WCHAR* ChosenName;
 			if (GroupMemberInfo.CardName[0])
 			{
@@ -83,11 +83,11 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int 
 			{
 				ChosenName = GroupMemberInfo.NickName;
 			}
-			if (QQID == 693511570)
+			if (boitSession->QQID == 693511570)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"àÛß´àÛß´£¬ %ls ÄãÒ²ÊÇÍÃ×Ó°¡", ChosenName);
 			}
-			else if (QQID == 1976658142)
+			else if (boitSession->QQID == 1976658142)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"ß÷ß÷ß÷£¬ %ls ÄãÒ²ÊÇºÓÀê°¡", ChosenName);
 			}
@@ -101,13 +101,13 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int 
 	else
 	{
 		BOIT_STRANGER_INFO StrangerInfo;
-		RetrieveStrangerInfo(QQID, TRUE, &StrangerInfo);
+		RetrieveStrangerInfo(boitSession->QQID, TRUE, &StrangerInfo);
 
-		if (QQID == 693511570)
+		if (boitSession->QQID == 693511570)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"àÛß´àÛß´£¬ %ls ÄãÒ²ÊÇÍÃ×Ó°¡", StrangerInfo.NickName);
 		}
-		else if (QQID == 1976658142)
+		else if (boitSession->QQID == 1976658142)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"ß÷ß÷ß÷£¬ %ls ÄãÒ²ÊÇºÓÀê°¡", StrangerInfo.NickName);
 		}
@@ -117,6 +117,6 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int 
 		}
 
 	}
-	SendBackMessage(GroupID, QQID, CatMessage);
+	SendBackMessage(boitSession, CatMessage);
 	return 0;
 }

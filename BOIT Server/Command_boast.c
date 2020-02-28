@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-int CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_boast_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR ReplyMessage[][128] = {
 		L"我可以查询codeforce上的比赛时间呢，我还能查询tourist的profile！",
@@ -14,16 +14,16 @@ int CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long 
 		L"在bot上玩人力资源机也可以做到哦",
 		L"什么时候通过图灵测试？我早就通过图灵测试了你不知道吗？"
 	};
-	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
+	SendBackMessage(boitSession, ReplyMessage[rand() % _countof(ReplyMessage)]);
 
 	switch (rand() % 20)
 	{
 	case 0:
-		SendBackMessage(GroupID, QQID, L"骗人？");
-		SendBackMessage(GroupID, QQID, L"吹牛逼不能算骗人.......吹牛逼......bot的事，能叫骗人吗？");
+		SendBackMessage(boitSession, L"骗人？");
+		SendBackMessage(boitSession, L"吹牛逼不能算骗人.......吹牛逼......bot的事，能叫骗人吗？");
 		break;
 	case 1:
-		SendBackMessage(GroupID, QQID, L"为什么我还不会做这些？那你得去问kernel.bin了");
+		SendBackMessage(boitSession, L"为什么我还不会做这些？那你得去问kernel.bin了");
 		break;
 	}
 	return 0;
