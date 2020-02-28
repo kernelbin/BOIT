@@ -28,9 +28,9 @@ int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, 
 	BOOL bSuccessSave = FALSE;
 	__try
 	{
-		//为了打开读取方便，这里转码成UTF-8
+		//为了打开读取方便，这里转码成CP_GB18030
 		int cbUTF8Len;
-		UTF8Text = StrConvWC2MB(CP_UTF8, Msg, -1, &cbUTF8Len);
+		UTF8Text = StrConvWC2MB(CP_GB18030, Msg, -1, &cbUTF8Len);
 
 		if (!UTF8Text)
 		{

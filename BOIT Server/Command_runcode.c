@@ -66,7 +66,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 		}
 
 		int cchWcLen;
-		WideCharStr = StrConvMB2WC(CP_UTF8, FileData, FileSizeLow, &cchWcLen);
+		WideCharStr = StrConvMB2WC(CP_GB18030, FileData, FileSizeLow, &cchWcLen);
 
 		
 		if (WideCharStr)
