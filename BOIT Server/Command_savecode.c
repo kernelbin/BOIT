@@ -2,6 +2,7 @@
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"DirManagement.h"
+#include"EncodeConvert.h"
 
 int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
@@ -28,11 +29,14 @@ int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, 
 	__try
 	{
 		//为了打开读取方便，这里转码成UTF-8
-		int cchWCLen = wcslen(Msg);
-		int cbUTF8Len = WideCharToMultiByte(54936, 0, Msg, cchWCLen, 0, 0, 0, 0);
-		UTF8Text = malloc(cbUTF8Len);
-		WideCharToMultiByte(54936, 0, Msg, cchWCLen, UTF8Text, cbUTF8Len, 0, 0);
+		int cbUTF8Len;
+		UTF8Text = StrConvWC2MB(CP_UTF8, Msg, -1, &cbUTF8Len);
 
+		if (!UTF8Text)
+		{
+			__leave;
+		}
+		
 		DWORD BytesWritten;
 		WriteFile(hSavedFile, UTF8Text, cbUTF8Len, &BytesWritten, 0);
 		if (BytesWritten != cbUTF8Len)

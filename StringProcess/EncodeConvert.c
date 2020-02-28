@@ -1,4 +1,6 @@
 #include<Windows.h>
+#include"EncodeConvert.h"
+
 
 WCHAR * StrConvMB2WC(UINT CodePage,LPCCH MbStr,int cbMbStrlen, int *cchWcLen) //转换字符串并默认补一个 \0在结尾。长度传入-1则自动计算长度，内存需要手动free
 {
@@ -31,7 +33,7 @@ char* StrConvWC2MB(UINT CodePage, LPCWCH WcStr, int cchWcStrlen, int* cbMbLen) /
 {
 	if (cchWcStrlen == -1)
 	{
-		cchWcStrlen = strlen(WcStr);
+		cchWcStrlen = wcslen(WcStr);
 	}
 	int _cbMbLen = WideCharToMultiByte(CodePage, 0, WcStr, cchWcStrlen, 0, 0, 0, 0);
 	char* mbStr = malloc(_cbMbLen + 1);

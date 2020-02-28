@@ -2,7 +2,7 @@
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"DirManagement.h"
-
+#include"EncodeConvert.h"
 
 int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
 
@@ -57,15 +57,14 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 			__leave;
 		}
 
+		int cchWcLen;
+		WideCharStr = StrConvMB2WC(CP_UTF8, FileData, FileSizeLow, &cchWcLen);
+
 		
-		int cchWcLen = MultiByteToWideChar(54936, 0, FileData, FileSizeLow, 0, 0);
-		WideCharStr = malloc(sizeof(WCHAR) * (cchWcLen + 1));
-		ZeroMemory(WideCharStr, sizeof(WCHAR) * (cchWcLen + 1));
-
-		MultiByteToWideChar(54936, 0, FileData, FileSizeLow, WideCharStr, cchWcLen);
-		WideCharStr[cchWcLen] = 0;
-
-		bSuccess = TRUE;
+		if (WideCharStr)
+		{
+			bSuccess = TRUE;
+		}
 	}
 	__finally
 	{

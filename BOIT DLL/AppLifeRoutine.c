@@ -4,6 +4,7 @@
 #include"EstablishConn.h"
 #include"BOITEventType.h"
 #include<process.h>
+#include"EncodeConvert.h"
 
 //生命周期
 
@@ -47,9 +48,10 @@ int HandlePrivateMessage(int subType, int msgId, long long fromQQ, const char* m
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_PRIVATE;
 		pSharedMemRecv->u.PrivateMsg.SubType = subType;
-		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
+
+		int cchWideCharLen = MultiByteToWideChar(CP_GB18030, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
-		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
+		MultiByteToWideChar(CP_GB18030, 0, msg, -1, pSharedMemRecv->u.PrivateMsg.Msg, cchWideCharLen);
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.PrivateMsg.Msg[cchWideCharLen + 1] = 0;
 
@@ -90,14 +92,14 @@ int HandleGroupMessage(int subType, int msgId, long long fromGroup, long long fr
 	{
 		pSharedMemRecv->EventType = BOIT_EVENT_RECV_GROUP;
 		pSharedMemRecv->u.GroupMsg.SubType = subType;
-		int cchWideCharLen = MultiByteToWideChar(54936, 0, msg, -1, 0, 0);
+		int cchWideCharLen = MultiByteToWideChar(CP_GB18030, 0, msg, -1, 0, 0);
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_TEXTLEN);
-		MultiByteToWideChar(54936, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);
+		MultiByteToWideChar(CP_GB18030, 0, msg, -1, pSharedMemRecv->u.GroupMsg.Msg, cchWideCharLen);
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen] = 0;
 		pSharedMemRecv->u.GroupMsg.Msg[cchWideCharLen + 1] = 0;
 
 		cchWideCharLen = min(cchWideCharLen, BOIT_MAX_NICKLEN);
-		MultiByteToWideChar(54936, 0, fromAnonymous, -1, pSharedMemRecv->u.GroupMsg.AnonymousName, cchWideCharLen);
+		MultiByteToWideChar(CP_GB18030, 0, fromAnonymous, -1, pSharedMemRecv->u.GroupMsg.AnonymousName, cchWideCharLen);
 		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen] = 0;
 		pSharedMemRecv->u.GroupMsg.AnonymousName[cchWideCharLen + 1] = 0;
 

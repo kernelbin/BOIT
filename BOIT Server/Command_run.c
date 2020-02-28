@@ -309,13 +309,15 @@ int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName
 	{
 		UINT CodePage = GetEncodeCodePage(CompileCfg->SourceEncode);
 
-		int wcCodeLen = wcslen(CodeStr);
-		int MultiByteStrLen = WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, 0, 0, 0, 0);
-		MultiByteStrCode = malloc(MultiByteStrLen + 1);
-		DWORD BytesWritten;
-		ZeroMemory(MultiByteStrCode, MultiByteStrLen + 1);
-		WideCharToMultiByte(CodePage, 0, CodeStr, wcCodeLen, MultiByteStrCode, MultiByteStrLen, 0, 0);
+		int MultiByteStrLen;
+		MultiByteStrCode = StrConvWC2MB(CodePage, CodeStr, -1, &MultiByteStrLen);
 
+		if (!MultiByteStrCode)
+		{
+			__leave;
+		}
+		
+		DWORD BytesWritten;
 		WriteFile(hSourceFile, (LPCVOID)MultiByteStrCode, MultiByteStrLen, &BytesWritten, 0);
 		if (BytesWritten != MultiByteStrLen)
 		{
@@ -787,12 +789,12 @@ BOOL MatchCompileConfig(WCHAR* ConfigFileName, pCOMPILE_CFG CompileCfg, WCHAR* L
 			__leave;
 		}
 
-		int wLen = MultiByteToWideChar(CP_ACP, 0, pData, FileSize, 0, 0);
-
-		pwData = (WCHAR*)malloc(sizeof(WCHAR) * (wLen + 1));
-		ZeroMemory(pwData, sizeof(WCHAR) * (wLen + 1));
-		MultiByteToWideChar(CP_ACP, 0, pData, FileSize, pwData, wLen);
-
+		int wLen;
+		pwData = StrConvMB2WC(CP_ACP, pData, FileSize, &wLen);
+		if (!pwData)
+		{
+			__leave;
+		}
 
 		//Çå¿ÕÅäÖÃ
 		CompileCfg->Application[0] = 0;
@@ -1141,7 +1143,7 @@ UINT GetEncodeCodePage(int Compile_Encode)
 
 	case COMPILE_ENCODE_GB18030:
 	default:
-		CodePage = 54936; //Ïê¼û  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
+		CodePage = CP_GB18030; //Ïê¼û  https://docs.microsoft.com/zh-cn/windows/win32/intl/code-page-identifiers
 		break;
 	}
 	return CodePage;
@@ -1170,17 +1172,24 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 		{
 			UINT CodePage = GetEncodeCodePage(InputSession->Encode);
 			PBYTE mbStr;
-			int wcStrlen = wcslen(Msg);
-			int mbStrlen = WideCharToMultiByte(CodePage, 0, Msg, wcStrlen, 0, 0, 0, 0);
-			mbStr = malloc(mbStrlen);
-			ZeroMemory(mbStr, mbStrlen);
-			WideCharToMultiByte(CodePage, 0, Msg, wcStrlen, mbStr, mbStrlen, 0, 0);
+			
 
-			DWORD BytesWritten;
-			WriteFile(Sandbox->hPipeInWrite, mbStr, mbStrlen, &BytesWritten, 0);
-			CloseHandle(Sandbox->hPipeInWrite);
-			Sandbox->hPipeInWrite = 0;
-			free(mbStr);
+			int mbStrlen;
+			mbStr = StrConvWC2MB(CodePage, Msg, -1, &mbStrlen);
+			if(mbStr)
+			{
+				DWORD BytesWritten;
+				WriteFile(Sandbox->hPipeInWrite, mbStr, mbStrlen, &BytesWritten, 0);
+				CloseHandle(Sandbox->hPipeInWrite);
+				Sandbox->hPipeInWrite = 0;
+				free(mbStr);
+			}
+			else
+			{
+				//StrConvWC2MBÊ§°Ü
+			}
+
+			
 			iRet = BOIT_MSGWATCH_BLOCK;
 		}
 	}

@@ -20,6 +20,7 @@ Global
 		BOIT Version\BOIT Version.vcxitems*{c8f4745c-7444-428b-b149-2765b7ad17e2}*SharedItemsImports = 9
 		BOIT Shared\BOIT Shared.vcxitems*{cce394d1-964d-4b5f-beb2-7bb1f016b268}*SharedItemsImports = 4
 		BOIT Version\BOIT Version.vcxitems*{cce394d1-964d-4b5f-beb2-7bb1f016b268}*SharedItemsImports = 4
+		StringProcess\StringProcess.vcxitems*{cce394d1-964d-4b5f-beb2-7bb1f016b268}*SharedItemsImports = 4
 		BOIT Shared\BOIT Shared.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
 		BOIT Version\BOIT Version.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
 		StringProcess\StringProcess.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
