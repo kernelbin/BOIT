@@ -35,11 +35,14 @@ pBOIT_SESSION DuplicateBOITSession(pBOIT_SESSION SourceSession)
 	boitSession->GroupID = SourceSession->GroupID;
 	boitSession->QQID = SourceSession->QQID;
 	boitSession->SubType = SourceSession->SubType;
-	if (SourceSession->AnonymousName[0])
+	if (SourceSession->AnonymousName && SourceSession->AnonymousName[0])
 	{
 		wcscpy_s(boitSession->AnonymousName, BOIT_MAX_NICKLEN, SourceSession->AnonymousName);
 	}
-
+	else
+	{
+		boitSession->AnonymousName[0] = 0;
+	}
 	return boitSession;
 }
 

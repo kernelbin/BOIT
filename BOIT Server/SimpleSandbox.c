@@ -131,7 +131,7 @@ int InitializeSandbox(int JobObjCompThreadNum, int PipeIOCompThreadNum)
 int FinalizeSandbox()
 {
 	SetEvent(SandboxCleaning);//沙盒关闭ing
-	
+
 	AcquireSRWLockExclusive(&SandboxListLock);
 
 	if (RootSandbox)
@@ -182,7 +182,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	BOOL bLimitPrivileges,			//限制权限
 	PBYTE pExternalData,			//附带的信息
 	SANDBOX_CALLBACK CallbackFunc	//回调函数
-	)
+)
 {
 	BOOL bSuccess = FALSE;
 	STARTUPINFOW SysInfo = { 0 };
@@ -263,10 +263,10 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 		SysInfo.cb = sizeof(STARTUPINFO);
 
 
-		
+
 		//创建管道
 		{
-			
+
 			CreateOverlappedNamedPipePair(&hPipeInRead, &hPipeInWrite, PIPEIO_BUFSIZE);
 			CreateOverlappedNamedPipePair(&hPipeOutRead, &hPipeOutWrite, PIPEIO_BUFSIZE);
 			SysInfo.hStdInput = hPipeInRead;
@@ -277,17 +277,17 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 			CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
 		}
 
-		
+
 		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		BOOL bCreated;
 		if (bLimitPrivileges)
 		{
-			bCreated = CreateLimitedProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED | CREATE_NEW_CONSOLE, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+			bCreated = CreateLimitedProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED, 0, CurrentDirectory, &SysInfo, &ProcInfo);
 		}
 		else
 		{
-			bCreated = CreateProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED | CREATE_NEW_CONSOLE, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+			bCreated = CreateProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED, 0, CurrentDirectory, &SysInfo, &ProcInfo);
 		}
 		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, 0);
 		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, 0);
@@ -347,7 +347,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 				//这里leave了，那一头Job的IOCP就要遭殃。对象被删了。所以这里当成功处理
 			}
 		}
-		
+
 
 		//读取Pipe
 		PipeIORead(hPipeOutRead);
@@ -421,7 +421,7 @@ unsigned __stdcall JobObjCompletionPort(LPVOID Args)
 		LPOVERLAPPED lpOverlapped;
 		pSANDBOX  pSandbox;
 		GetQueuedCompletionStatus(JobObjCompPort, &ByteTrans, (PULONG_PTR)(&pSandbox), (LPOVERLAPPED*)&lpOverlapped, INFINITE);
-		
+
 		switch (ByteTrans)
 		{
 		case JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO:
@@ -434,14 +434,14 @@ unsigned __stdcall JobObjCompletionPort(LPVOID Args)
 			SANDBOX_CALLBACK Callback;
 			PBYTE pData;
 			AcquireSRWLockShared(&SandboxListLock);
-				Callback = pSandbox->SandboxCallback;
-				pData = pSandbox->pExternalData;
+			Callback = pSandbox->SandboxCallback;
+			pData = pSandbox->pExternalData;
 			ReleaseSRWLockShared(&SandboxListLock);
 			if (Callback)
 			{
 				Callback(pSandbox, pData, SANDBOX_EVTNT_PROCESS_ZERO, 0, 0);
 			}
-			
+
 			break;
 		case JOB_OBJECT_MSG_EXIT_PROCESS:
 			if (pSandbox->ExitReason == SANDBOX_ER_RUNNING)
@@ -492,8 +492,8 @@ unsigned __stdcall PipeIOCompletionPort(LPVOID Args)
 				SANDBOX_CALLBACK Callback;
 				PBYTE pData;
 				AcquireSRWLockShared(&SandboxListLock);
-					Callback = pSandbox->SandboxCallback;
-					pData = pSandbox->pExternalData;
+				Callback = pSandbox->SandboxCallback;
+				pData = pSandbox->pExternalData;
 				ReleaseSRWLockShared(&SandboxListLock);
 				if (Callback)
 				{
@@ -505,7 +505,7 @@ unsigned __stdcall PipeIOCompletionPort(LPVOID Args)
 
 				PipeIORead(pSandbox->hPipeOutRead);
 			}
-				break;
+			break;
 			case PACKMODE_WRITE:
 				free(PipeIOPack);
 				break;
@@ -546,7 +546,7 @@ unsigned __stdcall TerminateJobTimerThread(LPVOID Args)
 			//Cleaning
 
 			return 0; //退出线程
-		case WAIT_OBJECT_0+1:
+		case WAIT_OBJECT_0 + 1:
 			//传参开始
 		{
 			HANDLE hTimer = CreateWaitableTimer(0, 0, 0);
@@ -559,10 +559,10 @@ unsigned __stdcall TerminateJobTimerThread(LPVOID Args)
 			hWaitableTimer = hTimer;
 			SetEvent(EventPassArgEnd);
 		}
-			break;
+		break;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -570,7 +570,7 @@ void __stdcall TerminateJobTimerRoutine(
 	_In_opt_ LPVOID lpArgToCompletionRoutine,
 	_In_     DWORD dwTimerLowValue,
 	_In_     DWORD dwTimerHighValue
-	)
+)
 {
 	AcquireSRWLockShared(&SandboxListLock);
 
@@ -589,7 +589,7 @@ void __stdcall TerminateJobTimerRoutine(
 			}
 		}
 	}
-	
+
 	ReleaseSRWLockShared(&SandboxListLock);
 	return;
 }
@@ -597,16 +597,16 @@ void __stdcall TerminateJobTimerRoutine(
 
 
 BOOL CreateLimitedProcessW(
-	 WCHAR lpApplicationName[],
-	 WCHAR lpCommandLine[],
-	 LPSECURITY_ATTRIBUTES lpProcessAttributes,
-	 LPSECURITY_ATTRIBUTES lpThreadAttributes,
-	 BOOL bInheritHandles,
-	 DWORD dwCreationFlags,
-	 LPVOID lpEnvironment,
-	 WCHAR lpCurrentDirectory[],
-	 LPSTARTUPINFOW lpStartupInfo,
-	 LPPROCESS_INFORMATION lpProcessInformation)
+	WCHAR lpApplicationName[],
+	WCHAR lpCommandLine[],
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL bInheritHandles,
+	DWORD dwCreationFlags,
+	LPVOID lpEnvironment,
+	WCHAR lpCurrentDirectory[],
+	LPSTARTUPINFOW lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation)
 {
 	BOOL bSuccess = FALSE;
 	BOOL bRet = FALSE;
@@ -698,7 +698,7 @@ BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD 
 		OPEN_EXISTING,  // opens existing pipe 
 		FILE_FLAG_OVERLAPPED,              // default attributes 
 		NULL);          // no template file 
-	if ((!(*hWritePipe))||((*hWritePipe) == INVALID_HANDLE_VALUE))
+	if ((!(*hWritePipe)) || ((*hWritePipe) == INVALID_HANDLE_VALUE))
 	{
 		CloseHandle((*hReadPipe));
 		(*hReadPipe) = (*hWritePipe) = 0;
@@ -727,7 +727,7 @@ BOOL PipeIORead(HANDLE PipeHandle)
 		ZeroMemory(PipeIOPack->pData, PIPEIO_BUFSIZE);
 		DWORD BytesRead;
 		BOOL bResult = ReadFile(PipeHandle, PipeIOPack->pData, PIPEIO_BUFSIZE, &BytesRead, (LPOVERLAPPED)PipeIOPack);
-		if ((!bResult) && (GetLastError()!= ERROR_IO_PENDING))//失败了，失败码还不是ERROR_IO_PENDING
+		if ((!bResult) && (GetLastError() != ERROR_IO_PENDING))//失败了，失败码还不是ERROR_IO_PENDING
 		{
 			__leave;
 		}

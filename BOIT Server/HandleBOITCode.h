@@ -1,3 +1,3 @@
 #include<Windows.h>
 
-BOOL SendTextWithBOITCode(long long GroupID, long long QQID, WCHAR* Msg);
+BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg);
