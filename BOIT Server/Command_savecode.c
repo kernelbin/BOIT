@@ -4,23 +4,23 @@
 #include"DirManagement.h"
 #include"EncodeConvert.h"
 
-int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 	
 	if (ParamLen + SpaceLen == wcslen(Msg))
 	{
-		SendBackMessage(GroupID, QQID, L"诶？你的代码呢？qwq");
+		SendBackMessage(boitSession, L"诶？你的代码呢？qwq");
 		return 0;
 	}
 
 	Msg += ParamLen + SpaceLen;
 	//写入文件
-	HANDLE hSavedFile = PerUserCreateStorageFile(QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
+	HANDLE hSavedFile = PerUserCreateStorageFile(boitSession->QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
 	if (hSavedFile == INVALID_HANDLE_VALUE)
 	{
-		SendBackMessage(GroupID, QQID, L"写入文件的时候出错了qaq");
+		SendBackMessage(boitSession, L"写入文件的时候出错了qaq");
 		return 0;
 	}
 
@@ -53,12 +53,12 @@ int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, 
 
 	if (bSuccessSave == TRUE)
 	{
-		SendBackMessage(GroupID, QQID, L"保存代码成功！");
-		SendBackMessage(GroupID, QQID, L"非常抱歉bot还在开发周期中，您的代码不一定会被始终保存！");
+		SendBackMessage(boitSession, L"保存代码成功！");
+		SendBackMessage(boitSession, L"非常抱歉bot还在开发周期中，您的代码不一定会被始终保存！");
 	}
 	else
 	{
-		SendBackMessage(GroupID, QQID, L"糟了！写入文件的时候失败了！");
+		SendBackMessage(boitSession, L"糟了！写入文件的时候失败了！");
 	}
 	return 0;
 }

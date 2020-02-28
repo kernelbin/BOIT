@@ -116,7 +116,7 @@ BOOL RemoveDirIfExist(WCHAR * Dir)
 		Buffer[Len] = 0;
 		Buffer[Len + 1] = 0;
 
-		FileOp.fFlags = FOF_NOCONFIRMATION;
+		FileOp.fFlags = FOF_NOCONFIRMATION | FOF_NO_UI;
 		FileOp.hNameMappings = NULL;
 		FileOp.hwnd = NULL;
 		FileOp.lpszProgressTitle = NULL;

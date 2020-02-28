@@ -4,21 +4,21 @@
 #include"DirManagement.h"
 #include"EncodeConvert.h"
 
-int RunCode(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
+int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg);
 
 
-int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	HANDLE hSavedFile = PerUserCreateStorageFile(QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
+	HANDLE hSavedFile = PerUserCreateStorageFile(boitSession->QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
 	if (hSavedFile == INVALID_HANDLE_VALUE)
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND)
 		{
-			SendBackMessage(GroupID, QQID, L"诶？代码找不到了诶~");
+			SendBackMessage(boitSession, L"诶？代码找不到了诶~");
 		}
 		else
 		{
-			SendBackMessage(GroupID, QQID, L"糟了！打开文件的时候出错了（⊙ｏ⊙）");
+			SendBackMessage(boitSession, L"糟了！打开文件的时候出错了（⊙ｏ⊙）");
 		}
 		return 0;
 	}
@@ -36,13 +36,13 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 
 		if (FileSizeHigh || FileSizeLow >= 65536)
 		{
-			SendBackMessage(GroupID, QQID, L"天哪这个代码文件怎么这么大？");
-			SendBackMessage(GroupID, QQID, L"我不干了 我罢工了qaq");
+			SendBackMessage(boitSession, L"天哪这个代码文件怎么这么大？");
+			SendBackMessage(boitSession, L"我不干了 我罢工了qaq");
 			__leave;
 		}
 		else if (FileSizeLow == 0)
 		{
-			SendBackMessage(GroupID, QQID, L"这个代码文件怎么是空的哇");
+			SendBackMessage(boitSession, L"这个代码文件怎么是空的哇");
 			__leave;
 		}
 
@@ -61,7 +61,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 
 		if (FileSizeLow != BytesRead)
 		{
-			SendBackMessage(GroupID, QQID, L"读取文件的时候出错了orz");
+			SendBackMessage(boitSession, L"读取文件的时候出错了orz");
 			__leave;
 		}
 
@@ -86,7 +86,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, i
 
 	if (bSuccess)
 	{
-		RunCode(GroupID, QQID, SubType, AnonymousName, WideCharStr);
+		RunCode(boitSession, WideCharStr);
 		free(WideCharStr);
 	}
 	return 0;

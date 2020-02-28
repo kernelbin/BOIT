@@ -1,8 +1,9 @@
 #include<Windows.h>
 #include"VBuffer.h"
 #include"APITransfer.h"
+#include"SessionManage.h"
 
-BOOL SendTextWithBOITCode(long long GroupID, long long QQID, WCHAR* Msg)
+BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	//¼òµ¥HandleÒ»ÏÂ
 	pVBUF SendTextBuffer;
@@ -22,7 +23,7 @@ BOOL SendTextWithBOITCode(long long GroupID, long long QQID, WCHAR* Msg)
 				((WCHAR*)(SendTextBuffer->Data))[j] = 0;
 
 				j = 0;
-				SendBackMessage(GroupID, QQID, (WCHAR*)SendTextBuffer->Data);
+				SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
 			}
 			
 			i += wcslen(L"[BOIT:flush]");
@@ -40,7 +41,7 @@ BOOL SendTextWithBOITCode(long long GroupID, long long QQID, WCHAR* Msg)
 	{
 		AdjustVBuf(SendTextBuffer, sizeof(WCHAR) * (j + 1));
 		((WCHAR*)(SendTextBuffer->Data))[j] = 0;
-		SendBackMessage(GroupID, QQID, (WCHAR*)SendTextBuffer->Data);
+		SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
 	}
 
 	FreeVBuf(SendTextBuffer);

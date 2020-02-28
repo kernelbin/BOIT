@@ -1,7 +1,7 @@
 #include<Windows.h>
 #include"MessageWatch.h"
 #include<process.h>
-
+#include"SessionManage.h"
 
 
 
@@ -77,10 +77,7 @@ int FinalizeMessageWatch()
 
 int RegisterMessageWatch(int WatchType,
 	long long TimeOutInterval,// -1代表无穷监视
-	long long GroupID,
-	long long QQID,
-	int SubType,
-	WCHAR* AnonymousName,
+	pBOIT_SESSION boitSession,
 	MSGWATCH_CALLBACK CallbackFunc,
 	PBYTE pData)
 {
@@ -91,8 +88,8 @@ int RegisterMessageWatch(int WatchType,
 		return 0;
 	}
 	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
-	MsgWatch->GroupID = GroupID;
-	MsgWatch->QQID = QQID;
+	MsgWatch->GroupID = boitSession->GroupID;
+	MsgWatch->QQID = boitSession->QQID;
 	MsgWatch->WatchType = WatchType;
 	MsgWatch->MsgWatchID = InterlockedIncrement64(&MsgWatchAllocID);
 	MsgWatch->Callback = CallbackFunc;

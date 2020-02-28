@@ -3,7 +3,7 @@
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
-int CmdMsg_help_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
+int CmdMsg_help_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR * HelpInfoStr = 0;
 
@@ -49,7 +49,7 @@ int CmdMsg_help_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long QQID, int 
 
 	if (HelpInfoStr)
 	{
-		SendBackMessage(GroupID, QQID, HelpInfoStr);
+		SendBackMessage(boitSession, HelpInfoStr);
 	}
 	
 	

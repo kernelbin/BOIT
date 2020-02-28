@@ -1,6 +1,7 @@
 #pragma once
 #include<Windows.h>
 #include"CommandEvent.h"
+#include"SessionManage.h"
 
 typedef UINT_PTR PARAMA;
 typedef UINT_PTR PARAMB;
@@ -13,7 +14,7 @@ typedef UINT_PTR PARAMB;
 typedef struct __tagCommand BOIT_COMMAND, * pBOIT_COMMAND;
 
 
-typedef INT(*MSGPROC)(pBOIT_COMMAND pCmd, long long GroupID, long long QQID,int SubType, WCHAR* AnonymousName, WCHAR* Msg);//回调函数定义
+typedef INT(*MSGPROC)(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg);//回调函数定义
 typedef INT(*EVENTPROC)(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB ParamB);//回调函数定义
 
 
@@ -71,7 +72,7 @@ int GetCmdParamLen(WCHAR* String);
 
 int GetCmdSpaceLen(WCHAR* String);
 
-int CommandHandler(long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg);
+int CommandHandler(pBOIT_SESSION boitSession, WCHAR* Msg);
 
 
 

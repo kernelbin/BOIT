@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)BOITVersion.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Settings.h" />
   </ItemGroup>
 </Project>

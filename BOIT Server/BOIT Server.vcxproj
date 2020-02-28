@@ -148,12 +148,13 @@
     <ClCompile Include="CommandManager.c" />
     <ClCompile Include="Command_about.c" />
     <ClCompile Include="Command_cat.c" />
-    <ClCompile Include="Command_commingfeature.c" />
+    <ClCompile Include="Command_boast.c" />
     <ClCompile Include="Command_help.c" />
     <ClCompile Include="Command_q_and_a.c" />
     <ClCompile Include="Command_run.c" />
     <ClCompile Include="Command_runcode.c" />
     <ClCompile Include="Command_stop.c" />
+    <ClCompile Include="Command_version.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="HandleBOITCode.c" />
