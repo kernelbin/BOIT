@@ -11,7 +11,7 @@ int CmdMsg_commingfeature_Proc(pBOIT_COMMAND pCmd, long long GroupID, long long 
 		L"洛谷上的题目我也可以找到√",
 		L"播放歌曲对我也是小菜一碟哦",
 		L"成语接龙和飞花令也是我的拿手长项",
-		L"在bot上玩人力资源机也可以做到哦"
+		L"在bot上玩人力资源机也可以做到哦",
 		L"什么时候通过图灵测试？我早就通过图灵测试了你不知道吗？"
 	};
 	SendBackMessage(GroupID, QQID, ReplyMessage[rand() % _countof(ReplyMessage)]);
