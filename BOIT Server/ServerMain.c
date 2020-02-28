@@ -18,6 +18,8 @@ BOOL StartInputThread();
 
 unsigned __stdcall HandleInputThread(LPVOID Args);
 
+HANDLE hInputThread; // 输入线程句柄
+
 BOOL ConsoleQueryYesNo(char* QueryText);
 
 
@@ -117,6 +119,8 @@ int main()
 	WaitForSingleObject(hEventServerStop, INFINITE);
 
 	//清理工作
+
+	TerminateInputThread();
 	BroadcastCommandEvent(EC_CMDFREE, 0, 0);
 	FinalizeCommandManager();
 	FinalizeMessageWatch();
@@ -147,8 +151,8 @@ int main()
 	}
 	else
 	{
-		puts("按任意键退出程序");
-		ch_ret = _getch();
+		//puts("按任意键退出程序");
+		//ch_ret = _getch();
 	}
 	return 0;
 }
@@ -185,7 +189,20 @@ BOOL ConsoleQueryYesNo(char * QueryText)
 
 BOOL StartInputThread()
 {
-	_beginthreadex(0, 0, HandleInputThread, 0, 0, 0);
+	hInputThread = _beginthreadex(0, 0, HandleInputThread, 0, 0, 0);
+	return 0;
+}
+
+BOOL TerminateInputThread()
+{
+	if (hInputThread)
+	{
+		if (WaitForSingleObject(hInputThread, 0) == WAIT_TIMEOUT)
+		{
+			TerminateThread(hInputThread, 0);
+			WaitForSingleObject(hInputThread, INFINITE);
+		}
+	}
 	return 0;
 }
 
