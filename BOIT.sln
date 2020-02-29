@@ -13,8 +13,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BOIT Version", "BOIT Versio
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StringProcess", "StringProcess\StringProcess.vcxitems", "{66FF8FA6-F3F7-41CF-9554-56AEEE1DDA77}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cJSON", "cJSON\cJSON.vcxitems", "{19899D8B-F0BB-4AFA-B671-1CCB10C98AA5}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		cJSON\cJSON.vcxitems*{19899d8b-f0bb-4afa-b671-1ccb10c98aa5}*SharedItemsImports = 9
 		StringProcess\StringProcess.vcxitems*{66ff8fa6-f3f7-41cf-9554-56aeee1dda77}*SharedItemsImports = 9
 		BOIT Shared\BOIT Shared.vcxitems*{b17851fb-4678-46a9-afbb-26eba1a293cf}*SharedItemsImports = 9
 		BOIT Version\BOIT Version.vcxitems*{c8f4745c-7444-428b-b149-2765b7ad17e2}*SharedItemsImports = 9
@@ -23,6 +26,7 @@ Global
 		StringProcess\StringProcess.vcxitems*{cce394d1-964d-4b5f-beb2-7bb1f016b268}*SharedItemsImports = 4
 		BOIT Shared\BOIT Shared.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
 		BOIT Version\BOIT Version.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
+		cJSON\cJSON.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
 		StringProcess\StringProcess.vcxitems*{e971129e-1ca0-4c70-8208-304b32243f91}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

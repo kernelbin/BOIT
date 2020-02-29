@@ -17,6 +17,8 @@ int StartRecvEventHandler()
 
 	for (unsigned int i = 0; i < SysInfo.dwNumberOfProcessors; i++)
 	{
+		//TODO ¼ÇÂ¼¾ä±ú
+
 		_beginthreadex(NULL, 0, RecvEventThread, (LPVOID)i, 0, NULL);
 	}
 	return 0;

@@ -127,6 +127,9 @@
     <Filter Include="源文件\指令回调\version">
       <UniqueIdentifier>{32a30a85-1b8d-4d5c-b123-e39d77d1ddc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\oier">
+      <UniqueIdentifier>{9d456a87-ec25-4155-aebb-576782a18b35}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -218,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="Command_version.c">
       <Filter>源文件\指令回调\version</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_oier.c">
+      <Filter>源文件\指令回调\oier</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
