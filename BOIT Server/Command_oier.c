@@ -277,7 +277,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 					{
 						WCHAR SexNameList[][4] = { L"女",L"未知",L"男" };
 						int SexIndex = atoi(JsonInfoField[1]->valuestring);
-						if (-1 <= SexIndex && SexIndex <= 1)
+						if (SexIndex == 1 || SexIndex == -1)
 						{
 							VBufferAppendStringW(PerPersonResult[TotalResult], L"生理性别：");
 							VBufferAppendStringW(PerPersonResult[TotalResult], SexNameList[SexIndex + 1]);
