@@ -13,7 +13,7 @@
 
 #define OIER_QRY_BUFSZ 4096
 
-#define OIER_MAX_DISPLAY 5
+#define OIER_MAX_DISPLAY 3
 typedef struct __tagQueryOIerStruct
 {
 	pBOIT_SESSION boitSession;
