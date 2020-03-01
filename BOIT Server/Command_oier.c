@@ -45,10 +45,14 @@ int CmdMsg_oier_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 
-	
-	if (wcslen(Msg + ParamLen + SpaceLen) >= 64)
+	int QueryStrlen = wcslen(Msg + ParamLen + SpaceLen);
+	if (QueryStrlen >= 64)
 	{
 		SendBackMessage(boitSession, L"这是哪个OIer啊，名字这么长？");
+	}
+	else if (QueryStrlen == 0)
+	{
+		SendBackMessage(boitSession, L"你要查询的是哪个OIer诶？");
 	}
 	else
 	{
@@ -387,25 +391,33 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 	}
 	__finally
 	{
-		for (int i = 0; i < OIER_MAX_DISPLAY; i++)
+		if (TotalResult == 0)
 		{
-			if (PerPersonResult[i])
+			SendBackMessage(boitSession, L"什么都没找到诶 再试试看？");
+		}
+		else
+		{
+			for (int i = 0; i < OIER_MAX_DISPLAY; i++)
 			{
-				AddSizeVBuf(PerPersonResult[i], sizeof(WCHAR) * 1);
-				((WCHAR*)(PerPersonResult[i]->Data))[(PerPersonResult[i]->Length / 2) - 1] = 0;
-				SendBackMessage(boitSession, PerPersonResult[i]->Data);
+				if (PerPersonResult[i])
+				{
+					AddSizeVBuf(PerPersonResult[i], sizeof(WCHAR) * 1);
+					((WCHAR*)(PerPersonResult[i]->Data))[(PerPersonResult[i]->Length / 2) - 1] = 0;
+					SendBackMessage(boitSession, PerPersonResult[i]->Data);
+				}
+			}
+			if (TotalResult > OIER_MAX_DISPLAY)
+			{
+				SendBackMessage(boitSession, L"更多信息请登录 OIerDB 网站详细查看");
+			}
+
+			cJSON_Delete(JsonRoot);
+			for (int i = 0; i < OIER_MAX_DISPLAY; i++)
+			{
+				if (PerPersonResult[i])FreeVBuf(PerPersonResult[i]);
 			}
 		}
-		if (TotalResult > OIER_MAX_DISPLAY)
-		{
-			SendBackMessage(boitSession, L"更多信息请登录 OIerDB 网站详细查看");
-		}
-
-		cJSON_Delete(JsonRoot);
-		for (int i = 0; i < OIER_MAX_DISPLAY; i++)
-		{
-			if (PerPersonResult[i])FreeVBuf(PerPersonResult[i]);
-		}
+		
 	}
 
 }
