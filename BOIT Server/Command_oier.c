@@ -263,7 +263,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 				{
 					for (int i = 0; i < _countof(InfoField); i++)
 					{
-						if (_strcmpi(EnumField->string, InfoField[i]) == 0)
+						if ((!JsonInfoField[i]) && _strcmpi(EnumField->string, InfoField[i]) == 0)
 							JsonInfoField[i] = EnumField;
 					}
 				}
@@ -312,7 +312,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 								{
 									for (int i = 0; i < _countof(AwardField); i++)
 									{
-										if (_strcmpi(EnumAwardField->string, AwardField[i]) == 0)
+										if ((!JsonAwardField[i]) && _strcmpi(EnumAwardField->string, AwardField[i]) == 0)
 											JsonAwardField[i] = EnumAwardField;
 									}
 								}
