@@ -28,12 +28,12 @@ int CmdMsg_help_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		ZeroMemory(HelpInfoStr, sizeof(WCHAR) * TotLen);
 
 		wcscpy_s(HelpInfoStr, TotLen, L"帮助信息:\n");
-		wcscat_s(HelpInfoStr, TotLen, L"功能	使用方法\n");
+		wcscat_s(HelpInfoStr, TotLen, L"功能  -  使用方法\n");
 		wcscat_s(HelpInfoStr, TotLen, L"————————\n");
 		for (pBOIT_COMMAND pList = RootCommand; pList; pList = pList->NextCommand)
 		{
 			wcscat_s(HelpInfoStr, TotLen, (pList->CommandName[0]));
-			wcscat_s(HelpInfoStr, TotLen, L"	");
+			wcscat_s(HelpInfoStr, TotLen, L"  -  ");
 			wcscat_s(HelpInfoStr, TotLen, (pList->ManualMsg));
 			wcscat_s(HelpInfoStr, TotLen, L"\n");
 		}
