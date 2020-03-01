@@ -8,6 +8,7 @@
 #include<strsafe.h>
 #include"EncodeConvert.h"
 #include<shlwapi.h>
+#include"DirManagement.h"
 #pragma comment(lib,"WinINet.lib")
 
 
@@ -41,7 +42,14 @@ VOID CALLBACK QueryOIerCallback(
 
 int CmdMsg_oier_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	//TODO: 解析参数
+	if (boitSession->GroupID && CheckGroupToken(boitSession->GroupID, L"PrivilegeQueryOIer") == 0)
+	{
+		SendBackMessage(boitSession, L"该群禁止了查询OIer功能。请在私聊中查询。");
+		return 0;
+	}
+
+
+
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 
@@ -112,15 +120,6 @@ BOOL FreeQueryOIerStruct(pQUERY_OIER_STRUCT QueryStruct)
 
 BOOL QueryOIerInfo(pBOIT_SESSION boitSession, WCHAR *  ToSearchStr)
 {
-	//偷个懒先随便瞎写一个
-
-	// https://docs.microsoft.com/en-us/windows/win32/api/wininet/nf-wininet-internetreadfileexw 参考这个文档
-	// TODO: 找到InternetReadFile的异步操作方法
-
-	// https://docs.microsoft.com/windows/desktop/api/wininet/nc-wininet-internet_status_callback
-
-	// https://blog.csdn.net/xbgprogrammer/article/details/52806279
-
 	WCHAR UrlBuffer[256];
 	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, 0);
 	char EncodedSearchStr[256];
