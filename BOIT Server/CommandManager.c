@@ -263,13 +263,13 @@ int CommandHandler(pBOIT_SESSION boitSession, WCHAR* Msg)
 			case BOIT_MATCH_PARAM:
 			{
 				int ParamLen = GetCmdParamLen(Msg);
-				if (ParamLen && _wcsnicmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
+				if (ParamLen == wcslen(pList->CommandName[i]) && _wcsnicmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_PARAM_CASE:
 			{
 				int ParamLen = GetCmdParamLen(Msg);
-				if (ParamLen && wcsncmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
+				if (ParamLen == wcslen(pList->CommandName[i]) && wcsncmp(pList->CommandName[i], Msg, ParamLen) == 0) bMatch = TRUE;
 			}
 				break;
 			case BOIT_MATCH_HEAD:
