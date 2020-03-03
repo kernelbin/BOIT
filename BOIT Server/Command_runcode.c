@@ -3,16 +3,34 @@
 #include"APITransfer.h"
 #include"DirManagement.h"
 #include"EncodeConvert.h"
-
+#include<wchar.h>
 int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg);
 
 
 int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	HANDLE hSavedFile = PerUserCreateStorageFile(boitSession->QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
+	int ParamLen = GetCmdParamLen(Msg);
+	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
+
+	long long ToRunQQID = boitSession->QQID;
+	if (SpaceLen != 0)
+	{
+		int QQIDLen = GetCmdParamLen(Msg + ParamLen + SpaceLen);
+		if (QQIDLen)
+		{
+			long long ParamQQID;
+			int iMatch = swscanf_s(Msg + ParamLen + SpaceLen, L"%lld", &ParamQQID);
+			if (iMatch == 1 && ParamQQID)
+			{
+				ToRunQQID = ParamQQID;
+			}
+		}
+	}
+
+	HANDLE hSavedFile = PerUserCreateStorageFile(ToRunQQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
 	if (hSavedFile == INVALID_HANDLE_VALUE)
 	{
-		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+		if (GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND)
 		{
 			SendBackMessage(boitSession, L"诶？代码找不到了诶~");
 		}
