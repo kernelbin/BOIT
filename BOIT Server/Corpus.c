@@ -25,8 +25,11 @@ WCHAR * Corpus_NoPrivilegeMessage[] = {
 		L"你坏坏 我不听你的",
 		L"我不听你的 请你吃桃子",
 		L"爪巴",
+		L"爬",
 		L"有内鬼，终止执行指令。",
-		L"You are not in the sudoers file. This incident will be reported."
+		L"才不要呢~",
+		L"You are not in the sudoers file. This incident will be reported.",
+		L"Unable to do this, are you root?"
 };
 
 
@@ -35,6 +38,9 @@ WCHAR* Corpus_WhereIsInputMessage[] = {
 		L"好饿.....",
 		L"输入数据去哪里了qaq",
 		L"输入数据呢qwq",
+		L"qaq?",
+		L"不输入拉倒",
+		L"不输入拉倒，不等你了"
 };
 
 
