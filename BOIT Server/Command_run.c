@@ -67,6 +67,13 @@ typedef struct __tagInputSession
 }INPUT_SESSION, * pINPUT_SESSION;
 
 
+
+
+//run指令最长输出
+#define BOIT_RUN_MAX_OUTPUT 2048
+
+
+
 pBOIT_COMMAND pRunCmd;// 存下来给savecode什么的用
 
 BOOL FindCompileConfig(pBOIT_COMMAND pCmd, WCHAR* LanguageName, int LanguageLen, WCHAR* ConfigSuffix, pCOMPILE_CFG CompileCfg);
@@ -625,9 +632,9 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 			if (wcStdout)
 			{
 				//实行截断
-				if (cchStdout > BOIT_MAX_TEXTLEN)
+				if (cchStdout > BOIT_RUN_MAX_OUTPUT)
 				{
-					wcStdout[BOIT_MAX_TEXTLEN] = 0;
+					wcStdout[BOIT_RUN_MAX_OUTPUT] = 0;
 				}
 				SendTextWithBOITCode(Session->boitSession, wcStdout);
 				free(wcStdout);
