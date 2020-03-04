@@ -16,13 +16,13 @@ int SendGroupMessage(long long GroupID, const char* msg)
 }
 
 
-const char * GetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache)
-{
-	return CQ_getGroupMemberInfoV2(CQAuthCode, GroupID, QQID, NoCache);
-}
-
-
-const char* GetStrangerInfo(long long QQID, BOOL NoCache)
-{
-	return CQ_getStrangerInfo(CQAuthCode, QQID, NoCache);
-}
+//const char * GetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache)
+//{
+//	return CQ_getGroupMemberInfoV2(CQAuthCode, GroupID, QQID, NoCache);
+//}
+//
+//
+//const char* GetStrangerInfo(long long QQID, BOOL NoCache)
+//{
+//	return CQ_getStrangerInfo(CQAuthCode, QQID, NoCache);
+//}

@@ -4,7 +4,7 @@
 #include"InlineCommand.h"
 #include"Global.h"
 #include"DirManagement.h"
-
+#include"Corpus.h"
 int CmdMsg_stop_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	if (CheckUserToken(boitSession->QQID, L"PrivilegeBOITStop"))

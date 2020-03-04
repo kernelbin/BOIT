@@ -26,7 +26,7 @@ WCHAR * Corpus_NoPrivilegeMessage[] = {
 		L"我不听你的 请你吃桃子",
 		L"爪巴",
 		L"有内鬼，终止执行指令。",
-		"You are not in the sudoers file. This incident will be reported."
+		L"You are not in the sudoers file. This incident will be reported."
 };
 
 
