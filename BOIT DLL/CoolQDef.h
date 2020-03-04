@@ -151,14 +151,14 @@ CQAPI(int) CQ_sendGroupMsg(int AuthCode, long long groupid, const char* msg);
 * QQID 目标QQ号
 * nocache 不使用缓存
 */
-//CQAPI(const char*) CQ_getGroupMemberInfoV2(int AuthCode, long long groupid, long long QQID, int nocache);
+CQAPI(const char*) CQ_getGroupMemberInfoV2(int AuthCode, long long groupid, long long QQID, int nocache);
 
 /*
 * 取陌生人信息
 * QQID 目标QQ
 * nocache 不使用缓存
 */
-//CQAPI(const char*) CQ_getStrangerInfo(int AuthCode, long long QQID, int nocache);
+CQAPI(const char*) CQ_getStrangerInfo(int AuthCode, long long QQID, int nocache);
 
 /*
 * 日志
