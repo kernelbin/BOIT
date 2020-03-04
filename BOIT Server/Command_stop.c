@@ -14,7 +14,7 @@ int CmdMsg_stop_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	}
 	else
 	{
-		SendBackMessage(boitSession, L"Oops... 您没有适当的权限进行操作");
+		SendBackMessage(boitSession, Corpus_NoPrivilege());
 	}
 	
 	return 0;

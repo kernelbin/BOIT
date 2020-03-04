@@ -159,6 +159,7 @@
     <ClCompile Include="Command_runcode.c" />
     <ClCompile Include="Command_stop.c" />
     <ClCompile Include="Command_version.c" />
+    <ClCompile Include="Corpus.c" />
     <ClCompile Include="DirManagement.c" />
     <ClCompile Include="Command_qwq.c" />
     <ClCompile Include="HandleBOITCode.c" />
@@ -183,6 +184,7 @@
     <ClInclude Include="APITransfer.h" />
     <ClInclude Include="CommandEvent.h" />
     <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="Corpus.h" />
     <ClInclude Include="DirManagement.h" />
     <ClInclude Include="HandleBOITCode.h" />
     <ClInclude Include="InlineCommand.h" />

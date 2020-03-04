@@ -11,6 +11,7 @@
 #include"HandleBOITCode.h"
 #include"MessageWatch.h"
 #include"EncodeConvert.h"
+#include"Corpus.h"
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -113,7 +114,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 {
 	if (CheckPrivilegeRunCode(orgboitSession->GroupID, orgboitSession->QQID) == 0)
 	{
-		SendBackMessage(orgboitSession, L"Oops... 您没有适当的权限进行操作");
+		SendBackMessage(orgboitSession, Corpus_NoPrivilege());
 		return 0;
 	}
 
@@ -276,7 +277,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 	//校验权限
 	if (bIsSU && (CheckUserToken(boitSession->QQID, L"PrivilegeRunCodeNoRestrict") == 0))
 	{
-		SendBackMessage(boitSession, L"Oops... 您没有适当的权限进行操作");
+		SendBackMessage(boitSession, Corpus_NoPrivilege());
 		FreeBOITSession(boitSession);
 		free(CompileCfg);
 		return 0;
@@ -1161,7 +1162,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	switch (Event)
 	{
 	case BOIT_MW_EVENT_TIMEOUT:
-		SendBackMessage(InputSession->boitSession, L"我好饿，喂给我的输入数据去哪里了qaq");
+		SendBackMessage(InputSession->boitSession, Corpus_WhereIsInput());
 		free(InputSession->boitSession);
 		break;
 	case BOIT_MW_EVENT_MESSAGE:

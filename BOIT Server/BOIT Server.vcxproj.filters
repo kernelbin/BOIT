@@ -130,6 +130,12 @@
     <Filter Include="源文件\指令回调\oier">
       <UniqueIdentifier>{9d456a87-ec25-4155-aebb-576782a18b35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\语料库">
+      <UniqueIdentifier>{ea92ccfa-02ab-4f03-b5aa-abaa9e12e172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\语料库">
+      <UniqueIdentifier>{1ceb090b-70a3-46db-9355-bdebf16b681a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -225,6 +231,9 @@
     <ClCompile Include="Command_oier.c">
       <Filter>源文件\指令回调\oier</Filter>
     </ClCompile>
+    <ClCompile Include="Corpus.c">
+      <Filter>源文件\语料库</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -271,6 +280,9 @@
     </ClInclude>
     <ClInclude Include="MessageWatch.h">
       <Filter>头文件\消息监视</Filter>
+    </ClInclude>
+    <ClInclude Include="Corpus.h">
+      <Filter>头文件\语料库</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

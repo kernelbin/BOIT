@@ -4,6 +4,7 @@
 #include"DirManagement.h"
 #include"EncodeConvert.h"
 #include<wchar.h>
+#include"Corpus.h"
 int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg);
 
 
@@ -32,7 +33,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND)
 		{
-			SendBackMessage(boitSession, L"诶？代码找不到了诶~");
+			SendBackMessage(boitSession, Corpus_CodeNotFound());
 		}
 		else
 		{
