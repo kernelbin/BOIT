@@ -70,7 +70,7 @@ typedef struct __tagInputSession
 
 
 //run指令最长输出
-#define BOIT_RUN_MAX_OUTPUT 2048
+#define BOIT_RUN_MAX_OUTPUT 1024
 
 
 
@@ -261,7 +261,8 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 			{
 				//显示详细帮助信息
 				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] sourcecode");
-
+				SendBackMessage(boitSession, L"example:\n\n#run c\n#include<stdio.h>\nint main(){\nprintf(\"hello, bot\");\n}");
+				SendBackMessage(boitSession, L"使用 /su 以用管理员权限执行指令。使用 /input 以启用输入数据");
 				ShowSupportLanguageInfo(pCmd, L".cfg", boitSession);
 			}
 			else
