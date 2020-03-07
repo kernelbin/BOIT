@@ -29,8 +29,8 @@ typedef struct __tagQueryOIerStruct
 
 WCHAR OIerDBServerName[] = L"bytew.net";
 
-HINTERNET hInet;
-HINTERNET hConnect;
+static HINTERNET hInet;
+static HINTERNET hConnect;
 
 VOID CALLBACK QueryOIerCallback(
 	_In_ HINTERNET hInternet,

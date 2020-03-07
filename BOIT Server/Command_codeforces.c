@@ -30,8 +30,8 @@ typedef struct __tagQueryCFUser
 
 WCHAR CFServerName[] = L"codeforces.com";
 
-HINTERNET hInet;
-HINTERNET hConnect;
+static HINTERNET hInet;
+static HINTERNET hConnect;
 
 VOID CALLBACK QueryCFUserCallback(
 	_In_ HINTERNET hInternet,
@@ -329,7 +329,7 @@ BOOL ParseCFUserInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						VBufferAppendStringW(ResultStr, L"\n");
 						free(NickString);
 					}
-					if (ProfileField[1] && ProfileField[2])
+					/*if (ProfileField[1] && ProfileField[2])
 					{
 						WCHAR* firstNameString = StrConvMB2WC(CP_UTF8, ProfileField[2]->valuestring, -1, 0);
 						VBufferAppendStringW(ResultStr, firstNameString);
@@ -340,7 +340,7 @@ BOOL ParseCFUserInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						VBufferAppendStringW(ResultStr, lastNameString);
 						VBufferAppendStringW(ResultStr, L"\n");
 						free(lastNameString);
-					}
+					}*/
 					if (ProfileField[3])
 					{
 						WCHAR* CountryStr = StrConvMB2WC(CP_UTF8, ProfileField[3]->valuestring, -1, 0);
