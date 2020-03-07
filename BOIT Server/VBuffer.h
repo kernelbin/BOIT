@@ -13,3 +13,5 @@ BOOL FreeVBuf(pVBUF pVBuf);
 BOOL AdjustVBuf(pVBUF pVBuf, DWORD Size);
 BOOL AddSizeVBuf(pVBUF pVBuf, DWORD AddSize);
 DWORD VBufGetCorrectSize(DWORD Size);
+
+BOOL VBufferAppendStringW(pVBUF VBuffer, WCHAR* String);

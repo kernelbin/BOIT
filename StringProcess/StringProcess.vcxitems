@@ -15,8 +15,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EncodeConvert.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)URIEncode.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)EncodeConvert.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)URIEncode.h" />
   </ItemGroup>
 </Project>

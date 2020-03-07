@@ -17,6 +17,9 @@ int RegisterInlineCommand()
 	RegisterCommand(L"savecode", CmdMsg_savecode_Proc, L"保存代码", BOIT_MATCH_PARAM);
 	RegisterCommand(L"runcode", CmdMsg_runcode_Proc, L"运行保存的代码", BOIT_MATCH_PARAM);
 	RegisterCommandEx(L"oier", CmdMsg_oier_Proc,CmdEvent_oier_Proc, L"查询 OIer 信息", BOIT_MATCH_PARAM);
+	pBOIT_COMMAND Command_cf = RegisterCommandEx(L"cf", CmdMsg_codeforces_Proc, CmdEvent_codeforces_Proc, L"查询 CF 信息", BOIT_MATCH_PARAM);
+	AddCommandAlias(Command_cf, L"codeforce");
+	AddCommandAlias(Command_cf, L"codeforces");
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
 	RegisterCommand(L"q&amp;a", CmdMsg_q_and_a_Proc, L"常见问答", BOIT_MATCH_FULL);
 	RegisterCommand(L"version", CmdMsg_version_Proc, L"查看boit版本", BOIT_MATCH_FULL);

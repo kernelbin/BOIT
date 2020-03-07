@@ -9,6 +9,7 @@
 #include"EncodeConvert.h"
 #include<shlwapi.h>
 #include"DirManagement.h"
+#include"URIEncode.h"
 #pragma comment(lib,"WinINet.lib")
 
 
@@ -226,15 +227,6 @@ VOID CALLBACK QueryOIerCallback(
 }
 
 
-BOOL VBufferAppendStringW(pVBUF VBuffer, WCHAR* String)
-{
-	int OrgLen = VBuffer->Length;
-	int cchwcLen = wcslen(String);
-	AddSizeVBuf(VBuffer, cchwcLen * sizeof(WCHAR));
-	memcpy(VBuffer->Data + OrgLen, String, cchwcLen * sizeof(WCHAR));
-	return TRUE;
-}
-
 
 BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 {
@@ -256,7 +248,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 				}
 				PerPersonResult[TotalResult] = AllocVBuf();
 				
-				char InfoField[][8] = { "name", "sex","awards" };
+				char * InfoField[] = { "name", "sex","awards" };
 				cJSON * JsonInfoField[_countof(InfoField)] = { 0 };
 				for (cJSON* EnumField = EnumPerson->child; EnumField; EnumField = EnumField->next)
 				{
@@ -278,7 +270,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 
 					if (JsonInfoField[1])
 					{
-						WCHAR SexNameList[][4] = { L"女",L"未知",L"男" };
+						WCHAR * SexNameList[] = { L"女",L"未知",L"男" };
 						int SexIndex = atoi(JsonInfoField[1]->valuestring);
 						if (SexIndex == 1 || SexIndex == -1)
 						{
@@ -304,7 +296,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						{
 							for (cJSON* EnumAward = ParseAward->child; EnumAward; EnumAward = EnumAward->next)
 							{
-								char AwardField[][16] = { "rank","province","award_type","identity","school","grade","score" };
+								char *AwardField[] = { "rank","province","award_type","identity","school","grade","score" };
 								cJSON* JsonAwardField[_countof(AwardField)] = { 0 };
 
 								for (cJSON* EnumAwardField = EnumAward->child; EnumAwardField; EnumAwardField = EnumAwardField->next)
@@ -422,40 +414,3 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 }
 
 
-int URLEncode(const char* str, const int strSize, char* result, const int resultSize)
-{
-	int i;
-	int j = 0;//for result index
-	char ch;
-
-	if ((str == NULL) || (result == NULL) || (strSize <= 0) || (resultSize <= 0)) {
-		return 0;
-	}
-
-	for (i = 0; (i < strSize) && (j < resultSize); ++i) {
-		ch = str[i];
-		if (((ch >= 'A') && (ch < 'Z')) ||
-			((ch >= 'a') && (ch < 'z')) ||
-			((ch >= '0') && (ch < '9'))) {
-			result[j++] = ch;
-		}
-		else if (ch == ' ') {
-			result[j++] = '+';
-		}
-		else if (ch == '.' || ch == '-' || ch == '_' || ch == '*') {
-			result[j++] = ch;
-		}
-		else {
-			if (j + 3 < resultSize) {
-				sprintf_s(result + j, resultSize - j, "%%%02X", (unsigned char)ch);
-				j += 3;
-			}
-			else {
-				return 0;
-			}
-		}
-	}
-
-	result[j] = '\0';
-	return j;
-}

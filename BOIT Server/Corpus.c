@@ -51,6 +51,15 @@ WCHAR* Corpus_CodeNotFoundMessage[] = {
 		L"找不到你的代码了，要不先存一份代码？"
 };
 
+
+WCHAR* Corpus_FunctionDevingMessage[] = {
+		L"前方施工，暂时无法通行",
+		L"这里的代码还没写好的样子诶",
+		L"kernel.bin还在咕咕咕，快去催他写代码！",
+		L"该功能还在开发中",
+		L"kernel.bin又咕咕咕了"
+};
+
 //语料库
 
 WCHAR* Corpus_Cute()
@@ -75,4 +84,10 @@ WCHAR* Corpus_WhereIsInput()
 WCHAR* Corpus_CodeNotFound()
 {
 	return Corpus_CodeNotFoundMessage[rand() % _countof(Corpus_CodeNotFoundMessage)];
+}
+
+
+WCHAR* Corpus_FunctionDeving()
+{
+	return Corpus_FunctionDevingMessage[rand() % _countof(Corpus_FunctionDevingMessage)];
 }

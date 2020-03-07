@@ -4,15 +4,24 @@
     <Filter Include="字符集转换">
       <UniqueIdentifier>{34bb2976-6cc8-4a1a-bd24-d06f6ef1fd07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="URI编码">
+      <UniqueIdentifier>{5e947021-f331-4e2a-9c62-4aecb3ae648f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EncodeConvert.c">
       <Filter>字符集转换</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)URIEncode.c">
+      <Filter>URI编码</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)EncodeConvert.h">
       <Filter>字符集转换</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)URIEncode.h">
+      <Filter>URI编码</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

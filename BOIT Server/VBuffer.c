@@ -72,3 +72,14 @@ DWORD VBufGetCorrectSize(DWORD Size)
 	}
 	return 0;
 }
+
+
+BOOL VBufferAppendStringW(pVBUF VBuffer, WCHAR* String)
+{
+	int OrgLen = VBuffer->Length;
+	int cchwcLen = wcslen(String);
+	AddSizeVBuf(VBuffer, cchwcLen * sizeof(WCHAR));
+	memcpy(VBuffer->Data + OrgLen, String, cchwcLen * sizeof(WCHAR));
+	return TRUE;
+}
+

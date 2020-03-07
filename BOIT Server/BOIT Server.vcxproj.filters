@@ -136,6 +136,9 @@
     <Filter Include="头文件\语料库">
       <UniqueIdentifier>{1ceb090b-70a3-46db-9355-bdebf16b681a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\codeforces">
+      <UniqueIdentifier>{68aaadfa-1afe-485a-ac4d-10b6f6a850dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -233,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="Corpus.c">
       <Filter>源文件\语料库</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_codeforces.c">
+      <Filter>源文件\指令回调\codeforces</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
