@@ -6,7 +6,7 @@
 int CmdMsg_boast_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR ReplyMessage[][128] = {
-		L"我可以查询codeforce上的比赛时间呢，我还能查询tourist的profile！",
+		L"我可以查询codeforce上的比赛时间呢，还可以查询题目的题面和测试数据！",
 		L"查询天气我也会的呢！一言查询也不是问题哦",
 		L"洛谷上的题目我也可以找到√",
 		L"播放歌曲对我也是小菜一碟哦",
