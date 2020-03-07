@@ -54,8 +54,11 @@ WCHAR* Corpus_CodeNotFoundMessage[] = {
 
 WCHAR* Corpus_FunctionDevingMessage[] = {
 		L"前方施工，暂时无法通行",
+		L"不行不行，这个还不能用！",
 		L"这里的代码还没写好的样子诶",
 		L"kernel.bin还在咕咕咕，快去催他写代码！",
+		L"kernel.bin什么时候才能写好这个功能？",
+		L"这个功能还在开发呢，可能永远也不会上线了",
 		L"该功能还在开发中",
 		L"kernel.bin又咕咕咕了"
 };
