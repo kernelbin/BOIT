@@ -10,6 +10,10 @@ yh蒟蒻写的给OIers用的一个bot，OI Bot的第二版。
 
 **易于部署**  程序本身不需要任何依赖（除CoolQ），可轻易部署
 
+# Try it!
+目前该bot部署在 QQ号 2068736261 上。可以加好友执行指令。（目前加好友审核是人工的，可能不会第一时间通过申请）
+指令前缀是 '#' 用 "#help"指令查看帮助
+
 # 部署
 从 [Release](https://github.com/kernelbin/BOIT/releases) 页面下载最新的Release，包括.cpk文件（CoolQ插件）和与您计算机位数相匹配的可执行文件（x86或x64）
 
