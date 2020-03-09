@@ -29,7 +29,7 @@ BOOL ConnState; //0表示没连接，1表示连接
 
 
 int InitEstablishConn();
-int TryEstablishConn();
+int TryEstablishConn(HANDLE hEventAbort);
 int GetConnState();
 BOOL CleanConn();
 BOOL InitConnVar();

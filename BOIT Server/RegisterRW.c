@@ -47,7 +47,7 @@ int RegisterRead(WCHAR * BaseDir)
 		if (VersionMajor < VERSION_MAJOR)
 		{
 			//老版本配置
-			iSuccess = SETTINGS_OUT_OF_DATE;
+			iSuccess = SETTINGS_ERR_OUT_OF_DATE;
 			__leave;
 		}
 		if (VersionMajor > VERSION_MAJOR)
@@ -60,13 +60,13 @@ int RegisterRead(WCHAR * BaseDir)
 		if (VersionMinor < VERSION_MINOR)
 		{
 			//老版本配置
-			iSuccess = SETTINGS_OUT_OF_DATE;
+			iSuccess = SETTINGS_ERR_OUT_OF_DATE;
 			__leave;
 		}
 		if (VersionMinor > VERSION_MINOR)
 		{
 			//老版本软件
-			iSuccess = SETTINGS_ERROR;
+			iSuccess = SETTINGS_ERR_OLD_SOFTWARE;
 			__leave;
 		}
 

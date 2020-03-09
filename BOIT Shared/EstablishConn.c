@@ -34,7 +34,7 @@ int InitEstablishConn()
 	return 0;
 }
 
-int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹¦Á¬½Ó
+int TryEstablishConn(HANDLE hEventAbort)//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹¦Á¬½Ó
 {
 	int iRet = -2;
 	InitConnVar();
@@ -86,7 +86,18 @@ int TryEstablishConn()//return -1´ú±íÊ§°Ü 0´ú±í³É¹¦´´½¨¶ÔÏó²¢µÈ´ýµ½Á¬½Ó 1´ú±í³É¹
 			break;
 		case 0:
 			pSharedMemProcess->pid[0] = GetCurrentProcessId();
-			WaitForSingleObject(hEventConnect, INFINITE);
+			HANDLE hObjWait[2] = { hEventConnect ,hEventAbort };
+			switch (WaitForMultipleObjects(hEventAbort ? 2 : 1, hObjWait, 0, INFINITE))
+			{
+			case WAIT_OBJECT_0:
+				break;
+			case WAIT_OBJECT_0 + 1:
+				iRet = -1;//Abandon
+				break;
+
+			}
+
+			//WaitForSingleObject(hEventConnect, INFINITE);
 			break;
 		case 1:
 			//°Ñ×Ô¼ºµÄ½ø³Ì¾ä±úÐ´Èë

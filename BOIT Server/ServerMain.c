@@ -42,6 +42,16 @@ int main()
 		puts("注册表加载成功\n");
 		InitBOITDirVar();
 		break;
+	case SETTINGS_ERR_OLD_SOFTWARE:
+		puts("检测到您正在使用的软件比之前使用过的版本更低。请使用高版本的软件\n如果需要使用低版本的软件请先在高版本软件中卸载之前的安装。\n");
+		puts("按任意键退出程序");
+		ch_ret = _getch();
+		return 0;
+	case SETTINGS_ERR_OUT_OF_DATE:
+		puts("检测到您正在使用新版本的软件。请先用旧版本软件移除之前的安装！");
+		puts("按任意键退出程序");
+		ch_ret = _getch();
+		return 0;
 	case SETTINGS_ERROR:
 		if (ConsoleQueryYesNo("注册表加载失败，是否清空设置并初始化 ?") == FALSE)
 		{
@@ -78,9 +88,9 @@ int main()
 		printf("将在目录 %s 初始化BOIT\n", InBaseDir);
 		PathAppendA(InBaseDir, "BOIT\\");
 
-		
+
 		MultiByteToWideChar(CP_ACP, 0, InBaseDir, -1, GetBOITBaseDir(), MAX_PATH);
-		
+
 		if (InitializeSettings(GetBOITBaseDir()) != SETTINGS_INITIALIZED)
 		{
 			//Oops
@@ -98,7 +108,7 @@ int main()
 		}
 		break;
 	}
-		
+
 	}
 
 	bBOITRemove = 0;//是否卸载程序标识
@@ -108,15 +118,19 @@ int main()
 	InitServerState();
 	InitSendEventDispatch();;
 	InitEstablishConn();
-	TryEstablishConn();
 
-	puts("连接成功！\n");
-	
 	StartInputThread(); // 启动控制台输入线程
-	
-	StartRecvEventHandler();
 
-	WaitForSingleObject(hEventServerStop, INFINITE);
+	if (TryEstablishConn(hEventServerStop) != -1)
+	{
+		puts("连接成功！\n");
+
+		StartRecvEventHandler();
+
+		WaitForSingleObject(hEventServerStop, INFINITE);
+	}
+
+	
 
 	//清理工作
 
@@ -157,7 +171,7 @@ int main()
 	return 0;
 }
 
-BOOL ConsoleQueryYesNo(char * QueryText)
+BOOL ConsoleQueryYesNo(char* QueryText)
 {
 	int ch_ret;
 	while (1)

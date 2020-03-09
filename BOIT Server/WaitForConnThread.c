@@ -8,7 +8,7 @@
 unsigned __stdcall WaitForConnThread(void* Args)
 {
 	InitEstablishConn();
-	TryEstablishConn();
+	TryEstablishConn(NULL);
 	StartSendEventHandler();
 	return 0;
 }
