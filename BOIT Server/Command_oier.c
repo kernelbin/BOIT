@@ -409,6 +409,16 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 			}
 		}
 		
+
+		switch (rand() % 8)
+		{
+		case 0:
+			SendBackMessage(boitSession, L"orz nocriz!!!");
+			break;
+		case 1:
+			SendBackMessage(boitSession, L"感谢 nocriz 开发的 OIerDB!");
+			break;
+		}
 	}
 
 }
