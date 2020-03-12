@@ -10,7 +10,6 @@
 #include"DirManagement.h"
 #include"URIEncode.h"
 #include"Corpus.h"
-
 #include"AsyncINet.h"
 
 pASYNCINET_INFO CodeforcesInetInfo;

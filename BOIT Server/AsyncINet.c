@@ -16,9 +16,18 @@ VOID CALLBACK AsyncINetCallback(
 pASYNCINET_INFO AsyncINetInit(WCHAR * ServerURL)
 {
 	pASYNCINET_INFO AsyncINetInfo = malloc(sizeof(ASYNCINET_INFO));
+	if (!AsyncINetInfo)
+	{
+		return 0;
+	}
 	ZeroMemory(AsyncINetInfo, sizeof(ASYNCINET_INFO));
 
 	AsyncINetInfo->hInet = InternetOpenW(L"BOIT", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
+	if (!AsyncINetInfo->hInet)
+	{
+		free(AsyncINetInfo);
+		return 0;
+	}
 	INTERNET_STATUS_CALLBACK pOldStatusCallback = InternetSetStatusCallbackW(AsyncINetInfo->hInet, AsyncINetCallback);
 
 	AsyncINetInfo->hConnect = InternetConnectW(AsyncINetInfo->hInet,
@@ -136,7 +145,6 @@ VOID CALLBACK AsyncINetCallback(
 		}
 		InternetCloseHandle(AsyncINetReq->hRequest);
 		FreeAsyncRequestStruct(AsyncINetReq);
-
 	}
 	}
 	return;
