@@ -185,6 +185,7 @@
     <ClInclude Include="APITransfer.h" />
     <ClInclude Include="CommandEvent.h" />
     <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="Command_run.h" />
     <ClInclude Include="Corpus.h" />
     <ClInclude Include="DirManagement.h" />
     <ClInclude Include="HandleBOITCode.h" />

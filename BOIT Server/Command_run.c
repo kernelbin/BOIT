@@ -12,6 +12,7 @@
 #include"MessageWatch.h"
 #include"EncodeConvert.h"
 #include"Corpus.h"
+#include"Command_run.h"
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -68,9 +69,6 @@ typedef struct __tagInputSession
 
 
 
-
-//run指令最长输出
-#define BOIT_RUN_MAX_OUTPUT 1024
 
 
 

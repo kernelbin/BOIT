@@ -5,6 +5,9 @@
 #include"EncodeConvert.h"
 #include<wchar.h>
 #include"Corpus.h"
+#include"Command_run.h"
+
+
 int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg);
 
 
@@ -28,7 +31,55 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 		}
 	}
 
-	HANDLE hSavedFile = PerUserCreateStorageFile(ToRunQQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
+	WCHAR* WideCharStr = 0;
+
+	BOOL bSuccess = GetSavedCode(boitSession, ToRunQQID, &WideCharStr);
+	if (bSuccess)
+	{
+		RunCode(boitSession, WideCharStr);
+		free(WideCharStr);
+	}
+	return 0;
+}
+
+int CmdMsg_showcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
+{
+	int ParamLen = GetCmdParamLen(Msg);
+	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
+
+	long long ToRunQQID = boitSession->QQID;
+	if (SpaceLen != 0)
+	{
+		int QQIDLen = GetCmdParamLen(Msg + ParamLen + SpaceLen);
+		if (QQIDLen)
+		{
+			long long ParamQQID;
+			int iMatch = swscanf_s(Msg + ParamLen + SpaceLen, L"%lld", &ParamQQID);
+			if (iMatch == 1 && ParamQQID)
+			{
+				ToRunQQID = ParamQQID;
+			}
+		}
+	}
+
+	WCHAR* WideCharStr = 0;
+
+	BOOL bSuccess = GetSavedCode(boitSession, ToRunQQID, &WideCharStr);
+	if (bSuccess)
+	{
+		if (wcslen(WideCharStr) > BOIT_RUN_MAX_OUTPUT)
+		{
+			WideCharStr[BOIT_RUN_MAX_OUTPUT] = 0;
+		}
+		SendBackMessage(boitSession, WideCharStr);
+		free(WideCharStr);
+	}
+	return 0;
+}
+
+BOOL GetSavedCode(pBOIT_SESSION boitSession, long long ToGetQQID, WCHAR** WideCharStr)
+{
+	HANDLE hSavedFile = PerUserCreateStorageFile(ToGetQQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
 	if (hSavedFile == INVALID_HANDLE_VALUE)
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND)
@@ -39,13 +90,12 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 		{
 			SendBackMessage(boitSession, L"糟了！打开文件的时候出错了（⊙ｏ⊙）");
 		}
-		return 0;
+		return FALSE;
 	}
-	
+
 
 	//这里要格外小心。这个文件可能是用户写入过的
 	CHAR* FileData = 0;
-	WCHAR* WideCharStr = 0;
 
 	BOOL bSuccess = 0;
 	__try
@@ -85,10 +135,10 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 		}
 
 		int cchWcLen;
-		WideCharStr = StrConvMB2WC(CP_GB18030, FileData, FileSizeLow, &cchWcLen);
+		(*WideCharStr) = StrConvMB2WC(CP_GB18030, FileData, FileSizeLow, &cchWcLen);
 
-		
-		if (WideCharStr)
+
+		if ((*WideCharStr))
 		{
 			bSuccess = TRUE;
 		}
@@ -97,16 +147,11 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 	{
 		if (bSuccess == FALSE)
 		{
-			if (WideCharStr)free(WideCharStr);
+			if ((*WideCharStr))free((*WideCharStr));
 		}
 		if (FileData)free(FileData);
 		CloseHandle(hSavedFile);
 	}
 
-	if (bSuccess)
-	{
-		RunCode(boitSession, WideCharStr);
-		free(WideCharStr);
-	}
-	return 0;
+	return bSuccess;
 }

@@ -139,6 +139,9 @@
     <Filter Include="源文件\指令回调\codeforces">
       <UniqueIdentifier>{68aaadfa-1afe-485a-ac4d-10b6f6a850dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\指令回调\run相关指令">
+      <UniqueIdentifier>{258ffeba-170c-4383-97d8-b6a153f26c65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -289,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="Corpus.h">
       <Filter>头文件\语料库</Filter>
+    </ClInclude>
+    <ClInclude Include="Command_run.h">
+      <Filter>头文件\指令回调\run相关指令</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
