@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="APITransfer.c" />
+    <ClCompile Include="AsyncINet.c" />
     <ClCompile Include="CommandManager.c" />
     <ClCompile Include="Command_about.c" />
     <ClCompile Include="Command_cat.c" />
@@ -183,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APITransfer.h" />
+    <ClInclude Include="AsyncINet.h" />
     <ClInclude Include="CommandEvent.h" />
     <ClInclude Include="CommandManager.h" />
     <ClInclude Include="Command_run.h" />

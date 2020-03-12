@@ -2,7 +2,6 @@
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"InlineCommand.h"
-#include<WinInet.h>
 #include"VBuffer.h"
 #include"cJSON.h"
 #include<strsafe.h>
@@ -11,34 +10,24 @@
 #include"DirManagement.h"
 #include"URIEncode.h"
 #include"Corpus.h"
-#pragma comment(lib,"WinINet.lib")
 
+#include"AsyncINet.h"
 
-#define CFUSER_QRY_BUFSZ 4096
+pASYNCINET_INFO CodeforcesInetInfo;
+
 
 #define OIER_MAX_DISPLAY 3
-typedef struct __tagQueryCFUser
-{
-	pBOIT_SESSION boitSession;
-	BYTE ReadBuffer[CFUSER_QRY_BUFSZ];
-	DWORD BytesRead;
 
-	HINTERNET hRequest;
-	pVBUF vBuffer;
-	BOOL bRequestComplete;
-}QUERY_CFUSER_STRUCT, * pQUERY_CFUSER_STRUCT;
 
 WCHAR CFServerName[] = L"codeforces.com";
 
 static HINTERNET hInet;
 static HINTERNET hConnect;
 
-VOID CALLBACK QueryCFUserCallback(
-	_In_ HINTERNET hInternet,
-	_In_opt_ DWORD_PTR dwContext,
-	_In_ DWORD dwInternetStatus,
-	_In_opt_ LPVOID lpvStatusInformation,
-	_In_ DWORD dwStatusInformationLength
+int AsyncCFUserCallback(
+	UINT iReason,
+	pVBUF ReceivedBuf,
+	PBYTE ExtData
 );
 
 
@@ -123,48 +112,15 @@ int CmdEvent_codeforces_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARA
 	switch (Event)
 	{
 	case EC_CMDLOAD:
-		hInet = InternetOpenW(L"BOIT", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
-		INTERNET_STATUS_CALLBACK pOldStatusCallback = InternetSetStatusCallbackW(hInet, QueryCFUserCallback);
-
-		// For HTTP InternetConnect returns synchronously because it does not
-		// actually make the connection.
-
-		hConnect = InternetConnectW(hInet,
-			CFServerName, INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+		CodeforcesInetInfo = AsyncINetInit(CFServerName);
 		break;
 
-
 	case EC_CMDFREE:
-		InternetCloseHandle(hConnect);
-		InternetCloseHandle(hInet);
+		AsyncINetCleanup(CodeforcesInetInfo);
 		break;
 	}
 	return 0;
 }
-
-
-pQUERY_CFUSER_STRUCT AllocQueryCFUserStruct(pBOIT_SESSION boitSession)
-{
-	pQUERY_CFUSER_STRUCT QueryStruct = malloc(sizeof(QUERY_CFUSER_STRUCT));
-	ZeroMemory(QueryStruct, sizeof(QUERY_CFUSER_STRUCT));
-
-	QueryStruct->boitSession = DuplicateBOITSession(boitSession);
-
-	QueryStruct->vBuffer = AllocVBuf();
-
-	return QueryStruct;
-}
-
-
-BOOL FreeQueryCFUserStruct(pQUERY_CFUSER_STRUCT QueryStruct)
-{
-	FreeBOITSession(QueryStruct->boitSession);
-	FreeVBuf(QueryStruct->vBuffer);
-	free(QueryStruct);
-	return TRUE;
-}
-
-
 
 BOOL QueryCFUserInfo(pBOIT_SESSION boitSession, WCHAR* ToSearchStr)
 {
@@ -177,102 +133,35 @@ BOOL QueryCFUserInfo(pBOIT_SESSION boitSession, WCHAR* ToSearchStr)
 	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, 0);
 	swprintf_s(UrlBuffer, _countof(UrlBuffer), L"/api/user.info?handles=%s", WCEncodedSearch);
 	free(WCEncodedSearch);
-	pQUERY_CFUSER_STRUCT QueryStruct = AllocQueryCFUserStruct(boitSession);
-	WCHAR* rgpszAcceptTypes[] = { L"*/*", NULL };
-	QueryStruct->hRequest = HttpOpenRequestW(hConnect, L"GET", UrlBuffer,
-		NULL, NULL, rgpszAcceptTypes, INTERNET_FLAG_RELOAD, QueryStruct);
 
-	BOOL x = HttpSendRequestW(QueryStruct->hRequest, 0, 0, 0, 0);
+
+	pBOIT_SESSION newBoitSess = DuplicateBOITSession(boitSession);
+	AsyncRequestGet(CodeforcesInetInfo, UrlBuffer, newBoitSess, AsyncCFUserCallback);
 	return TRUE;
 }
 
 
-
-VOID CALLBACK QueryCFUserCallback(
-	_In_ HINTERNET hInternet,
-	_In_opt_ DWORD_PTR dwContext,
-	_In_ DWORD dwInternetStatus,
-	_In_opt_ LPVOID lpvStatusInformation,
-	_In_ DWORD dwStatusInformationLength
+int AsyncCFUserCallback(
+	UINT iReason,
+	pVBUF ReceivedBuf,
+	PBYTE ExtData
 )
 {
-	pQUERY_CFUSER_STRUCT QueryStruct = dwContext;
-	BOOL bSuccess = FALSE;
-	HINTERNET* a = lpvStatusInformation;
-	switch (dwInternetStatus)
+	switch (iReason)
 	{
-	case INTERNET_STATUS_REQUEST_COMPLETE:
-	{
-		INTERNET_ASYNC_RESULT* AsyncResult = lpvStatusInformation;
-		if (AsyncResult->dwResult == 0)
-		{
-			//Failed
+	case ASYNCINET_REASON_SUCCESS:
+		AddSizeVBuf(ReceivedBuf, 1);
+		ReceivedBuf->Data[ReceivedBuf->Length - 1] = 0;
 
-		}
-		else
-		{
-			if (!QueryStruct->bRequestComplete)
-			{
-				QueryStruct->bRequestComplete = TRUE;
-			}
-			else
-			{
-				//上次结果复制进缓冲区
-				//if (QueryStruct->InetBuf.dwBufferLength < 1000)
-			ReadNow:
-				{
-					int OrgLen = QueryStruct->vBuffer->Length;
-					AddSizeVBuf(QueryStruct->vBuffer, QueryStruct->BytesRead);
-					memcpy(QueryStruct->vBuffer->Data + OrgLen, QueryStruct->ReadBuffer, QueryStruct->BytesRead);
-				}
-			}
-
-
-			//QueryStruct->InetBuf.dwBufferLength = CFUSER_QRY_BUFSZ;
-			ZeroMemory(QueryStruct->ReadBuffer, CFUSER_QRY_BUFSZ);
-			//BOOL bRet = InternetReadFile(QueryStruct->hRequest, &(QueryStruct->InetBuf), IRF_ASYNC, QueryStruct);
-
-			BOOL bRet = InternetReadFile(QueryStruct->hRequest, QueryStruct->ReadBuffer, CFUSER_QRY_BUFSZ, &(QueryStruct->BytesRead));
-			DWORD dwErr = GetLastError();
-			if (!bRet)
-			{
-				if (dwErr == ERROR_IO_PENDING)
-				{
-					//如果是ERROR_IO_PENDING的话，继续下去等待执行完毕即可
-					return;
-				}
-			}
-			else
-			{
-				if (QueryStruct->BytesRead)
-				{
-					goto ReadNow;
-				}
-				//操作结束了，末尾补一个0
-				AddSizeVBuf(QueryStruct->vBuffer, 1);
-				QueryStruct->vBuffer->Data[QueryStruct->vBuffer->Length - 1] = 0;
-				bSuccess = TRUE;
-
-				//解析json
-				ParseCFUserInfoJsonAndSend(QueryStruct->boitSession, QueryStruct->vBuffer->Data);
-			}
-		}
-
-		//控制流流到这里的不是失败了就是结束了。清理。
-		if (!bSuccess)
-		{
-			//失败通知
-			SendBackMessage(QueryStruct->boitSession, L"哎呀，查询CF用户失败了");
-		}
-		InternetCloseHandle(QueryStruct->hRequest);
-		FreeQueryCFUserStruct(QueryStruct);
-
+		//解析json
+		ParseCFUserInfoJsonAndSend((pBOIT_SESSION)ExtData, ReceivedBuf->Data);
+		break;
+	case ASYNCINET_REASON_FAILED:
+		SendBackMessage((pBOIT_SESSION)ExtData, L"哎呀，查询CF用户失败了");
+		break;
 	}
-	}
-	return;
+	FreeBOITSession((pBOIT_SESSION)ExtData);
 }
-
-
 
 BOOL ParseCFUserInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 {
