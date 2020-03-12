@@ -2,7 +2,6 @@
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"InlineCommand.h"
-#include<WinInet.h>
 #include"VBuffer.h"
 #include"cJSON.h"
 #include<strsafe.h>
@@ -10,7 +9,8 @@
 #include<shlwapi.h>
 #include"DirManagement.h"
 #include"URIEncode.h"
-#pragma comment(lib,"WinINet.lib")
+#include"AsyncINet.h"
+
 
 
 #define OIER_QRY_BUFSZ 4096
@@ -29,17 +29,13 @@ typedef struct __tagQueryOIerStruct
 
 WCHAR OIerDBServerName[] = L"bytew.net";
 
-static HINTERNET hInet;
-static HINTERNET hConnect;
+pASYNCINET_INFO OIerDBInetInfo;
 
-VOID CALLBACK QueryOIerCallback(
-	_In_ HINTERNET hInternet,
-	_In_opt_ DWORD_PTR dwContext,
-	_In_ DWORD dwInternetStatus,
-	_In_opt_ LPVOID lpvStatusInformation,
-	_In_ DWORD dwStatusInformationLength
+int AsyncOIerInfoCallback(
+	UINT iReason,
+	pVBUF ReceivedBuf,
+	PBYTE ExtData
 );
-
 
 int CmdMsg_oier_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
@@ -76,50 +72,23 @@ int CmdEvent_oier_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB Par
 	switch (Event)
 	{
 	case EC_CMDLOAD:
-		hInet = InternetOpenW(L"BOIT", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
-		INTERNET_STATUS_CALLBACK pOldStatusCallback = InternetSetStatusCallbackW(hInet, QueryOIerCallback);
-
-		// For HTTP InternetConnect returns synchronously because it does not
-		// actually make the connection.
-
-		hConnect = InternetConnectW(hInet,
-			OIerDBServerName, INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
+		OIerDBInetInfo = AsyncINetInit(OIerDBServerName);
 		break;
 
-
 	case EC_CMDFREE:
-		InternetCloseHandle(hConnect);
-		InternetCloseHandle(hInet);
+		AsyncINetCleanup(OIerDBInetInfo);
 		break;
 	}
 	return 0;
 }
 
 
-pQUERY_OIER_STRUCT AllocQueryOIerStruct(pBOIT_SESSION boitSession)
-{
-	pQUERY_OIER_STRUCT QueryStruct = malloc(sizeof(QUERY_OIER_STRUCT));
-	ZeroMemory(QueryStruct, sizeof(QUERY_OIER_STRUCT));
-
-	QueryStruct->boitSession = DuplicateBOITSession(boitSession);
-
-	QueryStruct->vBuffer = AllocVBuf();
-
-	return QueryStruct;
-}
-
-
-BOOL FreeQueryOIerStruct(pQUERY_OIER_STRUCT QueryStruct)
-{
-	FreeBOITSession(QueryStruct->boitSession);
-	FreeVBuf(QueryStruct->vBuffer);
-	free(QueryStruct);
-	return TRUE;
-}
 
 
 
-BOOL QueryOIerInfo(pBOIT_SESSION boitSession, WCHAR *  ToSearchStr)
+
+
+BOOL QueryOIerInfo(pBOIT_SESSION boitSession, WCHAR* ToSearchStr)
 {
 	WCHAR UrlBuffer[256];
 	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, 0);
@@ -127,103 +96,37 @@ BOOL QueryOIerInfo(pBOIT_SESSION boitSession, WCHAR *  ToSearchStr)
 	URLEncode(UTF8Search, strlen(UTF8Search), EncodedSearchStr, _countof(EncodedSearchStr));
 	free(UTF8Search);
 
-	WCHAR * WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, 0);
+	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, 0);
 	//http://bytew.net/OIer/search.php?method=normal&q=%E6%9D%A8%E8%B5%AB
 	swprintf_s(UrlBuffer, _countof(UrlBuffer), L"/OIer/search.php?method=normal&q=%ls", WCEncodedSearch);
 	free(WCEncodedSearch);
-	pQUERY_OIER_STRUCT QueryStruct = AllocQueryOIerStruct(boitSession);
-	WCHAR* rgpszAcceptTypes[] = { L"*/*", NULL };
-	QueryStruct->hRequest = HttpOpenRequestW(hConnect, L"GET", UrlBuffer,
-		NULL, NULL, rgpszAcceptTypes, INTERNET_FLAG_RELOAD, QueryStruct);
-
-	BOOL x = HttpSendRequestW(QueryStruct->hRequest, 0, 0, 0, 0);
+	
+	pBOIT_SESSION newBoitSess = DuplicateBOITSession(boitSession);
+	AsyncRequestGet(OIerDBInetInfo, UrlBuffer, newBoitSess, AsyncOIerInfoCallback);
 	return TRUE;
 }
 
 
-
-VOID CALLBACK QueryOIerCallback(
-	_In_ HINTERNET hInternet,
-	_In_opt_ DWORD_PTR dwContext,
-	_In_ DWORD dwInternetStatus,
-	_In_opt_ LPVOID lpvStatusInformation,
-	_In_ DWORD dwStatusInformationLength
+int AsyncOIerInfoCallback(
+	UINT iReason,
+	pVBUF ReceivedBuf,
+	PBYTE ExtData
 )
 {
-	pQUERY_OIER_STRUCT QueryStruct = dwContext;
-	BOOL bSuccess = FALSE;
-	HINTERNET * a = lpvStatusInformation;
-	switch (dwInternetStatus)
+	switch (iReason)
 	{
-	case INTERNET_STATUS_REQUEST_COMPLETE:
-	{
-		INTERNET_ASYNC_RESULT* AsyncResult = lpvStatusInformation;
-		if (AsyncResult->dwResult == 0)
-		{
-			//Failed
+	case ASYNCINET_REASON_SUCCESS:
+		AddSizeVBuf(ReceivedBuf, 1);
+		ReceivedBuf->Data[ReceivedBuf->Length - 1] = 0;
 
-		}
-		else
-		{
-			if (!QueryStruct->bRequestComplete)
-			{
-				QueryStruct->bRequestComplete = TRUE;
-			}
-			else
-			{
-				//上次结果复制进缓冲区
-				//if (QueryStruct->InetBuf.dwBufferLength < 1000)
-			ReadNow:
-				{
-					int OrgLen = QueryStruct->vBuffer->Length;
-					AddSizeVBuf(QueryStruct->vBuffer, QueryStruct->BytesRead);
-					memcpy(QueryStruct->vBuffer->Data + OrgLen, QueryStruct->ReadBuffer, QueryStruct->BytesRead);
-				}
-			}
-
-
-			//QueryStruct->InetBuf.dwBufferLength = OIER_QRY_BUFSZ;
-			ZeroMemory(QueryStruct->ReadBuffer, OIER_QRY_BUFSZ);
-			//BOOL bRet = InternetReadFile(QueryStruct->hRequest, &(QueryStruct->InetBuf), IRF_ASYNC, QueryStruct);
-
-			BOOL bRet = InternetReadFile(QueryStruct->hRequest, QueryStruct->ReadBuffer, OIER_QRY_BUFSZ, &(QueryStruct->BytesRead));
-			DWORD dwErr = GetLastError();
-			if (!bRet)
-			{
-				if (dwErr == ERROR_IO_PENDING)
-				{
-					//如果是ERROR_IO_PENDING的话，继续下去等待执行完毕即可
-					return;
-				}
-			}
-			else
-			{
-				if (QueryStruct->BytesRead)
-				{
-					goto ReadNow;
-				}
-				//操作结束了，末尾补一个0
-				AddSizeVBuf(QueryStruct->vBuffer, 1);
-				QueryStruct->vBuffer->Data[QueryStruct->vBuffer->Length - 1] = 0;
-				bSuccess = TRUE;
-				
-				//解析json
-				ParseOIerInfoJsonAndSend(QueryStruct->boitSession, QueryStruct->vBuffer->Data);
-			}
-		}
-
-		//控制流流到这里的不是失败了就是结束了。清理。
-		if (!bSuccess)
-		{
-			//失败通知
-			SendBackMessage(QueryStruct->boitSession, L"哎呀，查询OIer失败了");
-		}
-		InternetCloseHandle(QueryStruct->hRequest);
-		FreeQueryOIerStruct(QueryStruct);
-		
+						//解析json
+		ParseOIerInfoJsonAndSend((pBOIT_SESSION)ExtData, ReceivedBuf->Data);
+		break;
+	case ASYNCINET_REASON_FAILED:
+		SendBackMessage((pBOIT_SESSION)ExtData, L"哎呀，查询OIer失败了");
+		break;
 	}
-	}
-	return;
+	FreeBOITSession((pBOIT_SESSION)ExtData);
 }
 
 
@@ -240,16 +143,16 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 		{
 			for (cJSON* EnumPerson = JsonRoot->child->child; EnumPerson; EnumPerson = EnumPerson->next)
 			{
-				
+
 				if (TotalResult >= OIER_MAX_DISPLAY)
 				{
 					TotalResult++;
 					continue;
 				}
 				PerPersonResult[TotalResult] = AllocVBuf();
-				
-				char * InfoField[] = { "name", "sex","awards" };
-				cJSON * JsonInfoField[_countof(InfoField)] = { 0 };
+
+				char* InfoField[] = { "name", "sex","awards" };
+				cJSON* JsonInfoField[_countof(InfoField)] = { 0 };
 				for (cJSON* EnumField = EnumPerson->child; EnumField; EnumField = EnumField->next)
 				{
 					for (int i = 0; i < _countof(InfoField); i++)
@@ -270,7 +173,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 
 					if (JsonInfoField[1])
 					{
-						WCHAR * SexNameList[] = { L"女",L"未知",L"男" };
+						WCHAR* SexNameList[] = { L"女",L"未知",L"男" };
 						int SexIndex = atoi(JsonInfoField[1]->valuestring);
 						if (SexIndex == 1 || SexIndex == -1)
 						{
@@ -281,7 +184,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 					}
 					if (JsonInfoField[2])
 					{
-						char * AwardsStr = JsonInfoField[2]->valuestring;
+						char* AwardsStr = JsonInfoField[2]->valuestring;
 						int AwardStrlen = strlen(AwardsStr);
 						for (int i = 0; i < AwardStrlen; i++)
 						{
@@ -296,7 +199,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						{
 							for (cJSON* EnumAward = ParseAward->child; EnumAward; EnumAward = EnumAward->next)
 							{
-								char *AwardField[] = { "rank","province","award_type","identity","school","grade","score" };
+								char* AwardField[] = { "rank","province","award_type","identity","school","grade","score" };
 								cJSON* JsonAwardField[_countof(AwardField)] = { 0 };
 
 								for (cJSON* EnumAwardField = EnumAward->child; EnumAwardField; EnumAwardField = EnumAwardField->next)
@@ -373,7 +276,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						}
 
 
-						if(ParseAward)cJSON_Delete(ParseAward);
+						if (ParseAward)cJSON_Delete(ParseAward);
 					}
 					TotalResult++;
 				}
@@ -408,7 +311,7 @@ BOOL ParseOIerInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 				if (PerPersonResult[i])FreeVBuf(PerPersonResult[i]);
 			}
 		}
-		
+
 
 		switch (rand() % 8)
 		{

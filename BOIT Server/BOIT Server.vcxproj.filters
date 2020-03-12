@@ -142,6 +142,12 @@
     <Filter Include="头文件\指令回调\run相关指令">
       <UniqueIdentifier>{258ffeba-170c-4383-97d8-b6a153f26c65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\异步网络">
+      <UniqueIdentifier>{bbe3c8ed-a85d-4300-9204-eddff7a589e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\异步网络">
+      <UniqueIdentifier>{0b23ddb9-607c-4865-a3f8-4e0fb4bd31ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -243,6 +249,9 @@
     <ClCompile Include="Command_codeforces.c">
       <Filter>源文件\指令回调\codeforces</Filter>
     </ClCompile>
+    <ClCompile Include="AsyncINet.c">
+      <Filter>源文件\异步网络</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -295,6 +304,9 @@
     </ClInclude>
     <ClInclude Include="Command_run.h">
       <Filter>头文件\指令回调\run相关指令</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncINet.h">
+      <Filter>头文件\异步网络</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
