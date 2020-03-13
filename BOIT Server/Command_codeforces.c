@@ -239,9 +239,10 @@ int AsyncCFUserPhotoCallback(
 		WCHAR PhotoFilePath[MAX_PATH];
 		wcscpy_s(PhotoFilePath,MAX_PATH,GetCQImageDir());
 		PathAppendW(PhotoFilePath, PhotoFileName);
-		HFILE hFile = CreateFileW(PhotoFilePath, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+		HANDLE hFile = CreateFileW(PhotoFilePath, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
 		DWORD BytesWrite;
 		BOOL bSuccess = WriteFile(hFile, ReceivedBuf->Data, ReceivedBuf->Length, &BytesWrite, 0);
+		//MessageBoxW(0, PhotoFilePath, bSuccess ? L"1" : L"0", 0);
 		CloseHandle(hFile);
 		
 		WCHAR TestBuffer[32];
@@ -364,9 +365,17 @@ BOOL ParseCFUserInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 						{
 							CFQueryPhotoSess->CFUserInfo.Rating = ProfileField[4]->valueint;
 						}
+						else
+						{
+							CFQueryPhotoSess->CFUserInfo.Rating = -1;
+						}
 						if (ProfileField[5])
 						{
 							CFQueryPhotoSess->CFUserInfo.MaxRating = ProfileField[5]->valueint;
+						}
+						else
+						{
+							CFQueryPhotoSess->CFUserInfo.MaxRating = -1;
 						}
 						if (ProfileField[6])
 						{
