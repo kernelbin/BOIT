@@ -196,20 +196,20 @@ int AsyncCFUserPhotoCallback(
 
 	pVBUF ReplyBuffer = AllocVBuf();
 	
-	if (QueryPhotoSess->CFUserInfo.Handle)
+	if (QueryPhotoSess->CFUserInfo.Handle[0])
 	{
 		VBufferAppendStringW(ReplyBuffer, L"êÇ³Æ£º");
 		VBufferAppendStringW(ReplyBuffer, QueryPhotoSess->CFUserInfo.Handle);
 		VBufferAppendStringW(ReplyBuffer, L"\n");
 	}
-	/*if (QueryPhotoSess->CFUserInfo.FirstName && QueryPhotoSess->CFUserInfo.LastName)
+	/*if (QueryPhotoSess->CFUserInfo.FirstName[0] && QueryPhotoSess->CFUserInfo.LastName)
 	{
 		VBufferAppendStringW(ReplyBuffer, QueryPhotoSess->CFUserInfo.FirstName);
 		VBufferAppendStringW(ReplyBuffer, L"  ");
 		VBufferAppendStringW(ReplyBuffer, QueryPhotoSess->CFUserInfo.LastName);
 		VBufferAppendStringW(ReplyBuffer, L"\n");
 	}*/
-	if (QueryPhotoSess->CFUserInfo.Country)
+	if (QueryPhotoSess->CFUserInfo.Country[0])
 	{
 		VBufferAppendStringW(ReplyBuffer, QueryPhotoSess->CFUserInfo.Country);
 		VBufferAppendStringW(ReplyBuffer, L"\n");
