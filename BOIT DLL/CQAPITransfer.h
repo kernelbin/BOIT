@@ -10,3 +10,5 @@ int SendGroupMessage(long long GroupID, const char* msg);
 const char* GetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache);
 
 const char* GetStrangerInfo(long long QQID, BOOL NoCache);
+
+const char* GetAppDirectory();

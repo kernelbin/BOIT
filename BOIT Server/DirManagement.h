@@ -5,6 +5,12 @@
 
 WCHAR* GetBOITBaseDir();
 
+WCHAR* GetCQBaseDir();
+
+int InitCQDirVar();
+
+WCHAR* GetCQImageDir();
+
 int InitBOITDirVar();
 
 int InitBOITDir();
@@ -20,6 +26,9 @@ WCHAR BOITUserDataDir[MAX_PATH];
 WCHAR BOITGroupDataDir[MAX_PATH];
 WCHAR BOITCommandCfgDir[MAX_PATH];
 
+WCHAR CQBaseDir[MAX_PATH];
+WCHAR CQIamgeDir[MAX_PATH];
+
 BOOL IsPathDirA(CHAR* Path);
 BOOL IsPathDirW(WCHAR* Path);
 
@@ -27,6 +36,8 @@ int PathSimplifyA(CHAR* Path);
 int PathSimplifyW(WCHAR* Path);
 
 BOOL RemoveDirIfExist(WCHAR* Dir);
+
+BOOL CoolQAllocPicFileName(WCHAR* FileName);
 
 int CheckPerUserDataExist(long long QQID);
 

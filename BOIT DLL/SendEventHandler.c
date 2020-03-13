@@ -84,6 +84,16 @@ unsigned __stdcall SendEventThread(void *Args)
 				pSharedMemSend->u.StrangerInfo.iRet = iRet;
 			}
 			break;
+			case BOIT_EVENT_SEND_RETRIEVE_CQPATH:
+			{
+				//TODO: 进行mirai适配
+				//检测运行环境是否是mirai开一个BOOL说明是否是mirai
+				char* mbCQPath = GetAppDirectory();
+				WCHAR * wcCQPath = StrConvMB2WC(CP_GB18030, mbCQPath, -1, 0);
+				wcscpy_s(pSharedMemSend->u.CQPath.CQPath, MAX_PATH, wcCQPath);
+				free(wcCQPath);
+			}
+			break;
 			}
 			
 			SetEvent(hEventSendEnd);

@@ -26,3 +26,8 @@ const char* GetStrangerInfo(long long QQID, BOOL NoCache)
 {
 	return CQ_getStrangerInfo(CQAuthCode, QQID, NoCache);
 }
+
+const char* GetAppDirectory()
+{
+	return CQ_getAppDirectory(CQAuthCode);
+}

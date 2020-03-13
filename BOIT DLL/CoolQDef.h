@@ -191,7 +191,7 @@ CQAPI(const char*) CQ_getCookies(int AuthCode);
 /*
 * 取应用目录，返回的路径末尾带"\"
 */
-//CQAPI(const char*) CQ_getAppDirectory(int AuthCode);
+CQAPI(const char*) CQ_getAppDirectory(int AuthCode);
 
 /*
 * 置致命错误提示

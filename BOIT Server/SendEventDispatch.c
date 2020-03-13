@@ -110,8 +110,6 @@ int SendEventGetGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache,
 	return 0;
 }
 
-
-
 int SendEventGetStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
 {
 	if (GetConnState() == 0)
@@ -142,3 +140,36 @@ int SendEventGetStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO S
 	}
 	return 0;
 }
+
+int SendEventRetrieveCQPath(WCHAR * Path)
+{
+	if (GetConnState() == 0)
+	{
+		printf("和CoolQ之间的连接已经断开，消息未发送");
+		return 0;
+	}
+	AcquireSRWLockExclusive(&SendLock);
+	__try
+	{
+		pSharedMemSend->EventType = BOIT_EVENT_SEND_RETRIEVE_CQPATH;
+	
+		SetEvent(hEventSendStart);
+
+		if (ConnWaitForObject(hEventSendEnd) == 0)
+		{
+			__leave;
+		}
+		//成功
+		//memcpy(StrangerInfo, &(pSharedMemSend->u.StrangerInfo.StrangerInfo), sizeof(BOIT_STRANGER_INFO));
+		wcscpy_s(Path,MAX_PATH, pSharedMemSend->u.CQPath.CQPath);
+		SetEvent(hEventSendRet);
+	}
+	__finally
+	{
+		ReleaseSRWLockExclusive(&SendLock);
+	}
+	return 0;
+}
+
+
+

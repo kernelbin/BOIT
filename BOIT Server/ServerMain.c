@@ -14,6 +14,10 @@
 #include"MessageWatch.h"
 
 
+//****************************************************************************************************************
+#include"SendEventDispatch.h"
+
+
 BOOL StartInputThread();
 
 unsigned __stdcall HandleInputThread(LPVOID Args);
@@ -124,7 +128,11 @@ int main()
 	if (TryEstablishConn(hEventServerStop) != -1)
 	{
 		puts("连接成功！\n");
-
+		WCHAR Path[MAX_PATH];
+		SendEventRetrieveCQPath(Path);
+		PathAppendW(Path, L"..\\..\\..");
+		PathCanonicalizeW(GetCQBaseDir(), Path);
+		InitCQDirVar();
 		StartRecvEventHandler();
 
 		WaitForSingleObject(hEventServerStop, INFINITE);

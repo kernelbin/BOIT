@@ -2,13 +2,36 @@
 #include"DirManagement.h"
 #include <Shlwapi.h>
 #include"CommandManager.h"
+#include<wchar.h>
+
 
 #pragma comment(lib, "Shlwapi.lib")
+
+
+static long long CoolQPicID = 0;
 
 
 WCHAR * GetBOITBaseDir()
 {
 	return BOITBaseDir;
+}
+
+
+WCHAR* GetCQBaseDir()
+{
+	return CQBaseDir;
+}
+
+int InitCQDirVar()
+{
+	wcscpy_s(CQIamgeDir, MAX_PATH, CQBaseDir);
+	PathAppendW(CQIamgeDir, L"data\\image\\");
+	return 0;
+}
+
+WCHAR* GetCQImageDir()
+{
+	return CQIamgeDir;
 }
 
 
@@ -140,4 +163,12 @@ BOOL RemoveDirIfExist(WCHAR * Dir)
 		return FALSE;
 	}
 	//TODO:
+}
+
+
+BOOL CoolQAllocPicFileName(WCHAR * FileName)
+{
+	long long AllocID = InterlockedIncrement64(&CoolQPicID);
+	swprintf_s(FileName, MAX_PATH, L"Pic%lld", AllocID);
+	return TRUE;
 }

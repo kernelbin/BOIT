@@ -96,7 +96,6 @@ typedef struct __tagEventSendStruct
 			int iRet; // 1代表成功 0代表失败
 		}GroupMemberInfo;
 
-
 		struct
 		{
 			long long QQID;
@@ -105,6 +104,10 @@ typedef struct __tagEventSendStruct
 
 			int iRet; // 1代表成功 0代表失败
 		}StrangerInfo;
+
+		struct {
+			WCHAR CQPath[MAX_PATH];
+		}CQPath;
 	}u;
 }EVENT_SEND,*pEVENT_SEND;
 
