@@ -73,7 +73,9 @@ OutputEncode = GB18030
 
 - 提供好的 idea，或者是feature request
 
-- 参与BOIT的编码。（如果你熟悉Win32开发）
+- 参与BOIT的开发。（如果你熟悉Win32开发）
+
+- Sponsor Me!! 点击 GitHub 上的 Sponsor 按钮以赞助开发 BOIT
 
 ## todo
 - 指令插件化
