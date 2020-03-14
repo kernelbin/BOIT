@@ -47,6 +47,10 @@ BOOL AsyncINetCleanup(pASYNCINET_INFO AsyncINetInfo)
 pASYNC_REQUEST AllocAsyncRequestStruct()
 {
 	pASYNC_REQUEST AsyncRequest = malloc(sizeof(ASYNC_REQUEST));
+	if (!AsyncRequest)
+	{
+		return 0;
+	}
 	ZeroMemory(AsyncRequest, sizeof(ASYNC_REQUEST));
 
 	AsyncRequest->vBuffer = AllocVBuf();
@@ -64,6 +68,10 @@ BOOL AsyncRequestGet(pASYNCINET_INFO AsyncINetInfo, WCHAR * Url, PBYTE ExtData, 
 {
 	WCHAR* rgpszAcceptTypes[] = { L"*/*", NULL };
 	pASYNC_REQUEST AsyncRequest = AllocAsyncRequestStruct();
+	if (!AsyncRequest)
+	{
+		return 0;
+	}
 	AsyncRequest->AsyncCallback = AsyncCallback;
 	AsyncRequest->ExtData = ExtData;
 	AsyncRequest->hRequest = HttpOpenRequestW(AsyncINetInfo->hConnect, L"GET", Url,
@@ -71,6 +79,7 @@ BOOL AsyncRequestGet(pASYNCINET_INFO AsyncINetInfo, WCHAR * Url, PBYTE ExtData, 
 
 	
 	BOOL x = HttpSendRequestW(AsyncRequest->hRequest, 0, 0, 0, 0);
+	return TRUE;
 }
 
 VOID CALLBACK AsyncINetCallback(

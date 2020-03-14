@@ -183,7 +183,7 @@ int AsyncCFUserCallback(
 		FreeBOITSession((pBOIT_SESSION)ExtData);
 		break;
 	}
-	
+	return 0;
 }
 
 int AsyncCFUserPhotoCallback(

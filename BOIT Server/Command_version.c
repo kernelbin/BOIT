@@ -4,10 +4,10 @@
 #include"InlineCommand.h"
 #include"BOITVersion.h"
 
-#define __LPREFIX(quote) L##quote  
-#define LPREFIX(quote) __LPREFIX(quote)
+#define MY__LPREFIX(quote) L##quote  
+#define LPREFIX(quote) MY__LPREFIX(quote)
 
-#define __NUM2LTEXT(quote) __LPREFIX(#quote)
+#define __NUM2LTEXT(quote) MY__LPREFIX(#quote)
 #define NUM2LTEXT(quote) __NUM2LTEXT(quote)
 
 int CmdMsg_version_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)

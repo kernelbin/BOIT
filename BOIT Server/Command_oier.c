@@ -127,6 +127,7 @@ int AsyncOIerInfoCallback(
 		break;
 	}
 	FreeBOITSession((pBOIT_SESSION)ExtData);
+	return 0;
 }
 
 
