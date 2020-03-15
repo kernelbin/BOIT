@@ -90,19 +90,40 @@ int CmdEvent_oier_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARAMB Par
 
 BOOL QueryOIerInfo(pBOIT_SESSION boitSession, WCHAR* ToSearchStr)
 {
-	WCHAR UrlBuffer[256];
+	WCHAR* UrlBuffer;
+	int UTF8Len;
+	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, &UTF8Len);
+	char* EncodedSearchStr;
+	EncodedSearchStr = malloc((UTF8Len + 1) * 3); //最坏情况下每个字符都转义
+	ZeroMemory(EncodedSearchStr, (UTF8Len + 1) * 3);
+	URLEncode(UTF8Search, strlen(UTF8Search), EncodedSearchStr, (UTF8Len + 1) * 3);
+	free(UTF8Search);
+
+	int WCSLen;
+	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, &WCSLen);
+	free(EncodedSearchStr);
+
+	UrlBuffer = malloc((wcslen(L"/OIer/search.php?method=normal&q=") + WCSLen + 1) * sizeof(WCHAR));
+	swprintf_s(UrlBuffer, (wcslen(L"/OIer/search.php?method=normal&q=") + WCSLen + 1), L"/OIer/search.php?method=normal&q=%ls", WCEncodedSearch);
+	free(WCEncodedSearch);
+
+
+	pBOIT_SESSION newBoitSess = DuplicateBOITSession(boitSession);
+	AsyncRequestGet(OIerDBInetInfo, UrlBuffer, newBoitSess, AsyncOIerInfoCallback);
+
+
+	/*WCHAR UrlBuffer[256 + 32] = { 0 };
 	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, 0);
-	char EncodedSearchStr[256];
+	char EncodedSearchStr[256 + 1] = { 0 };
 	URLEncode(UTF8Search, strlen(UTF8Search), EncodedSearchStr, _countof(EncodedSearchStr));
 	free(UTF8Search);
 
 	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, 0);
-	//http://bytew.net/OIer/search.php?method=normal&q=%E6%9D%A8%E8%B5%AB
 	swprintf_s(UrlBuffer, _countof(UrlBuffer), L"/OIer/search.php?method=normal&q=%ls", WCEncodedSearch);
 	free(WCEncodedSearch);
 	
 	pBOIT_SESSION newBoitSess = DuplicateBOITSession(boitSession);
-	AsyncRequestGet(OIerDBInetInfo, UrlBuffer, newBoitSess, AsyncOIerInfoCallback);
+	AsyncRequestGet(OIerDBInetInfo, UrlBuffer, newBoitSess, AsyncOIerInfoCallback);*/
 	return TRUE;
 }
 

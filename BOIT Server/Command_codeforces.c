@@ -145,14 +145,21 @@ int CmdEvent_codeforces_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARA
 
 BOOL QueryCFUserInfo(pBOIT_SESSION boitSession, WCHAR* ToSearchStr)
 {
-	WCHAR UrlBuffer[256];
-	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, 0);
-	char EncodedSearchStr[256];
-	URLEncode(UTF8Search, strlen(UTF8Search), EncodedSearchStr, _countof(EncodedSearchStr));
+	WCHAR* UrlBuffer; 
+	int UTF8Len;
+	char* UTF8Search = StrConvWC2MB(CP_UTF8, ToSearchStr, -1, &UTF8Len);
+	char* EncodedSearchStr;
+	EncodedSearchStr = malloc((UTF8Len + 1) * 3); //最坏情况下每个字符都转义
+	ZeroMemory(EncodedSearchStr, (UTF8Len + 1) * 3);
+	URLEncode(UTF8Search, strlen(UTF8Search), EncodedSearchStr, (UTF8Len + 1) * 3);
 	free(UTF8Search);
 
-	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, 0);
-	swprintf_s(UrlBuffer, _countof(UrlBuffer), L"/api/user.info?handles=%s", WCEncodedSearch);
+	int WCSLen;
+	WCHAR* WCEncodedSearch = StrConvMB2WC(CP_ACP, EncodedSearchStr, -1, &WCSLen);
+	free(EncodedSearchStr);
+
+	UrlBuffer = malloc((wcslen(L"/api/user.info?handles=") + WCSLen + 1) * sizeof(WCHAR));
+	swprintf_s(UrlBuffer, (wcslen(L"/api/user.info?handles=") + WCSLen + 1), L"/api/user.info?handles=%ls", WCEncodedSearch);
 	free(WCEncodedSearch);
 
 
@@ -256,7 +263,7 @@ int AsyncCFUserPhotoCallback(
 		VBufferAppendStringW(ReplyBuffer, L"抓取头像失败了orz");
 		break;
 	}
-	FreeBOITSession((pBOIT_SESSION)QueryPhotoSess->boitSession);
+	
 	AsyncINetCleanup(QueryPhotoSess->CodeforcesPhotoInetInfo);
 
 	//清理CF Profile
@@ -270,6 +277,8 @@ int AsyncCFUserPhotoCallback(
 		SendBackMessage(QueryPhotoSess->boitSession, ReplyBuffer->Data);
 	}
 
+	FreeBOITSession((pBOIT_SESSION)QueryPhotoSess->boitSession);
+
 	{
 		free(QueryPhotoSess->CFUserInfo.Country);
 		free(QueryPhotoSess->CFUserInfo.FirstName);
@@ -279,6 +288,7 @@ int AsyncCFUserPhotoCallback(
 		free(QueryPhotoSess->CFUserInfo.Rank);
 		free(QueryPhotoSess->CFUserInfo.TitlePhotoURL);
 	}
+
 	free(QueryPhotoSess);
 
 	FreeVBuf(ReplyBuffer);
