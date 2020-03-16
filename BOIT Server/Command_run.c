@@ -48,6 +48,7 @@ typedef struct __tagCompileSession
 	LONGLONG AllocCompileID;
 	BOOL bIsSU;
 	BOOL bNeedInput;
+	BOOL bScrnShot;
 }COMPILE_SESSION, * pCOMPILE_SESSION;
 
 typedef struct __tagRunSession
@@ -55,6 +56,7 @@ typedef struct __tagRunSession
 	UINT Encode;
 	pBOIT_SESSION boitSession;
 	pVBUF StdOutBuffer;
+	BOOL bScrnShot;
 }RUN_SESSION, * pRUN_SESSION;
 
 typedef struct __tagInputSession
@@ -65,6 +67,7 @@ typedef struct __tagInputSession
 	BOOL bLimitPrivileges;
 	pBOIT_SESSION boitSession;
 	int Encode;
+	BOOL bScrnShot;
 }INPUT_SESSION, * pINPUT_SESSION;
 
 
@@ -101,7 +104,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 
 BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, WCHAR* ToCopyFileName, WCHAR* SandboxDir, WCHAR* SandboxFile);
 
-pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
+pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, BOOL bSnapShot, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
 
 
 LONGLONG CompileID;
@@ -145,7 +148,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 	BOOL LanguageMatched = 0, bCodeFound = 0;
 	WCHAR* CodeStr = 0;
 
-	BOOL bFailed = 0, bIsSU = 0, bIsHelp = 0, bNeedInput = 0;
+	BOOL bFailed = 0, bIsSU = 0, bIsHelp = 0, bNeedInput = 0, bScrnShot = 0;
 
 	WCHAR FailedReason[128];
 
@@ -198,6 +201,10 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 						else if ((ParamLen == wcslen(L"input") + 1) && (_wcsnicmp(lpwcParam + 1, L"input", wcslen(L"input")) == 0))
 						{
 							bNeedInput = TRUE;
+						}
+						else if ((ParamLen == wcslen(L"scrn") + 1) && (_wcsnicmp(lpwcParam + 1, L"scrn", wcslen(L"scrn")) == 0))
+						{
+							bScrnShot = TRUE;
 						}
 						else
 						{
@@ -258,14 +265,14 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 			if (bIsHelp)
 			{
 				//显示详细帮助信息
-				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] sourcecode");
+				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] [/scrn] sourcecode");
 				SendBackMessage(boitSession, L"example:\n\n#run c\n#include<stdio.h>\nint main(){\nprintf(\"hello, bot\");\n}");
-				SendBackMessage(boitSession, L"使用 /su 以用管理员权限执行指令。使用 /input 以启用输入数据");
+				SendBackMessage(boitSession, L"使用 /su 以用管理员权限执行指令。使用 /input 以启用输入数据。使用 /scrn 以查看程序运行截图。");
 				ShowSupportLanguageInfo(pCmd, L".cfg", boitSession);
 			}
 			else
 			{
-				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] sourcecode\n 输入#run /help 查看详细帮助信息");
+				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] [/scrn] sourcecode\n 输入#run /help 查看详细帮助信息");
 			}
 			FreeBOITSession(boitSession);
 			free(CompileCfg);
@@ -320,7 +327,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		{
 			__leave;
 		}
-		
+
 		DWORD BytesWritten;
 		WriteFile(hSourceFile, (LPCVOID)MultiByteStrCode, MultiByteStrLen, &BytesWritten, 0);
 		if (BytesWritten != MultiByteStrLen)
@@ -345,7 +352,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 	}
 
 
-	
+
 
 	switch (CompileCfg->Type)
 	{
@@ -382,6 +389,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		CompileSession->AllocCompileID = AllocCompileID;
 		CompileSession->bIsSU = bIsSU;
 		CompileSession->bNeedInput = bNeedInput;
+		CompileSession->bScrnShot = bScrnShot;
 
 		//TODO:这些限制都是我临时写的
 		if (CreateSimpleSandboxW(NULL,
@@ -391,6 +399,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 			256 * 1024 * 1024,	//256MB内存
 			20 * 100,				//10% CPU
 			FALSE,				//不设置权限限制
+			0, 0,
 			(PBYTE)CompileSession,
 			CompileSandboxCallback) == 0)
 		{
@@ -438,7 +447,8 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		else
 		{
 			if (!StartRunSandbox(CompileCfg->Application[0] ? CompileCfg->Application : NULL,
-				CompileCmd, SandboxDir, !bIsSU, boitSession, CompileCfg->OutputEncode, 0))
+
+				CompileCmd, SandboxDir, !bIsSU, bScrnShot, boitSession, CompileCfg->OutputEncode, 0))
 			{
 				FreeBOITSession(boitSession);//如果成功的话，这个session会继续传递下去
 			}
@@ -501,12 +511,13 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 			{
 				pINPUT_SESSION InputSession = malloc(sizeof(INPUT_SESSION));
 				ZeroMemory(InputSession, sizeof(INPUT_SESSION));
-				
+
 				wcscpy_s(InputSession->Command, MAX_PATH, SandboxFile);
 				wcscpy_s(InputSession->CuurentDir, MAX_PATH, SandboxDir);
 				InputSession->bLimitPrivileges = !(Session->bIsSU);
 				InputSession->Encode = Session->CompileCfg->OutputEncode;
 				InputSession->boitSession = Session->boitSession;
+				InputSession->bScrnShot = Session->bScrnShot;
 				if (Session->boitSession->GroupID)
 				{
 					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20,
@@ -523,12 +534,12 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 			}
 			else
 			{
-				if (!StartRunSandbox(NULL, SandboxFile, SandboxDir, !(Session->bIsSU), (Session->boitSession), Session->CompileCfg->OutputEncode, 0))
+				if (!StartRunSandbox(NULL, SandboxFile, SandboxDir, !(Session->bIsSU), Session->bScrnShot, (Session->boitSession), Session->CompileCfg->OutputEncode, 0))
 				{
 					free(Session->boitSession);
 				}
 			}
-			
+
 		}
 		else
 		{
@@ -572,6 +583,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 		FreeVBuf(Session->StdOutBuffer);
 		free(Session->CompileCfg);
 		free(Session);
+
 	}
 
 	break;
@@ -601,50 +613,91 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		{
 			SendBackMessage(Session->boitSession, L"程序超出内存上限了qaq");
 		}
+		
 		switch (Sandbox->ExitReason)
 		{
 		case SANDBOX_ER_ABNORMAL:
 			SendBackMessage(Session->boitSession, L"程序异常终止了！qaq");
 			break;
 		case SANDBOX_ER_TIMEOUT:
-			SendBackMessage(Session->boitSession, L"超出运行时间限制了！qaq");
+			if (!(Session->bScrnShot))
+			{
+				SendBackMessage(Session->boitSession, L"超出运行时间限制了！qaq");
+			}
 			break;
 		case SANDBOX_ER_KILLED:
 			SendBackMessage(Session->boitSession, L"程序被强行中断了！qaq");
 			break;
-		}
-
-
-		if (Session->StdOutBuffer->Length == 0)
-		{
-			SendBackMessage(Session->boitSession, L"程序莫得输出诶");
-		}
-		else
-		{
-			UINT CodePage = GetEncodeCodePage(Session->Encode);
-			WCHAR* wcStdout;
-			int cchStdout;
-			
-			wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
-				Session->StdOutBuffer->Length, &cchStdout);
-
-			if (wcStdout)
+		case SANDBOX_ER_EXIT:
+			if (Session->bScrnShot)
 			{
-				//实行截断
-				if (cchStdout > BOIT_RUN_MAX_OUTPUT)
-				{
-					wcStdout[BOIT_RUN_MAX_OUTPUT] = 0;
-				}
-				SendTextWithBOITCode(Session->boitSession, wcStdout);
-				free(wcStdout);
+				SendBackMessage(Session->boitSession, L"程序提早退出了，没能截到图orz");
 			}
-		
+			break;
 		}
+
+		if (!(Session->bScrnShot))
+		{
+			if (Session->StdOutBuffer->Length == 0)
+			{
+				SendBackMessage(Session->boitSession, L"程序莫得输出诶");
+			}
+			else
+			{
+				UINT CodePage = GetEncodeCodePage(Session->Encode);
+				WCHAR* wcStdout;
+				int cchStdout;
+
+				wcStdout = StrConvMB2WC(CodePage, Session->StdOutBuffer->Data,
+					Session->StdOutBuffer->Length, &cchStdout);
+
+				if (wcStdout)
+				{
+					//实行截断
+					if (cchStdout > BOIT_RUN_MAX_OUTPUT)
+					{
+						wcStdout[BOIT_RUN_MAX_OUTPUT] = 0;
+					}
+					SendTextWithBOITCode(Session->boitSession, wcStdout);
+					free(wcStdout);
+				}
+
+			}
+		}
+		/*else
+		{
+			SendBackMessage(Session->boitSession, L"Snapshot");
+		}*/
 		FreeBOITSession(Session->boitSession);
 		FreeVBuf(Session->StdOutBuffer);
 		free(Session);
+		FreeSimpleSandbox(Sandbox);
 	}
 	break;
+
+	case SANDBOX_EVENT_TIME_END:
+		//SandboxTakeScreenShot(Sandbox, L"C:\\Users\\Administrator\\Desktop\\qwq.bmp");
+	{
+		if (Session->bScrnShot)
+		{
+			WCHAR PhotoFileName[MAX_PATH];
+			CoolQAllocPicFileName(PhotoFileName);
+
+			WCHAR PhotoFilePath[MAX_PATH];
+
+			wcscpy_s(PhotoFilePath, MAX_PATH, GetCQImageDir());
+			PathAppendW(PhotoFilePath, PhotoFileName);
+
+			SandboxTakeScreenShot(Sandbox, PhotoFilePath);
+
+			WCHAR TestBuffer[32];
+
+			swprintf_s(TestBuffer, _countof(TestBuffer), L"[CQ:image,file=%ls]", PhotoFileName);
+			SendBackMessage(Session->boitSession, TestBuffer);
+		}
+	}
+		break;
+
 	case SANDBOX_EVENT_STD_OUTPUT:
 	{
 		if (Session->StdOutBuffer->Length + DataLen < BOIT_MAX_TEXTLEN * 4) // UTF8编码和GB编码在最恶劣情况下一个字符4字节
@@ -675,7 +728,7 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, W
 
 	wcscpy_s(SandboxDir, MAX_PATH, SandboxFile);
 
-	
+
 	RemoveDirIfExist(SandboxDir);
 
 
@@ -690,7 +743,7 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, W
 }
 
 
-pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, pBOIT_SESSION boitSession, int Encode, WCHAR* Input)
+pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, BOOL bSnapShot, pBOIT_SESSION boitSession, int Encode, WCHAR* Input)
 {
 	pSANDBOX Sandbox = 0;
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
@@ -701,14 +754,19 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 	RunSession->Encode = Encode;
 
 	RunSession->boitSession = boitSession;
-	
+
 	RunSession->StdOutBuffer = AllocVBuf();
-	
+
+	RunSession->bScrnShot = bSnapShot;
+
 	if ((Sandbox = CreateSimpleSandboxW(Application, CommandLine, CuurentDir,
 		10000000 * 10,		//10秒
 		512 * 1024 * 1024,	//512MB内存
 		10 * 100,			//10% CPU
-		bLimitPrivileges, (PBYTE)RunSession, RunSandboxCallback)) == 0)
+		bLimitPrivileges,
+		bSnapShot,
+		bSnapShot,
+		(PBYTE)RunSession, RunSandboxCallback)) == 0)
 	{
 		SendBackMessage(RunSession->boitSession, L"为程序创建沙盒时出现意外");
 		free(RunSession);
@@ -1174,18 +1232,19 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 	case BOIT_MW_EVENT_MESSAGE:
 	{
 		pSANDBOX Sandbox = StartRunSandbox(InputSession->Application[0] ? InputSession->Application : NULL,
-			InputSession->Command, InputSession->CuurentDir, InputSession->bLimitPrivileges, InputSession->boitSession, InputSession->Encode, 0);
 
-		
+			InputSession->Command, InputSession->CuurentDir, InputSession->bLimitPrivileges, InputSession->bScrnShot, InputSession->boitSession, InputSession->Encode, 0);
+
+
 		if (Sandbox)
 		{
 			UINT CodePage = GetEncodeCodePage(InputSession->Encode);
 			PBYTE mbStr;
-			
+
 
 			int mbStrlen;
 			mbStr = StrConvWC2MB(CodePage, Msg, -1, &mbStrlen);
-			if(mbStr)
+			if (mbStr)
 			{
 				DWORD BytesWritten;
 				WriteFile(Sandbox->hPipeInWrite, mbStr, mbStrlen, &BytesWritten, 0);
@@ -1198,7 +1257,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 				//StrConvWC2MB失败
 			}
 
-			
+
 			iRet = BOIT_MSGWATCH_BLOCK;
 		}
 		else

@@ -169,6 +169,7 @@
     <ClCompile Include="PerCommandData.c" />
     <ClCompile Include="PerGroupData.c" />
     <ClCompile Include="PerUserData.c" />
+    <ClCompile Include="Pic.cpp" />
     <ClCompile Include="RecvEventHandler.c" />
     <ClCompile Include="InlineCommand.c" />
     <ClCompile Include="RegisterRW.c" />
@@ -193,6 +194,7 @@
     <ClInclude Include="HandleBOITCode.h" />
     <ClInclude Include="InlineCommand.h" />
     <ClInclude Include="MessageWatch.h" />
+    <ClInclude Include="Pic.h" />
     <ClInclude Include="RecvEventHandler.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="RegisterRW.h" />

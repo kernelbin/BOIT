@@ -2,9 +2,17 @@
 #include<process.h>
 #include<sddl.h>
 #include "SimpleSandbox.h"
+#include <aclapi.h>
+#include<wtsapi32.h>
+#include<string.h>
+#include"Pic.h"
+
+#pragma comment(lib,"Wtsapi32.lib")
+#pragma comment(lib, "advapi32.lib")
 
 #define COMPPORT_MAX_THREAD 16
 
+SRWLOCK DesktopSwitchLock;
 
 
 HANDLE hJobObjPortThread[COMPPORT_MAX_THREAD];//线程句柄表
@@ -55,11 +63,15 @@ BOOL CreateLimitedProcessW(
 	LPSTARTUPINFOW lpStartupInfo,
 	LPPROCESS_INFORMATION lpProcessInformation);
 
+//BOOL GetLowLimitSA(SECURITY_ATTRIBUTES* psa);
+
 void __stdcall TerminateJobTimerRoutine(
 	_In_opt_ LPVOID lpArgToCompletionRoutine,
 	_In_     DWORD dwTimerLowValue,
 	_In_     DWORD dwTimerHighValue
 );
+
+
 
 
 BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize);
@@ -124,6 +136,8 @@ int InitializeSandbox(int JobObjCompThreadNum, int PipeIOCompThreadNum)
 		IO线程可以利用Overlapped的特性进行传参
 		WriteFileEx是一次性的。只要在完成端口校验一下是否完成输入就好了。（不排除还没输入进程就死了，试试）
 		ReadFileEx可能比较烦人*/
+
+	InitializeSRWLock(&DesktopSwitchLock);
 	return 0;
 }
 
@@ -180,6 +194,8 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	long long TotMemoryLimit,		//整个沙盒的内存限制，Byte为单位。设为-1不设置内存限制
 	int CpuRateLimit,				//CPU限制，1-10000，（10000意味着可以用100%的CPU）不可以是0。设为-1不设置限制
 	BOOL bLimitPrivileges,			//限制权限
+	BOOL DesktopIso,				//是否使用桌面隔离
+	BOOL NoOutPipe,					//是否关闭管道
 	PBYTE pExternalData,			//附带的信息
 	SANDBOX_CALLBACK CallbackFunc	//回调函数
 )
@@ -263,44 +279,94 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 		SysInfo.cb = sizeof(STARTUPINFO);
 
 
-
-		//创建管道
-		{
-
+		{//创建管道
 			CreateOverlappedNamedPipePair(&hPipeInRead, &hPipeInWrite, PIPEIO_BUFSIZE);
-			CreateOverlappedNamedPipePair(&hPipeOutRead, &hPipeOutWrite, PIPEIO_BUFSIZE);
 			SysInfo.hStdInput = hPipeInRead;
-			SysInfo.hStdOutput = SysInfo.hStdError = hPipeOutWrite;
-			SysInfo.dwFlags |= STARTF_USESTDHANDLES;
-
 			CreateIoCompletionPort(hPipeInWrite, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
-			CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
+			SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
+
+			if (!NoOutPipe)
+			{
+				CreateOverlappedNamedPipePair(&hPipeOutRead, &hPipeOutWrite, PIPEIO_BUFSIZE);
+				SysInfo.hStdOutput = SysInfo.hStdError = hPipeOutWrite;
+				CreateIoCompletionPort(hPipeOutRead, PipeIOCompPort, (ULONG_PTR)Sandbox, 0);
+				SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+			}
+			else
+			{
+				SysInfo.hStdOutput = SysInfo.hStdError = 0;
+			}
+			SysInfo.dwFlags |= STARTF_USESTDHANDLES;
 		}
 
 
-		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+		if (DesktopIso)//桌面隔离
+		{
+			//随机生成桌面名
+			for (int i = 0; i < 30; i++)
+			{
+				Sandbox->DesktopName[i] = L'a' + rand() % 26;
+			}
+			Sandbox->DesktopName[30] = 0;
+
+			SECURITY_ATTRIBUTES sa;
+			sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+			sa.bInheritHandle = FALSE;
+			ConvertStringSecurityDescriptorToSecurityDescriptorW(TEXT("S:(ML;;NW;;;LW)D:(A;;0x12019f;;;WD)"),
+				SDDL_REVISION_1,
+				&(sa.lpSecurityDescriptor), 0);
+
+			Sandbox->hDesktop = CreateDesktopW(Sandbox->DesktopName, NULL, NULL, 0, GENERIC_ALL, &sa);
+
+			LocalFree(sa.lpSecurityDescriptor);
+
+			if (!Sandbox->hDesktop)
+			{
+				__leave;
+			}
+			SysInfo.lpDesktop = Sandbox->DesktopName;
+		}
+
 		BOOL bCreated;
 		if (bLimitPrivileges)
 		{
-			bCreated = CreateLimitedProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+			bCreated = CreateLimitedProcessW(ApplicationName,
+				CommandLine,
+				0, 0,
+				TRUE,
+				CREATE_SUSPENDED | (NoOutPipe ? CREATE_NEW_CONSOLE : 0),
+				0, CurrentDirectory,
+				&SysInfo, &ProcInfo);
 		}
 		else
 		{
-			bCreated = CreateProcessW(ApplicationName, CommandLine, 0, 0, TRUE, CREATE_SUSPENDED, 0, CurrentDirectory, &SysInfo, &ProcInfo);
+			bCreated = CreateProcessW(ApplicationName,
+				CommandLine,
+				0, 0,
+				TRUE,
+				CREATE_SUSPENDED | (NoOutPipe ? CREATE_NEW_CONSOLE : 0),
+				0, CurrentDirectory,
+				&SysInfo, &ProcInfo);
 		}
-		SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, 0);
-		SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, 0);
 
-		CloseHandle(hPipeInRead);
-		CloseHandle(hPipeOutWrite);
+		{
+			SetHandleInformation(hPipeInRead, HANDLE_FLAG_INHERIT, 0);
+			CloseHandle(hPipeInRead);
+			Sandbox->hPipeInWrite = hPipeInWrite;
+
+			if (!NoOutPipe)
+			{
+				SetHandleInformation(hPipeOutWrite, HANDLE_FLAG_INHERIT, 0);
+				CloseHandle(hPipeOutWrite);
+				Sandbox->hPipeOutRead = hPipeOutRead;
+			}
+		}
 
 		if (!bCreated)
 		{
 			__leave;
 		}
-		Sandbox->hPipeInWrite = hPipeInWrite;
-		Sandbox->hPipeOutRead = hPipeOutRead;
 
 		if (!AssignProcessToJobObject(hJob, ProcInfo.hProcess))
 		{
@@ -369,6 +435,11 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 				CloseHandle(hJob);
 			}
 
+			if (Sandbox->hDesktop)
+			{
+				CloseDesktop(Sandbox->hDesktop);
+			}
+
 			if (Sandbox)
 			{
 				free(Sandbox);
@@ -406,10 +477,14 @@ int FreeSimpleSandbox(pSANDBOX Sandbox)
 	ReleaseSRWLockExclusive(&SandboxListLock);
 
 	TerminateJobObject(Sandbox->hJob, 1);
-	if (Sandbox->hPipeInWrite) CloseHandle(Sandbox->hPipeInWrite);
-	if (Sandbox->hPipeOutRead) CloseHandle(Sandbox->hPipeOutRead);
+	if (Sandbox->hPipeInWrite && (Sandbox->hPipeInWrite != INVALID_HANDLE_VALUE)) CloseHandle(Sandbox->hPipeInWrite);
+	if (Sandbox->hPipeOutRead && (Sandbox->hPipeOutRead != INVALID_HANDLE_VALUE)) CloseHandle(Sandbox->hPipeOutRead);
 	CloseHandle(Sandbox->hProcess);
 	CloseHandle(Sandbox->hJob);
+	if (Sandbox->hDesktop)
+	{
+		CloseDesktop(Sandbox->hDesktop);
+	}
 	return 0;
 }
 
@@ -580,6 +655,7 @@ void __stdcall TerminateJobTimerRoutine(
 		{
 			if (pList->SandboxID == (LONGLONG)lpArgToCompletionRoutine)
 			{
+				pList->SandboxCallback(pList, pList->pExternalData, SANDBOX_EVENT_TIME_END, 0, 0);
 				TerminateJobObject(pList->hJob, 1); //time over!
 				if (pList->ExitReason == SANDBOX_ER_RUNNING)
 				{
@@ -639,6 +715,7 @@ BOOL CreateLimitedProcessW(
 			sizeof(TOKEN_MANDATORY_LABEL) + GetLengthSid(pIntegritySid));
 		if (!bSuccess)__leave;
 
+		LocalFree(pIntegritySid);
 		// 设置进程的 UI 权限级别 
 		//bSuccess = SetTokenInformation(hNewToken, TokenIntegrityLevelDesktop,
 		//	&TIL, sizeof(TOKEN_MANDATORY_LABEL) + RtlLengthSid(pIntegritySid));
@@ -666,6 +743,310 @@ BOOL CreateLimitedProcessW(
 	return bRet;
 }
 
+
+int CaptureAnImage(HWND hWnd, WCHAR FilePath[])
+{
+	HDC hdcScreen;
+	HDC hdcWindow;
+	HDC hdcMemDC = NULL;
+	HBITMAP hbmScreen = NULL;
+	BITMAP bmpScreen;
+
+	// Retrieve the handle to a display device context for the client 
+	// area of the window. 
+	hdcScreen = GetDC(NULL);
+	hdcWindow = GetDC(hWnd);
+
+	// Create a compatible DC which is used in a BitBlt from the window DC
+	hdcMemDC = CreateCompatibleDC(hdcWindow);
+
+	if (!hdcMemDC)
+	{
+		goto done;
+	}
+
+	// Get the client area for size calculation
+	RECT rcClient;
+	GetClientRect(hWnd, &rcClient);
+
+	//This is the best stretch mode
+	SetStretchBltMode(hdcWindow, HALFTONE);
+
+	//The source DC is the entire screen and the destination DC is the current window (HWND)
+	if (!StretchBlt(hdcWindow,
+		0, 0,
+		rcClient.right, rcClient.bottom,
+		hdcScreen,
+		0, 0,
+		GetSystemMetrics(SM_CXSCREEN),
+		GetSystemMetrics(SM_CYSCREEN),
+		SRCCOPY))
+	{
+		goto done;
+	}
+
+	// Create a compatible bitmap from the Window DC
+	hbmScreen = CreateCompatibleBitmap(hdcWindow, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
+
+	if (!hbmScreen)
+	{
+		goto done;
+	}
+
+	// Select the compatible bitmap into the compatible memory DC.
+	SelectObject(hdcMemDC, hbmScreen);
+
+	// Bit block transfer into our compatible memory DC.
+	if (!BitBlt(hdcMemDC,
+		0, 0,
+		rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,
+		hdcWindow,
+		0, 0,
+		SRCCOPY))
+	{
+		goto done;
+	}
+
+	SaveHDCToFile(hdcMemDC, &rcClient, FilePath);
+
+	//// Get the BITMAP from the HBITMAP
+	//GetObject(hbmScreen, sizeof(BITMAP), &bmpScreen);
+
+	//BITMAPFILEHEADER   bmfHeader;
+	//BITMAPINFOHEADER   bi;
+
+	//bi.biSize = sizeof(BITMAPINFOHEADER);
+	//bi.biWidth = bmpScreen.bmWidth;
+	//bi.biHeight = bmpScreen.bmHeight;
+	//bi.biPlanes = 1;
+	//bi.biBitCount = 32;
+	//bi.biCompression = BI_RGB;
+	//bi.biSizeImage = 0;
+	//bi.biXPelsPerMeter = 0;
+	//bi.biYPelsPerMeter = 0;
+	//bi.biClrUsed = 0;
+	//bi.biClrImportant = 0;
+
+	//DWORD dwBmpSize = ((bmpScreen.bmWidth * bi.biBitCount + 31) / 32) * 4 * bmpScreen.bmHeight;
+
+	//// Starting with 32-bit Windows, GlobalAlloc and LocalAlloc are implemented as wrapper functions that 
+	//// call HeapAlloc using a handle to the process's default heap. Therefore, GlobalAlloc and LocalAlloc 
+	//// have greater overhead than HeapAlloc.
+	//HANDLE hDIB = GlobalAlloc(GHND, dwBmpSize);
+	//char* lpbitmap = (char*)GlobalLock(hDIB);
+
+	//// Gets the "bits" from the bitmap and copies them into a buffer 
+	//// which is pointed to by lpbitmap.
+	//GetDIBits(hdcWindow, hbmScreen, 0,
+	//	(UINT)bmpScreen.bmHeight,
+	//	lpbitmap,
+	//	(BITMAPINFO*)&bi, DIB_RGB_COLORS);
+
+	//// A file is created, this is where we will save the screen capture.
+	//HANDLE hFile = CreateFile(FilePath,
+	//	GENERIC_WRITE,
+	//	0,
+	//	NULL,
+	//	CREATE_ALWAYS,
+	//	FILE_ATTRIBUTE_NORMAL, NULL);
+
+	//// Add the size of the headers to the size of the bitmap to get the total file size
+	//DWORD dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	////Offset to where the actual bitmap bits start.
+	//bmfHeader.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER);
+
+	////Size of the file
+	//bmfHeader.bfSize = dwSizeofDIB;
+
+	////bfType must always be BM for Bitmaps
+	//bmfHeader.bfType = 0x4D42; //BM   
+
+	//DWORD dwBytesWritten = 0;
+	//WriteFile(hFile, (LPSTR)&bmfHeader, sizeof(BITMAPFILEHEADER), &dwBytesWritten, NULL);
+	//WriteFile(hFile, (LPSTR)&bi, sizeof(BITMAPINFOHEADER), &dwBytesWritten, NULL);
+	//WriteFile(hFile, (LPSTR)lpbitmap, dwBmpSize, &dwBytesWritten, NULL);
+
+	////Unlock and Free the DIB from the heap
+	//GlobalUnlock(hDIB);
+	//GlobalFree(hDIB);
+
+	////Close the handle for the file that was created
+	//CloseHandle(hFile);
+
+	//Clean up
+done:
+	DeleteObject(hbmScreen);
+	DeleteObject(hdcMemDC);
+	ReleaseDC(NULL, hdcScreen);
+	ReleaseDC(hWnd, hdcWindow);
+
+	return 0;
+}
+
+
+
+int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath)
+{
+	if (Sandbox && Sandbox->hDesktop)
+	{
+		//判当前Session是否活着
+		DWORD SessionID;
+		DWORD * ConnState;
+		DWORD BytesRet;
+		ProcessIdToSessionId(GetCurrentProcessId(), &SessionID);
+		WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, SessionID,
+			WTSConnectState, &ConnState, &BytesRet);
+		
+		if ((*ConnState) != WTSActive)
+		{
+			char buffer[256];
+			sprintf_s(buffer, _countof(buffer), "tscon %d /dest:console", SessionID);
+			system(buffer);
+		}
+		int OldPriority = GetThreadPriority(GetCurrentThread());
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+		AcquireSRWLockExclusive(&DesktopSwitchLock);
+		HDESK OldDesk = GetThreadDesktop(GetCurrentThreadId());
+		SetThreadDesktop(Sandbox->hDesktop);
+		SwitchDesktop(Sandbox->hDesktop);
+
+		CaptureAnImage(GetDesktopWindow(), FilePath);
+
+		SwitchDesktop(OldDesk);
+		SetThreadDesktop(OldDesk);
+		ReleaseSRWLockExclusive(&DesktopSwitchLock);
+		SetThreadPriority(GetCurrentThread(), OldPriority);
+	}
+	return 0;
+}
+
+//
+//BOOL GetLowLimitSA(SECURITY_ATTRIBUTES * psa)
+//{
+//	//DWORD dwRes, dwDisposition;
+//	//PSID pEveryoneSID = NULL, pAdminSID = NULL;
+//	//PACL pACL = NULL;
+//	//PSECURITY_DESCRIPTOR pSD = NULL;
+//	//EXPLICIT_ACCESS ea[2];
+//	//SID_IDENTIFIER_AUTHORITY SIDAuthWorld =
+//	//	SECURITY_WORLD_SID_AUTHORITY;
+//	//SID_IDENTIFIER_AUTHORITY SIDAuthNT = SECURITY_NT_AUTHORITY;
+//
+//	//LONG lRes;
+//	//HKEY hkSub = NULL;
+//
+//	//// Create a well-known SID for the Everyone group.
+//	//if (!AllocateAndInitializeSid(&SIDAuthWorld, 1,
+//	//	SECURITY_WORLD_RID,
+//	//	0, 0, 0, 0, 0, 0, 0,
+//	//	&pEveryoneSID))
+//	//{
+//	//	goto Cleanup;
+//	//}
+//
+//	//// Initialize an EXPLICIT_ACCESS structure for an ACE.
+//	//// The ACE will allow Everyone read access to the key.
+//	//ZeroMemory(&ea, 2 * sizeof(EXPLICIT_ACCESS));
+//	//ea[0].grfAccessPermissions = KEY_READ;
+//	//ea[0].grfAccessMode = SET_ACCESS;
+//	//ea[0].grfInheritance = NO_INHERITANCE;
+//	//ea[0].Trustee.TrusteeForm = TRUSTEE_IS_SID;
+//	//ea[0].Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+//	//ea[0].Trustee.ptstrName = (LPTSTR)pEveryoneSID;
+//
+//	//// Create a SID for the BUILTIN\Administrators group.
+//	//if (!AllocateAndInitializeSid(&SIDAuthNT, 2,
+//	//	SECURITY_BUILTIN_DOMAIN_RID,
+//	//	DOMAIN_ALIAS_RID_ADMINS,
+//	//	0, 0, 0, 0, 0, 0,
+//	//	&pAdminSID))
+//	//{
+//	//	goto Cleanup;
+//	//}
+//
+//	//// Initialize an EXPLICIT_ACCESS structure for an ACE.
+//	//// The ACE will allow the Administrators group full access to
+//	//// the key.
+//	//ea[1].grfAccessPermissions = KEY_ALL_ACCESS;
+//	//ea[1].grfAccessMode = SET_ACCESS;
+//	//ea[1].grfInheritance = NO_INHERITANCE;
+//	//ea[1].Trustee.TrusteeForm = TRUSTEE_IS_SID;
+//	//ea[1].Trustee.TrusteeType = TRUSTEE_IS_GROUP;
+//	//ea[1].Trustee.ptstrName = (LPTSTR)pAdminSID;
+//
+//	///*SYSTEM_MANDATORY_LABEL_ACE MandatoryLable;
+//	//InitializeAcl()*/
+//
+//	//// Create a new ACL that contains the new ACEs.
+//	////dwRes = SetEntriesInAcl(3, ea, NULL, &pACL);
+//	//
+//	//PACL pAcl;
+//	//pAcl = (ACL*)LocalAlloc(LPTR, 1000);
+//	//InitializeAcl(pAcl, 1000, ACL_REVISION_DS);
+//	////if (ERROR_SUCCESS != dwRes)
+//	//{
+//	////	goto Cleanup;
+//	//}
+//
+//	//PTCHAR szIntegritySid = TEXT("S-1-16-4096"); // 低完整性 SID 
+//	//PSID pIntegritySid = NULL;
+//
+//	//BOOL bSuccess = ConvertStringSidToSid(szIntegritySid, &pIntegritySid);
+//
+//	//SYSTEM_MANDATORY_LABEL_ACE SMLA;
+//
+//	//AddMandatoryAce(pAcl, ACL_REVISION_DS, INHERITED_ACE, SYSTEM_MANDATORY_LABEL_NO_WRITE_UP, pIntegritySid);
+//
+//	//SetEntriesInAcl(2, ea, pAcl, &pACL);
+//	//// Initialize a security descriptor.  
+//
+//	//pSD = (PSECURITY_DESCRIPTOR)LocalAlloc(LPTR,
+//	//	SECURITY_DESCRIPTOR_MIN_LENGTH);
+//	//if (NULL == pSD)
+//	//{
+//	//	goto Cleanup;
+//	//}
+//
+//	//if (!InitializeSecurityDescriptor(pSD,
+//	//	SECURITY_DESCRIPTOR_REVISION))
+//	//{
+//	//	goto Cleanup;
+//	//}
+//
+//	//// Add the ACL to the security descriptor. 
+//	//if (!SetSecurityDescriptorDacl(pSD,
+//	//	TRUE,     // bDaclPresent flag   
+//	//	pAcl,
+//	//	FALSE))   // not a default DACL 
+//	//{
+//	//	goto Cleanup;
+//	//}
+//
+//	// Initialize a security attributes structure.
+//psa->nLength = sizeof(SECURITY_ATTRIBUTES);
+////psa->lpSecurityDescriptor = pSD;
+//psa->bInheritHandle = FALSE;
+//
+//	PSECURITY_DESCRIPTOR psd = 0;
+//	
+//	Sleep(0);
+////Cleanup:
+////
+////	if (pEveryoneSID)
+////		FreeSid(pEveryoneSID);
+////	if (pAdminSID)
+////		FreeSid(pAdminSID);
+////	if (pACL)
+////		LocalFree(pACL);
+////	if (pSD)
+////		LocalFree(pSD);
+////	if (hkSub)
+////		RegCloseKey(hkSub);
+////
+////	return;
+//
+//}
 
 BOOL CreateOverlappedNamedPipePair(PHANDLE hReadPipe, PHANDLE hWritePipe, DWORD nSize)
 {

@@ -9,6 +9,7 @@ typedef INT(*SANDBOX_CALLBACK)(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE 
 //Callback事件
 #define SANDBOX_EVTNT_PROCESS_ZERO 1
 #define SANDBOX_EVENT_STD_OUTPUT 2
+#define SANDBOX_EVENT_TIME_END 3
 
 
 typedef struct __tagSandbox
@@ -28,6 +29,9 @@ typedef struct __tagSandbox
 	HANDLE hPipeInWrite;
 	HANDLE hPipeOutRead;
 
+	WCHAR DesktopName[30 + 1];
+	HDESK hDesktop;
+
 	pSANDBOX_CHAIN LastSandbox;
 	pSANDBOX_CHAIN NextSandbox;
 }SANDBOX, * pSANDBOX, SANDBOX_CHAIN, * pSANDBOX_CHAIN;
@@ -46,11 +50,15 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 	long long TotMemoryLimit,		//整个沙盒的内存限制，Byte为单位。设为-1不设置内存限制
 	int CpuRateLimit,				//CPU限制，1-10000，（10000意味着可以用100%的CPU）不可以是0。设为-1不设置限制
 	BOOL bLimitPrivileges,			//限制权限
+	BOOL DesktopIso,				//是否使用桌面隔离
+	BOOL NoOutPipe,					//是否关闭管道
 	PBYTE pExternalData,			//附带的信息
 	SANDBOX_CALLBACK CallbackFunc	//回调函数
 );
 
 int FreeSimpleSandbox(pSANDBOX Sandbox);
+
+int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath);
 
 //用于Pipe的OverlappedIO包
 

@@ -12,7 +12,7 @@
 #include"SimpleSandbox.h"
 #include<process.h>
 #include"MessageWatch.h"
-
+#include"Pic.h"
 
 //****************************************************************************************************************
 #include"SendEventDispatch.h"
@@ -32,6 +32,7 @@ int main()
 	int ch_ret;
 	puts("BOIT Server正在启动\n");
 
+	InitGDIPlus();
 	InitializeSandbox(2, 2);
 
 	InitializeMessageWatch();
@@ -147,6 +148,8 @@ int main()
 	FinalizeCommandManager();
 	FinalizeMessageWatch();
 	FinalizeSandbox();
+
+	CleanupGDIPlus();
 
 	//检查是否卸载
 	if (bBOITRemove)

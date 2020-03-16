@@ -148,6 +148,12 @@
     <Filter Include="头文件\异步网络">
       <UniqueIdentifier>{0b23ddb9-607c-4865-a3f8-4e0fb4bd31ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\图片处理">
+      <UniqueIdentifier>{4f1213a0-1b45-4f59-8ce9-39b7d8309fa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\图片处理">
+      <UniqueIdentifier>{294b99b7-9b78-48ce-b4c5-379a4fda5265}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -252,6 +258,9 @@
     <ClCompile Include="AsyncINet.c">
       <Filter>源文件\异步网络</Filter>
     </ClCompile>
+    <ClCompile Include="Pic.cpp">
+      <Filter>源文件\图片处理</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Global.h">
@@ -307,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="AsyncINet.h">
       <Filter>头文件\异步网络</Filter>
+    </ClInclude>
+    <ClInclude Include="Pic.h">
+      <Filter>头文件\图片处理</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
