@@ -225,11 +225,11 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 
 		{
 			JOBOBJECT_EXTENDED_LIMIT_INFORMATION ExtendLimit = { 0 };
-			if (TotUserTimeLimit != -1)
+			/*if (TotUserTimeLimit != -1)
 			{
 				ExtendLimit.BasicLimitInformation.PerJobUserTimeLimit.QuadPart = TotUserTimeLimit;
 				ExtendLimit.BasicLimitInformation.LimitFlags |= JOB_OBJECT_LIMIT_JOB_TIME;
-			}
+			}*/
 			if (TotMemoryLimit != -1)
 			{
 				ExtendLimit.JobMemoryLimit = (SIZE_T)TotMemoryLimit;
