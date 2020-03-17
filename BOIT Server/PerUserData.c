@@ -33,8 +33,8 @@ int CreatePerUserData(WCHAR * Path)
 int GetPerUserDir(WCHAR * Buffer,long long QQID)
 {
 	wcscpy_s(Buffer, MAX_PATH, GetBOITUserDataDir());
-	WCHAR QQIDStr[16] = { 0 };
-	swprintf_s(QQIDStr, 16, L"%lld\\", QQID);
+	WCHAR QQIDStr[32] = { 0 };
+	swprintf_s(QQIDStr, _countof(QQIDStr), L"%lld\\", QQID);
 	PathAppendW(Buffer, QQIDStr);
 	return 0;
 }
@@ -42,8 +42,8 @@ int GetPerUserDir(WCHAR * Buffer,long long QQID)
 int GetPerUserStorageDir(WCHAR* Buffer, long long QQID)
 {
 	wcscpy_s(Buffer, MAX_PATH, GetBOITUserDataDir());
-	WCHAR QQIDStr[16] = { 0 };
-	swprintf_s(QQIDStr, 16, L"%lld", QQID);
+	WCHAR QQIDStr[32] = { 0 };
+	swprintf_s(QQIDStr, _countof(QQIDStr), L"%lld", QQID);
 	PathAppendW(Buffer, QQIDStr);
 	PathAppendW(Buffer, L"Storage");
 	return 0;
