@@ -70,10 +70,12 @@ int CmdMsg_codeforces_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR*
 	if (OrderStrlen >= 64)
 	{
 		SendBackMessage(boitSession, L"无法识别指令");
+		return 0;
 	}
 	else if (OrderStrlen == 0)
 	{
 		SendBackMessage(boitSession, L"输入#cf help查看帮助");
+		return 0;
 	}
 
 	WCHAR* OrderStr[] = { L"help",L"profile",L"contests" };
