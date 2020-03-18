@@ -58,7 +58,7 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 
 int FreeSimpleSandbox(pSANDBOX Sandbox);
 
-int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath);
+int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath, WCHAR * WindowName);
 
 //用于Pipe的OverlappedIO包
 
