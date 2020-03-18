@@ -58,6 +58,7 @@ typedef struct __tagRunSession
 	pBOIT_SESSION boitSession;
 	pVBUF StdOutBuffer;
 	BOOL bScrnShot;
+	BOOL bScrnShotTaken;
 	WCHAR WindowName[32];
 }RUN_SESSION, * pRUN_SESSION;
 
@@ -654,12 +655,11 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		case SANDBOX_ER_KILLED:
 			SendBackMessage(Session->boitSession, L"程序被强行中断了！qaq");
 			break;
-		case SANDBOX_ER_EXIT:
-			if (Session->bScrnShot)
-			{
-				SendBackMessage(Session->boitSession, L"程序提早退出了，没能截到图orz");
-			}
-			break;
+		}
+
+		if (Session->bScrnShot && (Session->bScrnShotTaken == FALSE))
+		{
+			SendBackMessage(Session->boitSession, L"程序提早退出了，没能截到图orz");
 		}
 
 		if (!(Session->bScrnShot))
@@ -720,6 +720,7 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 
 			swprintf_s(TestBuffer, _countof(TestBuffer), L"[CQ:image,file=%ls]", PhotoFileName);
 			SendBackMessage(Session->boitSession, TestBuffer);
+			Session->bScrnShotTaken = TRUE;
 		}
 	}
 		break;
@@ -773,10 +774,13 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 {
 	pSANDBOX Sandbox = 0;
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
+	
 	if (!RunSession)
 	{
 		return 0;
 	}
+
+	ZeroMemory(RunSession, sizeof(RUN_SESSION));
 	RunSession->Encode = Encode;
 
 	RunSession->boitSession = boitSession;
@@ -784,6 +788,8 @@ pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentD
 	RunSession->StdOutBuffer = AllocVBuf();
 
 	RunSession->bScrnShot = bScrnShot;
+
+	RunSession->bScrnShotTaken = FALSE;
 	wcscpy_s(RunSession->WindowName, _countof(RunSession->WindowName), WindowName);
 	//RunSession->bWindow = bWindow;
 

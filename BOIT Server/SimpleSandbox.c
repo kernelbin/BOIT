@@ -523,7 +523,7 @@ unsigned __stdcall JobObjCompletionPort(LPVOID Args)
 
 			break;
 		case JOB_OBJECT_MSG_EXIT_PROCESS:
-			if (pSandbox->ExitReason == SANDBOX_ER_RUNNING)
+			if (pSandbox->ExitReason == SANDBOX_ER_RUNNING && (GetProcessId(pSandbox->hProcess) == lpOverlapped))
 			{
 				pSandbox->ExitReason = SANDBOX_ER_EXIT;
 			}
