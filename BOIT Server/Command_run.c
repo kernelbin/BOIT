@@ -458,11 +458,11 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 
 			if (boitSession->GroupID)
 			{
-				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20, boitSession, InputCallback, (PBYTE)InputSession);
+				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 30, boitSession, InputCallback, (PBYTE)InputSession);
 			}
 			else
 			{
-				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20, boitSession, InputCallback, (PBYTE)InputSession);
+				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 30, boitSession, InputCallback, (PBYTE)InputSession);
 			}
 			SendBackMessage(boitSession, L"请输入输入数据：");
 
@@ -546,12 +546,12 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				//InputSession->bWindow = Session->bWindow;
 				if (Session->boitSession->GroupID)
 				{
-					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 20,
+					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 30,
 						Session->boitSession, InputCallback, (PBYTE)InputSession);
 				}
 				else
 				{
-					RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 20,
+					RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 30,
 						Session->boitSession, InputCallback, (PBYTE)InputSession);
 				}
 				SendBackMessage(Session->boitSession, L"请输入输入数据：");
