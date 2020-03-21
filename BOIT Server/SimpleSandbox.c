@@ -760,13 +760,20 @@ int CaptureAnImage(HWND hWnd, WCHAR FilePath[])
 	return 0;
 }
 
-int CaptureWindowImage(HWND hWnd, WCHAR FilePath[])
+int CaptureWindowImage(HWND hWnd, BOOL bClient, WCHAR FilePath[])
 {
 	//HDC hdcScreen;
-	HDC hdcMem,hdcWnd;
+	HDC hdcMem, hdcWnd;
 	HBITMAP hBitmap;
 	RECT rcWindow;
-	GetWindowRect(hWnd, &rcWindow);
+	if (bClient)
+	{
+		GetClientRect(hWnd, &rcWindow);
+	}
+	else
+	{
+		GetWindowRect(hWnd, &rcWindow);
+	}
 	rcWindow.right -= rcWindow.left;
 	rcWindow.bottom -= rcWindow.top;
 	rcWindow.top = rcWindow.left = 0;
@@ -777,7 +784,16 @@ int CaptureWindowImage(HWND hWnd, WCHAR FilePath[])
 	ReleaseDC(hWnd, hdcWnd);
 
 	SelectObject(hdcMem, hBitmap);
-	PrintWindow(hWnd, hdcMem, PW_RENDERFULLCONTENT);
+	UINT PrintWindowFlag;
+	if (bClient)
+	{
+		PrintWindowFlag = PW_CLIENTONLY;
+	}
+	else
+	{
+		PrintWindowFlag = PW_RENDERFULLCONTENT;
+	}
+	PrintWindow(hWnd, hdcMem, PrintWindowFlag);
 	//SendMessage(hWnd, WM_PRINT, hdcMem, PRF_NONCLIENT);
 	SaveHDCToFile(hdcMem, &rcWindow, FilePath);
 	
@@ -788,7 +804,7 @@ int CaptureWindowImage(HWND hWnd, WCHAR FilePath[])
 
 
 
-int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath, WCHAR * WindowName)
+int SandboxTakeScreenShot(pSANDBOX Sandbox, int iScrnShot, WCHAR* FilePath, WCHAR * WindowName)
 {
 	if (Sandbox && Sandbox->hDesktop)
 	{
@@ -814,22 +830,40 @@ int SandboxTakeScreenShot(pSANDBOX Sandbox, WCHAR* FilePath, WCHAR * WindowName)
 		//
 		
 		HWND hwnd = 0;
-		if (WindowName && WindowName[0])
+		switch (iScrnShot)
 		{
-			hwnd = FindWindow(0, WindowName);
-			if (hwnd)
+		case 1:
+			if (hwnd == 0)
 			{
-				CaptureWindowImage(hwnd, FilePath);
+				SwitchDesktop(Sandbox->hDesktop);
+				hwnd = GetDesktopWindow();
+				CaptureAnImage(hwnd, FilePath);
+				SwitchDesktop(OldDesk);
 			}
+			break;
+		case 2:
+			if (WindowName && WindowName[0])
+			{
+				hwnd = FindWindow(0, WindowName);
+				if (hwnd)
+				{
+					CaptureWindowImage(hwnd, FALSE, FilePath);
+				}
+			}
+			break;
+		case 3:
+			if (WindowName && WindowName[0])
+			{
+				hwnd = FindWindow(0, WindowName);
+				if (hwnd)
+				{
+					CaptureWindowImage(hwnd, TRUE, FilePath);
+				}
+			}
+			break;
 		}
 		
-		if(hwnd == 0)
-		{
-			SwitchDesktop(Sandbox->hDesktop);
-			hwnd = GetDesktopWindow();
-			CaptureAnImage(hwnd, FilePath);
-			SwitchDesktop(OldDesk);
-		}
+		
 		
 
 		//CaptureAnImage(hwnd, FilePath);
