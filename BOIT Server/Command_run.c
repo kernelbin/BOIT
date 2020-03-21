@@ -304,9 +304,9 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 			if (bIsHelp)
 			{
 				//显示详细帮助信息
-				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] [/scrn] [/wnd:\"name\"] sourcecode");
+				SendBackMessage(boitSession, L"usage: #run language [/su] [/input] [/scrn] [/wnd:\"name\"] [/clnt:\"name\"] sourcecode");
 				SendBackMessage(boitSession, L"example:\n\n#run c\n#include<stdio.h>\nint main(){\nprintf(\"hello, bot\");\n}");
-				SendBackMessage(boitSession, L"使用 /su 以用管理员权限执行指令。使用 /input 以启用输入数据。使用 /scrn 以全屏截图。使用 /wnd:\"name\" 以对窗口标题为name的窗口进行截图");
+				SendBackMessage(boitSession, L"/su :用管理员权限执行指令。 /input :启用输入数据。/scrn :全屏截图。 /wnd:\"name\" 或 /clnt:\"name\" :对标题为name的窗口或客户区进行截图");
 				ShowSupportLanguageInfo(pCmd, L".cfg", boitSession);
 			}
 			else
