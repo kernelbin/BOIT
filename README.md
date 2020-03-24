@@ -1,6 +1,9 @@
 # BOIT
 yh蒟蒻写的给OIers用的一个bot，OI Bot的第二版。
 
+A bot running on QQ (IM software, popular in China) written by YH for OIers (Who learn Olympiad in Informatics)
+
+
 # features
 **小!!!**  目前可执行文件和dll打包大小不到400KB
  
