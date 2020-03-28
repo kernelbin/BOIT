@@ -275,7 +275,47 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 				if (((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds == TimeStamp)
 				{
 					VBufferAppendStringW(ReplyMsg, ((pCFCONTESTINFO)(CFContests->Data))[i].ContestName);
-					VBufferAppendStringW(ReplyMsg, L"\n");
+					int TimeLeft = ((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds - CurrentUnixTime;
+					WCHAR Buffer[128];
+
+					VBufferAppendStringW(ReplyMsg, L"（将于");
+					if (TimeLeft < 5 * 30)
+					{
+						//预报分钟和秒
+						if (TimeLeft / (60))
+						{
+							swprintf_s(Buffer, _countof(Buffer), L" %d 分钟", TimeLeft / (60));
+							VBufferAppendStringW(ReplyMsg, Buffer);
+							TimeLeft %= (60);
+						}
+						if (TimeLeft)
+						{
+							swprintf_s(Buffer, _countof(Buffer), L" %d 秒", TimeLeft);
+							VBufferAppendStringW(ReplyMsg, Buffer);
+						}
+					}
+					else
+					{
+						if (TimeLeft / (24 * 60 * 60))
+						{
+							swprintf_s(Buffer, _countof(Buffer), L" %d 天", TimeLeft / (24 * 60 * 60));
+							VBufferAppendStringW(ReplyMsg, Buffer);
+							TimeLeft %= (24 * 60 * 60);
+						}
+						if (TimeLeft / (60 * 60))
+						{
+							swprintf_s(Buffer, _countof(Buffer), L" %d 小时", TimeLeft / (60 * 60));
+							VBufferAppendStringW(ReplyMsg, Buffer);
+							TimeLeft %= (60 * 60);
+						}
+						if (TimeLeft / (60))
+						{
+							swprintf_s(Buffer, _countof(Buffer), L" %d 分钟", TimeLeft / (60));
+							VBufferAppendStringW(ReplyMsg, Buffer);
+							TimeLeft %= (60);
+						}
+					}
+					VBufferAppendStringW(ReplyMsg, L"后开始）\n");
 				}
 			}
 		}
@@ -620,7 +660,14 @@ BOOL ParseCFContest(cJSON* ContestJson, pCFCONTESTINFO CFContest)
 	CFContest->TypeString = StrConvMB2WC(CP_UTF8, ContestField[2]->valuestring, -1, 0);
 	CFContest->PhaseString = StrConvMB2WC(CP_UTF8, ContestField[3]->valuestring, -1, 0);
 	CFContest->DurationSeconds = ContestField[4]->valueint;
-	CFContest->StartTimeSeconds = ContestField[5]->valueint;
+	if (ContestField[5])
+	{
+		CFContest->StartTimeSeconds = ContestField[5]->valueint;
+	}
+	else
+	{
+		CFContest->StartTimeSeconds = 0;
+	}
 	return 0;
 }
 
