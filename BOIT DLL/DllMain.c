@@ -1,7 +1,7 @@
 /*
 	DllMain.c
 	Copyright (c) 2019 yh
-	智能宿舍的CoolQ服务端
+	BOIT 的 CoolQ 前端
 */
 
 #include<Windows.h>
