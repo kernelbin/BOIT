@@ -159,6 +159,7 @@
     <ClCompile Include="Command_q_and_a.c" />
     <ClCompile Include="Command_run.c" />
     <ClCompile Include="Command_runcode.c" />
+    <ClCompile Include="Command_sponsor.c" />
     <ClCompile Include="Command_stop.c" />
     <ClCompile Include="Command_version.c" />
     <ClCompile Include="Corpus.c" />

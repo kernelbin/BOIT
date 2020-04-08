@@ -157,6 +157,9 @@
     <Filter Include="源文件\消息回复">
       <UniqueIdentifier>{20060292-656f-4184-9ca6-869118cebab8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\打钱">
+      <UniqueIdentifier>{a94ea5e6-966d-4db2-b15f-c46c17834712}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -266,6 +269,9 @@
     </ClCompile>
     <ClCompile Include="MessageReply.c">
       <Filter>源文件\消息回复</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_sponsor.c">
+      <Filter>源文件\指令回调\打钱</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
