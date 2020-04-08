@@ -232,7 +232,7 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 		else
 		{
 			WCHAR Buffer[32];
-			swprintf_s(Buffer, _countof(Buffer), L"当前正在进行的比赛有 %d 个：\n", iOnGoing);
+			swprintf_s(Buffer, _countof(Buffer), L"当前正在进行的比赛有 %d 个：", iOnGoing);
 			VBufferAppendStringW(ReplyMsg, Buffer);
 
 			for (int i = 0; i < ContestCount; i++)
@@ -240,21 +240,21 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 				if (((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds < CurrentUnixTime &&
 					((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds + ((pCFCONTESTINFO)(CFContests->Data))[i].DurationSeconds >= CurrentUnixTime)
 				{
-					VBufferAppendStringW(ReplyMsg, ((pCFCONTESTINFO)(CFContests->Data))[i].ContestName);
 					VBufferAppendStringW(ReplyMsg, L"\n");
+					VBufferAppendStringW(ReplyMsg, ((pCFCONTESTINFO)(CFContests->Data))[i].ContestName);
 				}
 			}
 			
 			
 		}
-		AddSizeVBuf(ReplyMsg, sizeof(WCHAR) * 1);
+		/*AddSizeVBuf(ReplyMsg, sizeof(WCHAR) * 1);
 		((WCHAR*)(ReplyMsg->Data))[(ReplyMsg->Length / 2) - 1] = 0;
 		SendBackMessage(boitSession, ReplyMsg->Data);
-		FreeVBuf(ReplyMsg);
+		FreeVBuf(ReplyMsg);*/
 
 		//即将开始的比赛
 		int TimeStamp = 0x7fffffff;
-		ReplyMsg = AllocVBuf();
+		/*ReplyMsg = AllocVBuf();*/
 		for (int i = 0; i < ContestCount; i++)
 		{
 			if (((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds > CurrentUnixTime)
@@ -265,15 +265,16 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 
 		if (TimeStamp == 0x7fffffff)
 		{
-			VBufferAppendStringW(ReplyMsg, L"最近没有什么比赛诶\n");
+			VBufferAppendStringW(ReplyMsg, L"\n\n最近没有什么比赛诶");
 		}
 		else
 		{
-			VBufferAppendStringW(ReplyMsg, L"最近将要开始的比赛有：\n");
+			VBufferAppendStringW(ReplyMsg, L"\n\n最近将要开始的比赛有：");
 			for (int i = 0; i < ContestCount; i++)
 			{
 				if (((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds == TimeStamp)
 				{
+					VBufferAppendStringW(ReplyMsg, L"\n");
 					VBufferAppendStringW(ReplyMsg, ((pCFCONTESTINFO)(CFContests->Data))[i].ContestName);
 					int TimeLeft = ((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds - CurrentUnixTime;
 					WCHAR Buffer[128];
@@ -315,7 +316,7 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 							TimeLeft %= (60);
 						}
 					}
-					VBufferAppendStringW(ReplyMsg, L"后开始）\n");
+					VBufferAppendStringW(ReplyMsg, L"后开始）");
 				}
 			}
 		}
