@@ -37,6 +37,7 @@ int main()
 
 	InitializeMessageWatch();
 	InitializeCommandManager();
+	InitMessageReply();
 
 	RegisterInlineCommand();//注册所有内置指令
 

@@ -14,3 +14,6 @@ int StartSendEventHandler();
 
 int InitSendEventDispatch();
 
+
+//ÏûÏ¢»Ø¸´
+BOOL InitMessageReply();

@@ -57,7 +57,9 @@ int FinalizeMessageWatch()
 	{
 		for (pBOIT_MSGWATCH pList = RootMsgWatch; pList; pList = pList->Next)
 		{
-			free(pList);
+			pBOIT_MSGWATCH pToFree = pList;
+			pList = pList->Next;
+			free(pToFree);
 		}
 	}
 	LeaveCriticalSection(&MsgWatchChainLock);
@@ -82,14 +84,17 @@ int RegisterMessageWatch(int WatchType,
 	PBYTE pData)
 {
 	pBOIT_MSGWATCH MsgWatch = malloc(sizeof(BOIT_MSGWATCH));
-	
+	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
 	if (!MsgWatch)
 	{
 		return 0;
 	}
 	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
-	MsgWatch->GroupID = boitSession->GroupID;
-	MsgWatch->QQID = boitSession->QQID;
+	if (boitSession)
+	{
+		MsgWatch->GroupID = boitSession->GroupID;
+		MsgWatch->QQID = boitSession->QQID;
+	}
 	MsgWatch->WatchType = WatchType;
 	MsgWatch->MsgWatchID = InterlockedIncrement64(&MsgWatchAllocID);
 	MsgWatch->Callback = CallbackFunc;

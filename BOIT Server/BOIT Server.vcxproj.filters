@@ -154,6 +154,9 @@
     <Filter Include="头文件\图片处理">
       <UniqueIdentifier>{294b99b7-9b78-48ce-b4c5-379a4fda5265}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\消息回复">
+      <UniqueIdentifier>{20060292-656f-4184-9ca6-869118cebab8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -260,6 +263,9 @@
     </ClCompile>
     <ClCompile Include="Pic.cpp">
       <Filter>源文件\图片处理</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageReply.c">
+      <Filter>源文件\消息回复</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

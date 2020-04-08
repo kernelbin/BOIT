@@ -46,6 +46,9 @@ int InitBOITDirVar()//初始化各种目录路径
 
 	wcscpy_s(BOITCommandCfgDir, MAX_PATH, BOITBaseDir);
 	PathAppendW(BOITCommandCfgDir, L"CommandCfg\\");
+
+	wcscpy_s(BOITMsgReplyDir, MAX_PATH, BOITBaseDir);
+	PathAppendW(BOITMsgReplyDir, L"MsgReply\\");
 	return 0;
 }
 
@@ -57,6 +60,8 @@ int InitBOITDir()
 	CreateDirectoryW(GetBOITUserDataDir(), 0);
 	CreateDirectoryW(GetBOITGroupDataDir(), 0);
 	CreateDirectoryW(GetBOITCommandCfgDir(), 0);
+	CreateDirectoryW(GetBOITMsgReplyDir(), 0);
+
 
 	AcquireSRWLockShared(&CommandChainLock);
 	WCHAR PerCommandDir[MAX_PATH];
@@ -87,6 +92,10 @@ WCHAR* GetBOITGroupDataDir()
 WCHAR* GetBOITCommandCfgDir()
 {
 	return BOITCommandCfgDir;
+}
+WCHAR* GetBOITMsgReplyDir()
+{
+	return BOITMsgReplyDir;
 }
 
 

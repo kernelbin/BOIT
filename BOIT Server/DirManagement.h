@@ -21,10 +21,14 @@ WCHAR* GetBOITGroupDataDir();
 
 WCHAR* GetBOITCommandCfgDir();
 
+WCHAR* GetBOITMsgReplyDir();
+
 WCHAR BOITBaseDir[MAX_PATH];
 WCHAR BOITUserDataDir[MAX_PATH];
 WCHAR BOITGroupDataDir[MAX_PATH];
 WCHAR BOITCommandCfgDir[MAX_PATH];
+WCHAR BOITMsgReplyDir[MAX_PATH];
+
 
 WCHAR CQBaseDir[MAX_PATH];
 WCHAR CQIamgeDir[MAX_PATH];
