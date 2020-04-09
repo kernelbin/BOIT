@@ -242,6 +242,33 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 				{
 					VBufferAppendStringW(ReplyMsg, L"\n");
 					VBufferAppendStringW(ReplyMsg, ((pCFCONTESTINFO)(CFContests->Data))[i].ContestName);
+
+					int TimeLeft = ((pCFCONTESTINFO)(CFContests->Data))[i].StartTimeSeconds + ((pCFCONTESTINFO)(CFContests->Data))[i].DurationSeconds - CurrentUnixTime;
+					VBufferAppendStringW(ReplyMsg, L"（剩余时间");
+					if (TimeLeft / (24 * 60 * 60))
+					{
+						swprintf_s(Buffer, _countof(Buffer), L" %d 天", TimeLeft / (24 * 60 * 60));
+						VBufferAppendStringW(ReplyMsg, Buffer);
+						TimeLeft %= (24 * 60 * 60);
+					}
+					if (TimeLeft / (60 * 60))
+					{
+						swprintf_s(Buffer, _countof(Buffer), L" %d 小时", TimeLeft / (60 * 60));
+						VBufferAppendStringW(ReplyMsg, Buffer);
+						TimeLeft %= (60 * 60);
+					}
+					if (TimeLeft / (60))
+					{
+						swprintf_s(Buffer, _countof(Buffer), L" %d 分钟", TimeLeft / (60));
+						VBufferAppendStringW(ReplyMsg, Buffer);
+						TimeLeft %= (60);
+					}
+					if (TimeLeft)
+					{
+						swprintf_s(Buffer, _countof(Buffer), L" %d 秒", TimeLeft);
+						VBufferAppendStringW(ReplyMsg, Buffer);
+					}
+					VBufferAppendStringW(ReplyMsg, L"）");
 				}
 			}
 			
@@ -280,7 +307,7 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 					WCHAR Buffer[128];
 
 					VBufferAppendStringW(ReplyMsg, L"（将于");
-					if (TimeLeft < 5 * 30)
+					if (TimeLeft < 10 * 30)
 					{
 						//预报分钟和秒
 						if (TimeLeft / (60))
@@ -294,6 +321,7 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 							swprintf_s(Buffer, _countof(Buffer), L" %d 秒", TimeLeft);
 							VBufferAppendStringW(ReplyMsg, Buffer);
 						}
+						VBufferAppendStringW(ReplyMsg, L"后开始，请做好参赛准备！）");
 					}
 					else
 					{
@@ -315,8 +343,9 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 							VBufferAppendStringW(ReplyMsg, Buffer);
 							TimeLeft %= (60);
 						}
+						VBufferAppendStringW(ReplyMsg, L"后开始）");
 					}
-					VBufferAppendStringW(ReplyMsg, L"后开始）");
+					
 				}
 			}
 		}
