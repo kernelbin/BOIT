@@ -252,8 +252,8 @@ pSANDBOX CreateSimpleSandboxW(WCHAR* ApplicationName,
 				JOB_OBJECT_UILIMIT_SYSTEMPARAMETERS | //阻止进程更改系统参数。
 				JOB_OBJECT_UILIMIT_DISPLAYSETTINGS | //进程更改显示设置。
 				JOB_OBJECT_UILIMIT_GLOBALATOMS | //为作业指定其专有的全局原子表，并限定作业中的进程只能访问此作业的表。
-				JOB_OBJECT_UILIMIT_DESKTOP | //阻止进程创建或切换桌面。
-				JOB_OBJECT_UILIMIT_HANDLES; //阻止作业中的进程使用同一个作业外部的进程所创建的用户对象( 如HWND) 。
+				JOB_OBJECT_UILIMIT_DESKTOP;// | //阻止进程创建或切换桌面。
+				//JOB_OBJECT_UILIMIT_HANDLES; //阻止作业中的进程使用同一个作业外部的进程所创建的用户对象( 如HWND) 。
 			bSuccess = SetInformationJobObject(hJob, JobObjectBasicUIRestrictions, &UIRestriction, sizeof(UIRestriction));
 			if (!bSuccess)__leave;
 			bSuccess = FALSE;

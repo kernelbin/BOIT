@@ -24,7 +24,7 @@ int CmdMsg_donate_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg
 		break;
 
 	case 3:
-		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=让kernel.bin写你想要的功能,content=一只给钱就写代码的kernel.bin,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
+		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=赞助bot开发，拥有属于你自己的指令,content=qwq,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
 		break;
 	}
 	return 0;
