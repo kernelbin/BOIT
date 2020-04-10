@@ -21,6 +21,9 @@ int RegisterInlineCommand()
 	pBOIT_COMMAND Command_cf = RegisterCommandEx(L"cf", CmdMsg_codeforces_Proc, CmdEvent_codeforces_Proc, L"查询 CF 信息", BOIT_MATCH_PARAM);
 	AddCommandAlias(Command_cf, L"codeforce");
 	AddCommandAlias(Command_cf, L"codeforces");
+
+	RegisterCommand(L"luogu", CmdMsg_luogu_Proc, L"查询洛谷信息", BOIT_MATCH_PARAM);
+
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
 	RegisterCommand(L"q&amp;a", CmdMsg_q_and_a_Proc, L"常见问答", BOIT_MATCH_FULL);
 	RegisterCommand(L"about", CmdMsg_about_Proc, L"关于", BOIT_MATCH_FULL);

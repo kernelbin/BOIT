@@ -160,6 +160,9 @@
     <Filter Include="源文件\指令回调\打钱">
       <UniqueIdentifier>{a94ea5e6-966d-4db2-b15f-c46c17834712}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\luogu">
+      <UniqueIdentifier>{592cbf17-2490-4651-b5b9-b04cb52900fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -272,6 +275,9 @@
     </ClCompile>
     <ClCompile Include="Command_sponsor.c">
       <Filter>源文件\指令回调\打钱</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_luogu.c">
+      <Filter>源文件\指令回调\luogu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

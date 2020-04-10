@@ -155,6 +155,7 @@
     <ClCompile Include="Command_boast.c" />
     <ClCompile Include="Command_codeforces.c" />
     <ClCompile Include="Command_help.c" />
+    <ClCompile Include="Command_luogu.c" />
     <ClCompile Include="Command_oier.c" />
     <ClCompile Include="Command_q_and_a.c" />
     <ClCompile Include="Command_run.c" />
