@@ -8,7 +8,6 @@ int CmdMsg_boast_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	WCHAR ReplyMessage[][128] = {
 		L"我可以查询codeforce上题目的题面和测试数据！",
 		L"洛谷上的题目和题解我也可以找到√",
-		L"成语接龙和飞花令也是我的拿手长项",
 		L"LOJ, UOJ的题目我也可以查哦",
 		L"OI Wiki上的文档也可以查看",
 		L"数列找规律不如直接在bot上OEIS查询√",

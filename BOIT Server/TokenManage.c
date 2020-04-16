@@ -1,12 +1,26 @@
 #include<Windows.h>
 #include"DirManagement.h"
 
+
+
+BOOL InitializeUserDefaultToken(long long QQID)
+{
+	//初始化默认权限
+	PerUserCreateFileIfNExist(QQID, L"Token\\PrivilegeRunCode");
+}
+
+BOOL InitializeGroupDefaultToken(long long GroupID)
+{
+	//初始化默认权限
+	PerGroupCreateFileIfNExist(GroupID, L"Token\\PrivilegeRunCode");
+}
+
+
 BOOL CheckUserToken(long long QQID, WCHAR* TokenStr)
 {
 	if (PerUserCreateDirIfNExist(QQID, L"Token"))
 	{
-		//初始化默认权限
-		PerUserCreateFileIfNExist(QQID,L"Token\\PrivilegeRunCode");
+		InitializeUserDefaultToken(QQID);
 	}
 
 	WCHAR TokenFile[MAX_PATH];
@@ -27,8 +41,7 @@ BOOL CheckGroupToken(long long GroupID, WCHAR* TokenStr)
 {
 	if (PerGroupCreateDirIfNExist(GroupID, L"Token"))
 	{
-		//初始化默认权限
-		PerGroupCreateFileIfNExist(GroupID, L"Token\\PrivilegeRunCode");
+		InitializeGroupDefaultToken(GroupID);
 	}
 
 	WCHAR TokenFile[MAX_PATH];
@@ -42,4 +55,5 @@ BOOL CheckGroupToken(long long GroupID, WCHAR* TokenStr)
 
 	return FALSE;
 }
+
 

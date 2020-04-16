@@ -137,7 +137,7 @@ int CmdMsg_codeforces_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR*
 
 	break;
 	case 2:
-		
+
 		QueryComingCurrentContests(boitSession);
 
 		break;
@@ -173,7 +173,7 @@ int CmdEvent_codeforces_Proc(pBOIT_COMMAND pCmd, UINT Event, PARAMA ParamA, PARA
 		CloseHandle(hEventCFThreadCleanUp);
 		CloseHandle(hCFContestThread);
 		AsyncINetCleanup(CodeforcesInetInfo);
-		
+
 		AcquireSRWLockExclusive(&CFContestsLock);
 		if (CFContests)
 		{
@@ -209,7 +209,7 @@ long long GetPresentUnixTime()
 BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 {
 	AcquireSRWLockShared(&CFContestsLock);
-	
+
 	if (CFContests)
 	{
 		//寻找正在进行的比赛
@@ -271,8 +271,8 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 					VBufferAppendStringW(ReplyMsg, L"）");
 				}
 			}
-			
-			
+
+
 		}
 		/*AddSizeVBuf(ReplyMsg, sizeof(WCHAR) * 1);
 		((WCHAR*)(ReplyMsg->Data))[(ReplyMsg->Length / 2) - 1] = 0;
@@ -345,7 +345,7 @@ BOOL QueryComingCurrentContests(pBOIT_SESSION boitSession)
 						}
 						VBufferAppendStringW(ReplyMsg, L"后开始）");
 					}
-					
+
 				}
 			}
 		}
@@ -780,7 +780,7 @@ BOOL ParseCFContestsInfoJson(char* JsonData)
 				}
 				FreeVBuf(OldContests);
 			}
-			
+
 		}
 	}
 	return 0;

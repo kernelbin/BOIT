@@ -1,13 +1,13 @@
-#include<Windows.h>
+Ôªø#include<Windows.h>
 #include"CommandManager.h"
 #include"APITransfer.h"
 #include"InlineCommand.h"
 
 int CmdMsg_about_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	SendBackMessage(boitSession, L"BOIT 2.0 MadeBy kernel.bin");
+	SendBackMessage(boitSession, L"BOIT 2.0 MadeBy kernel.bin with ‚ù§");
 	SendBackMessage(boitSession, L"OI + BOT = BOIT");
-	SendBackMessage(boitSession, L"[CQ:share,url=https://github.com/kernelbin/BOIT,title=BOIT œÓƒø Github ¡¥Ω”,content=An open sourced bot for OIers,image=image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
+	SendBackMessage(boitSession, L"[CQ:share,url=https://github.com/kernelbin/BOIT,title=BOIT È°πÁõÆ Github ÈìæÊé•,content=An open sourced bot for OIers,image=image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
 
 	return 0;
 }
