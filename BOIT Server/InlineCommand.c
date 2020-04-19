@@ -22,7 +22,7 @@ int RegisterInlineCommand()
 	AddCommandAlias(Command_cf, L"codeforce");
 	AddCommandAlias(Command_cf, L"codeforces");
 
-	RegisterCommand(L"luogu", CmdMsg_luogu_Proc, L"查询洛谷信息", BOIT_MATCH_PARAM);
+	RegisterCommandEx(L"luogu", CmdMsg_luogu_Proc, CmdEvent_luogu_Proc, L"查询洛谷信息", BOIT_MATCH_PARAM);
 
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
 	RegisterCommand(L"q&amp;a", CmdMsg_q_and_a_Proc, L"常见问答", BOIT_MATCH_FULL);
