@@ -37,7 +37,7 @@ int CmdMsg_luogu_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		return 0;
 	}
 
-	WCHAR* OrderStr[] = { L"help",L"profile",L"problem"};
+	WCHAR* OrderStr[] = { L"help",L"profile",L"problem" };
 	int iMatch;
 	for (iMatch = 0; iMatch < _countof(OrderStr); iMatch++)
 	{
@@ -60,6 +60,13 @@ int CmdMsg_luogu_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	break;
 	case 2:
 	{
+
+		if (boitSession->GroupID && CheckGroupToken(boitSession->GroupID, L"PrivilegeQueryLuoguProblem") == 0)
+		{
+			SendBackMessage(boitSession, L"该群禁止了查询洛谷题目。请在私聊中查询。");
+			return 0;
+		}
+
 		WCHAR* OrderBase = Msg + ParamLen + SpaceLen + OrderStrlen;
 		OrderBase += GetCmdSpaceLen(OrderBase);
 		int QueryStrlen = GetCmdParamLen(OrderBase);
@@ -75,10 +82,10 @@ int CmdMsg_luogu_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		{
 			QueryLuoguProblemInfo(boitSession, OrderBase);
 		}
-		
+
 	}
 
-		break;
+	break;
 	default:
 		SendBackMessage(boitSession, L"未找到指令。输入#luogu help查看帮助");
 		break;
@@ -165,7 +172,7 @@ BOOL ParseLuoguProblemInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 			}
 		}
 
-		if ((!JsonDataField[0]) || (!JsonDataField[1]))
+		if ((!JsonDataField[0]) || (!(JsonDataField[0]->valuestring)) || (!JsonDataField[1]) || (!(JsonDataField[1]->valuestring)))
 		{
 			SendBackMessage(boitSession, L"貌似出了点小问题诶quq");
 			__leave;
@@ -179,27 +186,27 @@ BOOL ParseLuoguProblemInfoJsonAndSend(pBOIT_SESSION boitSession, char* JsonData)
 		StrBuf = StrConvMB2WC(CP_UTF8, JsonDataField[1]->valuestring, -1, NULL);
 		VBufferAppendStringW(ReplyStr, StrBuf);
 		free(StrBuf);
-		
 
-		if (JsonDataField[2] && strlen(JsonDataField[2]->valuestring))
+
+		if (JsonDataField[2] && JsonDataField[2]->valuestring && strlen(JsonDataField[2]->valuestring))
 		{
 			VBufferAppendStringW(ReplyStr, L"\n题目背景：\n");
 			StrBuf = StrConvMB2WC(CP_UTF8, JsonDataField[2]->valuestring, -1, NULL);
 			VBufferAppendStringW(ReplyStr, StrBuf);
 		}
-		if (JsonDataField[3] && strlen(JsonDataField[3]->valuestring))
+		if (JsonDataField[3] && JsonDataField[3]->valuestring && strlen(JsonDataField[3]->valuestring))
 		{
 			VBufferAppendStringW(ReplyStr, L"\n题目描述：\n");
 			StrBuf = StrConvMB2WC(CP_UTF8, JsonDataField[3]->valuestring, -1, NULL);
 			VBufferAppendStringW(ReplyStr, StrBuf);
 		}
-		if (JsonDataField[4] && strlen(JsonDataField[4]->valuestring))
+		if (JsonDataField[4] && JsonDataField[4]->valuestring && strlen(JsonDataField[4]->valuestring))
 		{
 			VBufferAppendStringW(ReplyStr, L"\n输入格式：\n");
 			StrBuf = StrConvMB2WC(CP_UTF8, JsonDataField[4]->valuestring, -1, NULL);
 			VBufferAppendStringW(ReplyStr, StrBuf);
 		}
-		if (JsonDataField[5] && strlen(JsonDataField[5]->valuestring))
+		if (JsonDataField[5] && JsonDataField[5]->valuestring && strlen(JsonDataField[5]->valuestring))
 		{
 			VBufferAppendStringW(ReplyStr, L"\n输出格式：\n");
 			StrBuf = StrConvMB2WC(CP_UTF8, JsonDataField[5]->valuestring, -1, NULL);
