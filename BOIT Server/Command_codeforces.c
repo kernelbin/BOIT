@@ -126,7 +126,7 @@ int CmdMsg_codeforces_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR*
 		}
 		else if (QueryStrlen == 0)
 		{
-			SendBackMessage(boitSession, L"你要查询的是哪个CF用户诶？");
+			SendBackMessage(boitSession, L"你要查询的是哪个CF用户诶？（试试#cf profile tourist）");
 		}
 		else
 		{

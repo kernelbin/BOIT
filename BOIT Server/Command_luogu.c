@@ -76,7 +76,7 @@ int CmdMsg_luogu_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		}
 		else if (QueryStrlen == 0)
 		{
-			SendBackMessage(boitSession, L"你要查询的是哪个题目诶？");
+			SendBackMessage(boitSession, L"你要查询的是哪个题目诶？（试试#luogu problem P1001）");
 		}
 		else
 		{

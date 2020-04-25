@@ -57,7 +57,7 @@ int CmdMsg_oier_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	}
 	else if (QueryStrlen == 0)
 	{
-		SendBackMessage(boitSession, L"你要查询的是哪个OIer诶？");
+		SendBackMessage(boitSession, L"你要查询的是哪个OIer诶？（试试 #oier 人名/拼音）");
 	}
 	else
 	{
