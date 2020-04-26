@@ -65,3 +65,13 @@ BOOL PerGroupCreateFileIfNExist(long long GroupID, WCHAR* FileName) //返回 TRUE 
 	return FALSE;
 }
 
+
+
+BOOL PerGroupDeleteFile(long long GroupID, WCHAR* FileName) //返回 TRUE 说明创建了，返回 FALSE 代表本来就有
+{
+	WCHAR FilePath[MAX_PATH];
+	GetPerGroupDir(FilePath, GroupID);
+	PathAppendW(FilePath, FileName);
+
+	return DeleteFileW(FilePath);
+}

@@ -151,6 +151,7 @@
     <ClCompile Include="AsyncINet.c" />
     <ClCompile Include="CommandManager.c" />
     <ClCompile Include="Command_about.c" />
+    <ClCompile Include="Command_admin.c" />
     <ClCompile Include="Command_cat.c" />
     <ClCompile Include="Command_boast.c" />
     <ClCompile Include="Command_codeforces.c" />

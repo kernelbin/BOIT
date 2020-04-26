@@ -55,6 +55,8 @@ BOOL PerUserCreateDirIfNExist(long long QQID, WCHAR* FolderName);
 
 BOOL PerUserCreateFileIfNExist(long long QQID, WCHAR* FileName);
 
+BOOL PerUserDeleteFile(long long QQID, WCHAR* FileName);
+
 HANDLE PerUserCreateStorageFile(long long QQID, WCHAR* FileName, DWORD DesiredAccess, DWORD dwShareMode, DWORD CreationDisposition);
 
 int CheckPerGroupDataExist(long long GroupID);
@@ -66,6 +68,8 @@ int GetPerGroupDir(WCHAR* Buffer, long long GroupID);
 BOOL PerGroupCreateDirIfNExist(long long GroupID, WCHAR* FolderName);
 
 BOOL PerGroupCreateFileIfNExist(long long GroupID, WCHAR* FileName);
+
+BOOL PerGroupDeleteFile(long long GroupID, WCHAR* FileName);
 
 int GetPerCommandCfgDir(WCHAR* Buffer, pBOIT_COMMAND pCmd);
 

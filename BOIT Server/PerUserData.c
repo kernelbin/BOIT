@@ -83,6 +83,16 @@ BOOL PerUserCreateFileIfNExist(long long QQID, WCHAR* FileName) //返回 TRUE 说明
 	return FALSE;
 }
 
+BOOL PerUserDeleteFile(long long QQID, WCHAR* FileName) //返回 TRUE 说明创建了，返回 FALSE 代表本来就有
+{
+	WCHAR FilePath[MAX_PATH];
+	GetPerUserDir(FilePath, QQID);
+	PathAppendW(FilePath, FileName);
+
+	return DeleteFileW(FilePath);
+}
+
+
 
 
 HANDLE PerUserCreateStorageFile(long long QQID, WCHAR* FileName,DWORD DesiredAccess,DWORD dwShareMode,DWORD CreationDisposition) //返回 TRUE 说明创建了，返回 FALSE 代表本来就有

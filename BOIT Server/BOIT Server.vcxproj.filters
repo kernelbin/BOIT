@@ -163,6 +163,9 @@
     <Filter Include="源文件\指令回调\luogu">
       <UniqueIdentifier>{592cbf17-2490-4651-b5b9-b04cb52900fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\指令回调\admin">
+      <UniqueIdentifier>{86c10e14-8de8-499c-b916-158c18c80bb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RecvEventHandler.c">
@@ -278,6 +281,9 @@
     </ClCompile>
     <ClCompile Include="Command_luogu.c">
       <Filter>源文件\指令回调\luogu</Filter>
+    </ClCompile>
+    <ClCompile Include="Command_admin.c">
+      <Filter>源文件\指令回调\admin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

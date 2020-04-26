@@ -26,6 +26,7 @@ int RegisterInlineCommand()
 
 	RegisterCommand(L"help", CmdMsg_help_Proc, L"帮助信息", BOIT_MATCH_PARAM);
 	RegisterCommand(L"q&amp;a", CmdMsg_q_and_a_Proc, L"常见问答", BOIT_MATCH_FULL);
+	RegisterCommand(L"admin", CmdMsg_admin_Proc, L"管理群聊中bot功能", BOIT_MATCH_PARAM);
 	RegisterCommand(L"about", CmdMsg_about_Proc, L"关于", BOIT_MATCH_FULL);
 	RegisterCommand(L"打钱", CmdMsg_donate_Proc, L"???", BOIT_MATCH_FULL);
 	RegisterCommand(L"version", CmdMsg_version_Proc, L"查看boit版本", BOIT_MATCH_FULL);
