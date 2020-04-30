@@ -24,3 +24,7 @@ pBOIT_SESSION DuplicateBOITSession(pBOIT_SESSION SourceSession);
 BOOL FreeBOITSession(pBOIT_SESSION boitSession);
 
 int GetBOITSessionType(pBOIT_SESSION boitSession);
+
+long long GetBOITSessionQQID(pBOIT_SESSION boitSession);
+
+long long GetBOITSessionGroupID(pBOIT_SESSION boitSession);

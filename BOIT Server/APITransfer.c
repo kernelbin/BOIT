@@ -73,14 +73,19 @@ int RecvGroupMessage(long long GroupID, long long QQID, int SubType, WCHAR* Anon
 	return 0;
 }
 
-int RetrieveGroupMemberInfo(long long GroupID, long long QQID, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
+int RetrieveGroupMemberInfo(pBOIT_SESSION boitSession, BOOL NoCache, pBOIT_GROUPMEMBER_INFO GroupMemberInfo)
 {
-	return SendEventGetGroupMemberInfo(GroupID, QQID, NoCache, GroupMemberInfo);
+	return SendEventGetGroupMemberInfo(GetBOITSessionGroupID(boitSession),
+		GetBOITSessionQQID(boitSession),
+		NoCache,
+		GroupMemberInfo);
 }
 
-int RetrieveStrangerInfo(long long QQID, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
+int RetrieveStrangerInfo(pBOIT_SESSION boitSession, BOOL NoCache, pBOIT_STRANGER_INFO StrangerInfo)
 {
-	return SendEventGetStrangerInfo(QQID, NoCache, StrangerInfo);
+	return SendEventGetStrangerInfo(GetBOITSessionQQID(boitSession),
+		NoCache,
+		StrangerInfo);
 }
 
 
@@ -91,11 +96,11 @@ int SendBackMessage(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	if (boitSession->GroupID)
 	{
-		SendGroupMessage(boitSession->GroupID, Msg);
+		SendGroupMessage(GetBOITSessionGroupID(boitSession), Msg);
 	}
 	else
 	{
-		SendPrivateMessage(boitSession->QQID, Msg);
+		SendPrivateMessage(GetBOITSessionQQID(boitSession), Msg);
 	}
 	return 0;
 }

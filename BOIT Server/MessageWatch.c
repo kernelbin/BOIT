@@ -92,8 +92,8 @@ int RegisterMessageWatch(int WatchType,
 	ZeroMemory(MsgWatch, sizeof(BOIT_MSGWATCH));
 	if (boitSession)
 	{
-		MsgWatch->GroupID = boitSession->GroupID;
-		MsgWatch->QQID = boitSession->QQID;
+		MsgWatch->GroupID = GetBOITSessionGroupID(boitSession);
+		MsgWatch->QQID = GetBOITSessionQQID(boitSession);
 	}
 	MsgWatch->WatchType = WatchType;
 	MsgWatch->MsgWatchID = InterlockedIncrement64(&MsgWatchAllocID);
