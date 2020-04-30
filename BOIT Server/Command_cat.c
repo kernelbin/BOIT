@@ -9,7 +9,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR CatMessage[128];
 	
-	if (boitSession->GroupID)
+	if (GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP)
 	{
 		if (boitSession->QQID == 80000000)
 		{
@@ -64,7 +64,7 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	WCHAR CatMessage[128];
 
-	if (boitSession->GroupID)
+	if (GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP)
 	{
 		if (boitSession->QQID == 80000000)
 		{

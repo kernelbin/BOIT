@@ -46,7 +46,6 @@ pBOIT_SESSION DuplicateBOITSession(pBOIT_SESSION SourceSession)
 	return boitSession;
 }
 
-
 BOOL FreeBOITSession(pBOIT_SESSION boitSession)
 {
 	if (boitSession)
@@ -54,4 +53,30 @@ BOOL FreeBOITSession(pBOIT_SESSION boitSession)
 		free(boitSession);
 	}
 	return TRUE;
+}
+
+int GetBOITSessionType(pBOIT_SESSION boitSession)
+{
+	if (boitSession->GroupID)
+	{
+		if (boitSession->QQID)
+		{
+			return BOITSESS_TYPE_GROUP;
+		}
+		else
+		{
+			return BOITSESS_TYPE_ERROR;
+		}
+	}
+	else
+	{
+		if (boitSession->QQID)
+		{
+			return BOITSESS_TYPE_PRIVATE;
+		}
+		else
+		{
+			return BOITSESS_TYPE_NULL;
+		}
+	}
 }

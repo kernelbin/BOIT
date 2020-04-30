@@ -2,6 +2,11 @@
 #include<Windows.h>
 #include"SharedMemStruct.h"
 
+#define BOITSESS_TYPE_ERROR -1
+
+#define BOITSESS_TYPE_NULL 0
+#define BOITSESS_TYPE_GROUP 1
+#define BOITSESS_TYPE_PRIVATE 2
 
 typedef struct __tagSession
 {
@@ -17,3 +22,5 @@ pBOIT_SESSION InitBOITSession(long long GroupID, long long QQID, WCHAR* Anonymou
 pBOIT_SESSION DuplicateBOITSession(pBOIT_SESSION SourceSession);
 
 BOOL FreeBOITSession(pBOIT_SESSION boitSession);
+
+int GetBOITSessionType(pBOIT_SESSION boitSession);

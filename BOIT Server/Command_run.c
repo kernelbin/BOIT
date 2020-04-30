@@ -474,14 +474,19 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 			InputSession->iScrnShot = iScrnShot;
 			wcscpy_s(InputSession->WindowName, _countof(InputSession->WindowName), WindowName);
 
-			if (boitSession->GroupID)
+			switch (GetBOITSessionType(boitSession))
 			{
+			case BOITSESS_TYPE_GROUP:
 				RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 30, boitSession, InputCallback, (PBYTE)InputSession);
-			}
-			else
-			{
+				break;
+			case BOITSESS_TYPE_PRIVATE:
 				RegisterMessageWatch(BOIT_MW_QQ, 10000000 * 30, boitSession, InputCallback, (PBYTE)InputSession);
+				break;
+			default:
+				//TODO: 错误处理
+				break;
 			}
+
 			SendBackMessage(boitSession, L"请输入输入数据：");
 
 			free(CompileCfg);

@@ -54,7 +54,7 @@ BOOL GroupEnableDisableFunc(long long GroupID, WCHAR FuncName[], BOOL bEnable)
 
 int CmdMsg_admin_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	if (!(boitSession->GroupID))
+	if (GetBOITSessionType(boitSession) != BOITSESS_TYPE_GROUP)
 	{
 		SendBackMessage(boitSession, L"请在群聊中使用该指令");
 		return 0;
@@ -113,16 +113,16 @@ int CmdMsg_admin_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		{
 			if (GroupEnableDisableFunc(boitSession->GroupID, OrderBase, iMatch == 0))
 			{
-				SendBackMessage(boitSession, (iMatch == 0 )? L"已成功启用该功能" :L"已成功关闭该功能");
+				SendBackMessage(boitSession, (iMatch == 0) ? L"已成功启用该功能" : L"已成功关闭该功能");
 			}
 			else
 			{
 				SendBackMessage(boitSession, L"未找到该功能。#admin list以查看可控制的功能列表");
 			}
-			
+
 		}
 	}
-		break;
+	break;
 	case 2: // list
 		//TODO: 改为从那个数组里生成
 		SendBackMessage(boitSession, L"目前可以控制的功能：\nRunCode\nQueryOIer\nQueryLuoguProblem");
