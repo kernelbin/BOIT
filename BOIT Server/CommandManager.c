@@ -354,8 +354,8 @@ int GetCmdSpaceLen(WCHAR* String)
 
 int CommandHandler(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	CheckPerUserDataExist(boitSession->QQID);
-	CheckPerGroupDataExist(boitSession->GroupID);
+	CheckPerUserDataExist(GetBOITSessionQQID(boitSession));
+	CheckPerGroupDataExist(GetBOITSessionGroupID(boitSession));
 	AcquireSRWLockShared(&CommandChainLock);
 	if (!RootCommand)
 	{

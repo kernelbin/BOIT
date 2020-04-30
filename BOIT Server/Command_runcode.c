@@ -16,7 +16,7 @@ int CmdMsg_runcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Ms
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 
-	long long ToRunQQID = boitSession->QQID;
+	long long ToRunQQID = GetBOITSessionQQID(boitSession);
 	if (SpaceLen != 0)
 	{
 		int QQIDLen = GetCmdParamLen(Msg + ParamLen + SpaceLen);
@@ -47,7 +47,7 @@ int CmdMsg_showcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* M
 	int ParamLen = GetCmdParamLen(Msg);
 	int SpaceLen = GetCmdSpaceLen(Msg + ParamLen);
 
-	long long ToRunQQID = boitSession->QQID;
+	long long ToShowQQID = GetBOITSessionQQID(boitSession);
 	if (SpaceLen != 0)
 	{
 		int QQIDLen = GetCmdParamLen(Msg + ParamLen + SpaceLen);
@@ -57,14 +57,14 @@ int CmdMsg_showcode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* M
 			int iMatch = swscanf_s(Msg + ParamLen + SpaceLen, L"%lld", &ParamQQID);
 			if (iMatch == 1 && ParamQQID)
 			{
-				ToRunQQID = ParamQQID;
+				ToShowQQID = ParamQQID;
 			}
 		}
 	}
 
 	WCHAR* WideCharStr = 0;
 
-	BOOL bSuccess = GetSavedCode(boitSession, ToRunQQID, &WideCharStr);
+	BOOL bSuccess = GetSavedCode(boitSession, ToShowQQID, &WideCharStr);
 	if (bSuccess)
 	{
 		if (wcslen(WideCharStr) > BOIT_RUN_MAX_OUTPUT)

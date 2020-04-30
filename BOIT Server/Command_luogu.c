@@ -61,7 +61,8 @@ int CmdMsg_luogu_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	case 2:
 	{
 
-		if ((GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP) && CheckGroupToken(boitSession->GroupID, L"PrivilegeQueryLuoguProblem") == 0)
+		if ((GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP) &&
+			CheckGroupToken(GetBOITSessionGroupID(boitSession), L"PrivilegeQueryLuoguProblem") == 0)
 		{
 			SendBackMessage(boitSession, L"该群禁止了查询洛谷题目。请在私聊中查询或联系管理员开放功能。");
 			return 0;

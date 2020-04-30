@@ -10,7 +10,7 @@ WCHAR* AvaliableFunc[] = { L"RunCode", L"QueryOIer", L"QueryLuoguProblem" };
 int HavePermissionToAdmin(pBOIT_SESSION boitSession)
 {
 	BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-	RetrieveGroupMemberInfo(boitSession->GroupID, boitSession->QQID, TRUE, &GroupMemberInfo);
+	RetrieveGroupMemberInfo(boitSession, TRUE, &GroupMemberInfo);
 	switch (GroupMemberInfo.ManageLevel)
 	{
 	case 2:
@@ -111,7 +111,7 @@ int CmdMsg_admin_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		}
 		else
 		{
-			if (GroupEnableDisableFunc(boitSession->GroupID, OrderBase, iMatch == 0))
+			if (GroupEnableDisableFunc(GetBOITSessionGroupID(boitSession), OrderBase, iMatch == 0))
 			{
 				SendBackMessage(boitSession, (iMatch == 0) ? L"已成功启用该功能" : L"已成功关闭该功能");
 			}

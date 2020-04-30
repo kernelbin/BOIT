@@ -7,7 +7,7 @@
 #include"Corpus.h"
 int CmdMsg_stop_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	if (CheckUserToken(boitSession->QQID, L"PrivilegeBOITStop"))
+	if (CheckUserToken(GetBOITSessionQQID(boitSession), L"PrivilegeBOITStop"))
 	{
 		SendBackMessage(boitSession, L"Goodbye~");
 		SetEvent(hEventServerStop);

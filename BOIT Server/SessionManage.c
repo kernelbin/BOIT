@@ -80,3 +80,17 @@ int GetBOITSessionType(pBOIT_SESSION boitSession)
 		}
 	}
 }
+
+
+
+
+long long GetBOITSessionQQID(pBOIT_SESSION boitSession)
+{
+	return boitSession->QQID;
+}
+
+long long GetBOITSessionGroupID(pBOIT_SESSION boitSession)
+{
+	return boitSession->GroupID;
+}
+

@@ -108,7 +108,7 @@ int InputCallback(long long MsgWatchID, PBYTE pData, UINT Event,
 
 BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, WCHAR* ToCopyFileName, WCHAR* SandboxDir, WCHAR* SandboxFile);
 
-pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, int iScrnShot, WCHAR * WindowName, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
+pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, int iScrnShot, WCHAR* WindowName, pBOIT_SESSION boitSession, int Encode, WCHAR* Input);
 
 
 LONGLONG CompileID;
@@ -124,18 +124,19 @@ int CmdMsg_run_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 
 int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 {
-	if (CheckPrivilegeRunCode(orgboitSession->GroupID, orgboitSession->QQID) == 0)
+	if (CheckPrivilegeRunCode(GetBOITSessionGroupID(orgboitSession),
+		GetBOITSessionQQID(orgboitSession)) == 0)
 	{
 		SendBackMessage(orgboitSession, Corpus_NoPrivilege());
 		return 0;
 	}
 
 	//检查用户目录下是否有相应文件夹
-	if (PerUserCreateDirIfNExist(orgboitSession->QQID, L"Sandbox"))
+	if (PerUserCreateDirIfNExist(GetBOITSessionQQID(orgboitSession), L"Sandbox"))
 	{
 		//创建相应文件
 	}
-	if (PerUserCreateDirIfNExist(orgboitSession->QQID, L"Compile"))
+	if (PerUserCreateDirIfNExist(GetBOITSessionQQID(orgboitSession), L"Compile"))
 	{
 		//创建相应文件
 	}
@@ -327,7 +328,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 
 
 	//校验权限
-	if (bIsSU && (CheckUserToken(boitSession->QQID, L"PrivilegeRunCodeNoRestrict") == 0))
+	if (bIsSU && (CheckUserToken(GetBOITSessionQQID(boitSession), L"PrivilegeRunCodeNoRestrict") == 0))
 	{
 		SendBackMessage(boitSession, Corpus_NoPrivilege());
 		FreeBOITSession(boitSession);
@@ -340,7 +341,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 
 	WCHAR SourceCodeFile[MAX_PATH];
 
-	GetPerUserDir(SourceCodeFile, boitSession->QQID);
+	GetPerUserDir(SourceCodeFile, GetBOITSessionQQID(boitSession));
 	PathAppendW(SourceCodeFile, L"Compile\\");
 
 	WCHAR SourceFileName[16];
@@ -401,7 +402,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		WCHAR ExecutableFileName[16];
 
 
-		GetPerUserDir(ExecutableCodeFile, boitSession->QQID);
+		GetPerUserDir(ExecutableCodeFile, GetBOITSessionQQID(boitSession));
 		PathAppendW(ExecutableCodeFile, L"Compile\\");
 		swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", AllocCompileID);
 		PathAppendW(ExecutableCodeFile, ExecutableFileName);
@@ -415,7 +416,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
 
 		WCHAR WorkDir[MAX_PATH];
-		GetPerUserDir(WorkDir, boitSession->QQID);
+		GetPerUserDir(WorkDir, GetBOITSessionQQID(boitSession));
 		PathAppendW(WorkDir, L"Compile\\");
 
 		//TODO; 这个Session是临时瞎写的
@@ -429,7 +430,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 		CompileSession->bIsSU = bIsSU;
 		CompileSession->bNeedInput = bNeedInput;
 		CompileSession->iScrnShot = iScrnShot;
-		wcscpy_s(CompileSession->WindowName,_countof(CompileSession->WindowName), WindowName);
+		wcscpy_s(CompileSession->WindowName, _countof(CompileSession->WindowName), WindowName);
 
 		//TODO:这些限制都是我临时写的
 		if (CreateSimpleSandboxW(NULL,
@@ -454,7 +455,7 @@ int RunCode(pBOIT_SESSION orgboitSession, WCHAR* Msg)
 	{
 		WCHAR SandboxDir[MAX_PATH];
 		WCHAR SandboxFile[MAX_PATH];
-		InitSandboxDir(boitSession->QQID, AllocCompileID, SourceCodeFile, SourceFileName, SandboxDir, SandboxFile);
+		InitSandboxDir(GetBOITSessionQQID(boitSession), AllocCompileID, SourceCodeFile, SourceFileName, SandboxDir, SandboxFile);
 
 		WCHAR CompileCmd[COMPILECMD_MAXLEN + 1];
 		GetCompileCommand(CompileCmd, CompileCfg, AllocCompileID);
@@ -537,7 +538,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 
 		WCHAR ExecutableCodeFile[MAX_PATH];
 		WCHAR ExecutableFileName[16];
-		GetPerUserDir(ExecutableCodeFile, Session->boitSession->QQID);
+		GetPerUserDir(ExecutableCodeFile, GetBOITSessionQQID(Session->boitSession));
 		PathAppendW(ExecutableCodeFile, L"Compile\\");
 		swprintf_s(ExecutableFileName, _countof(ExecutableFileName), L"Temp%lld.exe", Session->AllocCompileID);
 		PathAppendW(ExecutableCodeFile, ExecutableFileName);
@@ -548,7 +549,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 			//WCHAR SandboxFile[MAX_PATH] = { 0 };
 			WCHAR SandboxDir[MAX_PATH];
 			WCHAR SandboxFile[MAX_PATH];
-			InitSandboxDir(Session->boitSession->QQID,
+			InitSandboxDir(GetBOITSessionQQID(Session->boitSession),
 				Session->AllocCompileID,
 				ExecutableCodeFile,
 				ExecutableFileName,
@@ -567,7 +568,7 @@ int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdO
 				InputSession->iScrnShot = Session->iScrnShot;
 				wcscpy_s(InputSession->WindowName, _countof(InputSession->WindowName), Session->WindowName);
 				//InputSession->bWindow = Session->bWindow;
-				if (Session->boitSession->GroupID)
+				if (GetBOITSessionGroupID(Session->boitSession))
 				{
 					RegisterMessageWatch(BOIT_MW_GROUP_QQ, 10000000 * 30,
 						Session->boitSession, InputCallback, (PBYTE)InputSession);
@@ -662,7 +663,7 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 		{
 			SendBackMessage(Session->boitSession, L"程序超出内存上限了qaq");
 		}
-		
+
 		switch (Sandbox->ExitReason)
 		{
 		case SANDBOX_ER_ABNORMAL:
@@ -745,7 +746,7 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 			Session->bScrnShotTaken = TRUE;
 		}
 	}
-		break;
+	break;
 
 	case SANDBOX_EVENT_STD_OUTPUT:
 	{
@@ -792,11 +793,11 @@ BOOL InitSandboxDir(LONGLONG QQID, LONGLONG AllocCompileID, WCHAR* ToCopyFile, W
 }
 
 
-pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, int iScrnShot, WCHAR * WindowName, pBOIT_SESSION boitSession, int Encode, WCHAR* Input)
+pSANDBOX StartRunSandbox(WCHAR* Application, WCHAR* CommandLine, WCHAR* CuurentDir, BOOL bLimitPrivileges, int iScrnShot, WCHAR* WindowName, pBOIT_SESSION boitSession, int Encode, WCHAR* Input)
 {
 	pSANDBOX Sandbox = 0;
 	pRUN_SESSION RunSession = malloc(sizeof(RUN_SESSION));
-	
+
 	if (!RunSession)
 	{
 		return 0;

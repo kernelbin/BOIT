@@ -39,7 +39,8 @@ int AsyncOIerInfoCallback(
 
 int CmdMsg_oier_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
-	if ((GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP) && CheckGroupToken(boitSession->GroupID, L"PrivilegeQueryOIer") == 0)
+	if ((GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP)
+		&& CheckGroupToken(GetBOITSessionGroupID(boitSession), L"PrivilegeQueryOIer") == 0)
 	{
 		SendBackMessage(boitSession, L"该群禁止了查询OIer功能。请在私聊中查询或联系管理员开放功能。");
 		return 0;

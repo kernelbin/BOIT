@@ -11,19 +11,19 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	
 	if (GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP)
 	{
-		if (boitSession->QQID == 80000000)
+		if (GetBOITSessionQQID(boitSession) == 80000000)
 		{
 			return 0;
 		}
 		else
 		{
 			BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-			RetrieveGroupMemberInfo(boitSession->GroupID, boitSession->QQID, TRUE, &GroupMemberInfo);
-			if (boitSession->QQID == 693511570)
+			RetrieveGroupMemberInfo(boitSession, TRUE, &GroupMemberInfo);
+			if (GetBOITSessionQQID(boitSession) == 693511570)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", GroupMemberInfo.NickName);
 			}
-			else if (boitSession->QQID == 1976658142)
+			else if (GetBOITSessionQQID(boitSession) == 1976658142)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", GroupMemberInfo.NickName);
 			}
@@ -37,13 +37,13 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	else
 	{
 		BOIT_STRANGER_INFO StrangerInfo;
-		RetrieveStrangerInfo(boitSession->QQID, TRUE, &StrangerInfo);
+		RetrieveStrangerInfo(boitSession, TRUE, &StrangerInfo);
 
-		if (boitSession->QQID == 693511570)
+		if (GetBOITSessionQQID(boitSession) == 693511570)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", StrangerInfo.NickName);
 		}
-		else if (boitSession->QQID == 1976658142)
+		else if (GetBOITSessionQQID(boitSession) == 1976658142)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", StrangerInfo.NickName);
 		}
@@ -66,14 +66,14 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 
 	if (GetBOITSessionType(boitSession) == BOITSESS_TYPE_GROUP)
 	{
-		if (boitSession->QQID == 80000000)
+		if (GetBOITSessionQQID(boitSession) == 80000000)
 		{
 			return 0;
 		}
 		else
 		{
 			BOIT_GROUPMEMBER_INFO GroupMemberInfo;
-			RetrieveGroupMemberInfo(boitSession->GroupID, boitSession->QQID, TRUE, &GroupMemberInfo);
+			RetrieveGroupMemberInfo(boitSession, TRUE, &GroupMemberInfo);
 			WCHAR* ChosenName;
 			if (GroupMemberInfo.CardName[0])
 			{
@@ -83,11 +83,11 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 			{
 				ChosenName = GroupMemberInfo.NickName;
 			}
-			if (boitSession->QQID == 693511570)
+			if (GetBOITSessionQQID(boitSession) == 693511570)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", ChosenName);
 			}
-			else if (boitSession->QQID == 1976658142)
+			else if (GetBOITSessionQQID(boitSession) == 1976658142)
 			{
 				swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", ChosenName);
 			}
@@ -101,13 +101,13 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 	else
 	{
 		BOIT_STRANGER_INFO StrangerInfo;
-		RetrieveStrangerInfo(boitSession->QQID, TRUE, &StrangerInfo);
+		RetrieveStrangerInfo(boitSession, TRUE, &StrangerInfo);
 
-		if (boitSession->QQID == 693511570)
+		if (GetBOITSessionQQID(boitSession) == 693511570)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"噗叽噗叽， %ls 你也是兔子啊", StrangerInfo.NickName);
 		}
-		else if (boitSession->QQID == 1976658142)
+		else if (GetBOITSessionQQID(boitSession) == 1976658142)
 		{
 			swprintf_s(CatMessage, _countof(CatMessage), L"喵喵喵， %ls 你也是河狸啊", StrangerInfo.NickName);
 		}

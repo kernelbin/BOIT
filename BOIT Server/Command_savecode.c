@@ -17,7 +17,7 @@ int CmdMsg_savecode_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* M
 
 	Msg += ParamLen + SpaceLen;
 	//写入文件
-	HANDLE hSavedFile = PerUserCreateStorageFile(boitSession->QQID, L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
+	HANDLE hSavedFile = PerUserCreateStorageFile(GetBOITSessionQQID(boitSession), L"SavedCode.txt", GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
 	if (hSavedFile == INVALID_HANDLE_VALUE)
 	{
 		SendBackMessage(boitSession, L"写入文件的时候出错了qaq");
