@@ -128,7 +128,7 @@ int CmdMsg_admin_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		SendBackMessage(boitSession, L"目前可以控制的功能：\nRunCode\nQueryOIer\nQueryLuoguProblem");
 		break;
 	case 3: // help
-		SendBackMessage(boitSession, L"管理群聊中bot功能\n#admin enable/disbale 功能名以打开关闭功能。\n#admin list以查看可控制的功能列表。\n#admin help以查看该帮助信息。");
+		SendBackMessage(boitSession, L"管理群聊中bot功能\n#admin enable/disable 功能名以打开关闭功能。\n#admin list以查看可控制的功能列表。\n#admin help以查看该帮助信息。");
 		break;
 	default:
 		SendBackMessage(boitSession, L"未找到指令。输入 #admin help查看帮助");
