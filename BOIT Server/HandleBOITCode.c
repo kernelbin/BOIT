@@ -2,6 +2,42 @@
 #include"VBuffer.h"
 #include"APITransfer.h"
 #include"SessionManage.h"
+#include"HandleBOITCode.h"
+
+
+WCHAR* BOITCodeStart[] = L"[";
+WCHAR* BOITCodeEnd[] = L"]";
+WCHAR* BOITCodeID[] = L"BOIT";
+
+
+pBOITCODEINFO GetBOITCode(WCHAR* Msg, int* Len)
+{
+	//TODO: 传入一个字符串，判断开头是不是一个boit码，是就返回相关信息（提供一个函数用于释放）否则返回0
+
+	int Offset = 0;
+	if (_wcsnicmp(Msg + Offset, BOITCodeStart, wcslen(BOITCodeStart)))
+	{
+		return 0;
+	}
+	Offset += wcslen(BOITCodeStart);
+
+	if (_wcsnicmp(Msg + Offset, BOITCodeID, wcslen(BOITCodeID)))
+	{
+		return 0;
+	}
+	Offset += wcslen(BOITCodeID);
+
+	if (Msg[Offset] != L':')
+	{
+		return 0;
+	}
+	Offset++;
+
+
+
+	return 0;
+}
+
 
 BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
@@ -25,7 +61,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				j = 0;
 				SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
 			}
-			
+
 			i += wcslen(L"[BOIT:flush]");
 		}
 		else
