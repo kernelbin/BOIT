@@ -169,6 +169,10 @@ pBOITCODEINFO GetBOITCode(WCHAR* Msg, int* Len)
 		}
 		else
 		{
+			if (Len)
+			{
+				(*Len) = Offset;
+			}
 			return BOITCodeInfo;
 		}
 	}
@@ -213,14 +217,35 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 	int BOITFlushMaxUse = 2;
 	for (i = 0; i < OrgLen;)
 	{
-		pBOITCODEINFO BOITCodeInfo = GetBOITCode(Msg + i, 0);
+		int BOITCodeLen = 0;
+		pBOITCODEINFO BOITCodeInfo = GetBOITCode(Msg + i, &BOITCodeLen);
 
 		if (BOITCodeInfo)
 		{
-			
+			BOOL bBOITCodeRecognize = FALSE;
+
+			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"flush",wcslen(L"flush")) == 0)
+			{
+				if (BOITFlushMaxUse-- > 0)
+				{
+					AdjustVBuf(SendTextBuffer, sizeof(WCHAR) * (j + 1));
+					((WCHAR*)(SendTextBuffer->Data))[j] = 0;
+
+					j = 0;
+					SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
+				}
+				bBOITCodeRecognize = TRUE;
+			}
+
 			FreeBOITCode(BOITCodeInfo);
+
+			if (bBOITCodeRecognize)
+			{
+				i += BOITCodeLen;
+				continue;
+			}
 		}
-		else
+		
 		{
 			AdjustVBuf(SendTextBuffer, sizeof(WCHAR) * (j + 1));
 			((WCHAR*)(SendTextBuffer->Data))[j] = Msg[i];
@@ -230,14 +255,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 
 		/*if (_wcsnicmp(Msg + i, L"[BOIT:flush]", wcslen(L"[BOIT:flush]")) == 0)
 		{
-			if (BOITFlushMaxUse-- > 0)
-			{
-				AdjustVBuf(SendTextBuffer, sizeof(WCHAR) * (j + 1));
-				((WCHAR*)(SendTextBuffer->Data))[j] = 0;
-
-				j = 0;
-				SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
-			}
+			
 
 			i += wcslen(L"[BOIT:flush]");
 		}
