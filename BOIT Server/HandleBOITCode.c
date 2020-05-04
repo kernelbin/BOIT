@@ -1,4 +1,5 @@
 #include<Windows.h>
+#include<wchar.h>
 #include"VBuffer.h"
 #include"APITransfer.h"
 #include"SessionManage.h"
@@ -235,6 +236,32 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 					SendBackMessage(boitSession, (WCHAR*)SendTextBuffer->Data);
 				}
 				bBOITCodeRecognize = TRUE;
+			}
+
+			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"at", wcslen(L"at")) == 0)
+			{
+				for (int i = 0; i < BOITCodeInfo->ParamNum; i++)
+				{
+					if (_wcsnicmp(BOITCodeInfo->Key[i], L"qq", wcslen(L"qq")) == 0)
+					{
+						
+						bBOITCodeRecognize = TRUE;
+
+						WCHAR BufferStr[32] = { 0 };
+
+						if (_wcsnicmp(BOITCodeInfo->Value[i], L"all", wcslen("all")) == 0)
+						{
+							wcscpy_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=all]");
+						}
+						else
+						{
+							long long x = _wcstoi64(BOITCodeInfo->Value[i], 0, 0);
+							swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=%lld]", x);
+						}
+						VBufferAppendStringW(SendTextBuffer, BufferStr);
+						j += wcslen(BufferStr);
+					}
+				}
 			}
 
 			FreeBOITCode(BOITCodeInfo);
