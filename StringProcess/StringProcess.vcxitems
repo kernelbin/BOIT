@@ -14,10 +14,12 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)CommandProcess.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EncodeConvert.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)URIEncode.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)CommandProcess.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)EncodeConvert.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)URIEncode.h" />
   </ItemGroup>

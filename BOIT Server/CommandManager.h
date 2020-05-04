@@ -68,14 +68,6 @@ int AddCommandAlias(pBOIT_COMMAND Command, WCHAR* AliasName);
 
 BOOL CheckIsCommand(WCHAR* Msg, int* PrefixLen);
 
-int GetCmdParamLen(WCHAR* String);
-
-int GetCmdParamWithEscapeLen(WCHAR* String);
-
-int CmdParamUnescape(WCHAR* String, WCHAR* UnescapeStr);
-
-int GetCmdSpaceLen(WCHAR* String);
-
 int CommandHandler(pBOIT_SESSION boitSession, WCHAR* Msg);
 
 

@@ -13,6 +13,8 @@
 #include"EncodeConvert.h"
 #include"Corpus.h"
 #include"Command_run.h"
+#include"CommandProcess.h"
+
 
 #define COMPILECMD_MAXLEN 512
 #define COMPILE_MAXSUFFIX 9
@@ -91,13 +93,7 @@ BOOL CheckPrivilegeRunCode(long long GroupID, long long QQID);
 
 int CompileSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutData, DWORD DataLen);
 
-int GetLineLen(WCHAR* String);
-
-int GetLineFeedLen(WCHAR* String);
-
 BOOL GetCompileCommand(WCHAR* CommandBuffer, pCOMPILE_CFG CompileCfg, LONGLONG AllocCompileID);
-
-int GetLineSpaceLen(WCHAR* String);
 
 UINT GetEncodeCodePage(int Compile_Encode);
 
@@ -1160,53 +1156,6 @@ BOOL ShowSupportLanguageInfo(pBOIT_COMMAND pCmd, WCHAR* ConfigSuffix, pBOIT_SESS
 
 	SendBackMessage(boitSession, ReplyMessage);
 	return 0;
-}
-
-
-int GetLineLen(WCHAR* String)
-{
-	int i;
-	for (i = 0;; i++)
-	{
-		if (String[i] == L'\r' ||
-			String[i] == L'\n' ||
-			String[i] == 0)
-		{
-			break;
-		}
-	}
-	return i;
-}
-
-
-int GetLineSpaceLen(WCHAR* String)
-{
-	int i;
-	for (i = 0;; i++)
-	{
-		if (String[i] != L' ' &&
-			String[i] != L'\t')
-		{
-			break;
-		}
-	}
-	return i;
-}
-
-
-int GetLineFeedLen(WCHAR* String)
-{
-	int i;
-	for (i = 0;; i++)
-	{
-		if (String[i] != L' ' &&
-			String[i] != L'\r' &&
-			String[i] != L'\n')
-		{
-			break;
-		}
-	}
-	return i;
 }
 
 

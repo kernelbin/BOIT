@@ -7,6 +7,9 @@
     <Filter Include="URI编码">
       <UniqueIdentifier>{5e947021-f331-4e2a-9c62-4aecb3ae648f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="指令解析">
+      <UniqueIdentifier>{76202d39-88c7-4fa5-8e19-9d5ae00526d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EncodeConvert.c">
@@ -15,6 +18,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)URIEncode.c">
       <Filter>URI编码</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)CommandProcess.c">
+      <Filter>指令解析</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)EncodeConvert.h">
@@ -22,6 +28,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)URIEncode.h">
       <Filter>URI编码</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)CommandProcess.h">
+      <Filter>指令解析</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
