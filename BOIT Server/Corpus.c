@@ -1,20 +1,6 @@
 ﻿#include<Windows.h>
 #include"Corpus.h"
 
-WCHAR* Corpus_CuteMessage[] = {
-		L"pwp",
-		L"qwq",
-		L"owo",
-		L"awa",
-		L"/w\\",
-		L"QwQ",
-		L"/qwq\\",
-		L"ヾ(≧▽≦*)o",
-		L"`(*>﹏<*)′",
-		L"(*≧▽≦)o☆" ,
-		L"(*/ω＼*)",
-		L"(。・∀・)ノ"
-};
 
 WCHAR * Corpus_NoPrivilegeMessage[] = {
 		L"Oops... 您没有适当的权限进行操作",
@@ -65,10 +51,6 @@ WCHAR* Corpus_FunctionDevingMessage[] = {
 
 //语料库
 
-WCHAR* Corpus_Cute()
-{
-	return Corpus_CuteMessage[rand() % _countof(Corpus_CuteMessage)];
-}
 
 
 WCHAR* Corpus_NoPrivilege()
