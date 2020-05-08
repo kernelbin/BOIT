@@ -1,10 +1,12 @@
 #include<Windows.h>
 #include<wchar.h>
+#include<WinInet.h>
 #include"VBuffer.h"
 #include"APITransfer.h"
 #include"SessionManage.h"
 #include"HandleBOITCode.h"
 #include"CommandProcess.h"
+#include"DirManagement.h"
 
 WCHAR* BOITCodeStart = L"[";
 WCHAR* BOITCodeEnd = L"]";
@@ -206,6 +208,87 @@ BOOL FreeBOITCode(pBOITCODEINFO BOITCodeInfo)
 	return TRUE;
 }
 
+int DownloadUrlAsFile(WCHAR URL[], WCHAR FilePath[], DWORD MaxSize)
+{
+	HINTERNET hInternet = 0;
+	HINTERNET hUrl = 0;
+	BOOL bSuccess = FALSE;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+
+	__try
+	{
+		hInternet = InternetOpenW(L"BOIT", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+		if (!hInternet)
+		{
+			__leave;
+		}
+		hUrl = InternetOpenUrlW(hInternet, URL, 0, 0, 0, 0);
+		if (!hUrl)
+		{
+			__leave;
+		}
+		hFile = CreateFileW(FilePath, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+		if (hFile == INVALID_HANDLE_VALUE)
+		{
+			__leave;
+		}
+
+		DWORD TotDownload = 0;
+		BYTE Buffer[1024];
+		DWORD BytesRead;
+		DWORD BytesWritten;
+		for (;;)
+		{
+			BOOL bResult = InternetReadFile(hUrl, Buffer, sizeof(Buffer), &BytesRead);
+			if (bResult == FALSE)
+			{
+				// failed
+				__leave;
+			}
+			// bResult = TRUE
+			if (BytesRead == 0)
+			{
+				break;
+			}
+			// BytesRead > 0
+			TotDownload += BytesRead;
+			if (MaxSize && TotDownload > MaxSize) // 有大小限制，并且超出了
+			{
+				__leave;
+			}
+			bResult = WriteFile(hFile, Buffer, BytesRead, &BytesWritten, 0);
+			if ((!bResult) || (BytesRead != BytesWritten))
+			{
+				//写入失败？
+				__leave;
+			}
+		}
+
+		bSuccess = TRUE;
+	}
+	__finally
+	{
+		if (hUrl)
+		{
+			InternetCloseHandle(hUrl);
+		}
+		if (hInternet)
+		{
+			InternetCloseHandle(hInternet);
+		}
+		if (hFile)
+		{
+			CloseHandle(hFile);
+			if (!bSuccess)
+			{
+				DeleteFileW(FilePath);
+			}
+		}
+	}
+	
+	return bSuccess;
+}
+
 BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 {
 	//简单Handle一下
@@ -264,6 +347,50 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				}
 			}
 
+			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"img", wcslen(L"img")) == 0)
+			{
+				if (BOITCodeInfo->ParamNum == 1)
+				{
+					//目前只接收一个参数
+					if (_wcsnicmp(BOITCodeInfo->Key[0], L"url", wcslen(L"url")) == 0)
+					{
+						bBOITCodeRecognize = TRUE;
+						//尝试爬取图片
+						WCHAR DownloadFileName[MAX_PATH];
+						WCHAR DownloadFilePath[MAX_PATH];
+						
+						CoolQAllocPicFileName(&DownloadFileName);
+
+						wcscpy_s(DownloadFilePath, MAX_PATH, GetCQImageDir());
+						PathAppendW(DownloadFilePath, DownloadFileName);
+
+						int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], DownloadFilePath, 4*1024*1024);
+
+
+						WCHAR BufferStr[64] = { 0 };
+
+						if (!bPicDownloadSuccess)
+						{
+							wcscpy_s(BufferStr, _countof(BufferStr), L"[图片抓取失败]");
+						}
+						else
+						{
+							swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", DownloadFileName);
+						}
+
+						VBufferAppendStringW(SendTextBuffer, BufferStr);
+						j += wcslen(BufferStr);
+						
+					}
+					else if (_wcsnicmp(BOITCodeInfo->Key[0], L"file", wcslen(L"file")) == 0)
+					{
+						bBOITCodeRecognize = TRUE;
+						//TODO: 尝试寻找本地文件。考虑权限问题
+						VBufferAppendStringW(SendTextBuffer, L"[暂不支持file参数]");
+						j += wcslen(L"[暂不支持file参数]");
+					}
+				}
+			}
 			FreeBOITCode(BOITCodeInfo);
 
 			if (bBOITCodeRecognize)
