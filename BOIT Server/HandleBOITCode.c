@@ -124,7 +124,7 @@ pBOITCODEINFO GetBOITCode(WCHAR* Msg, int* Len)
 					__leave;
 				}
 
-				
+
 				BOITCodeInfo->Key[ParamIndex] = malloc((BOITCodeFieldLen + 1) * sizeof(WCHAR));
 				wcsncpy_s(BOITCodeInfo->Key[ParamIndex], BOITCodeFieldLen + 1, Msg + Offset, BOITCodeFieldLen);
 				BOITCodeInfo->Key[ParamIndex][BOITCodeFieldLen] = 0;
@@ -285,7 +285,7 @@ int DownloadUrlAsFile(WCHAR URL[], WCHAR FilePath[], DWORD MaxSize)
 			}
 		}
 	}
-	
+
 	return bSuccess;
 }
 
@@ -308,7 +308,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 		{
 			BOOL bBOITCodeRecognize = FALSE;
 
-			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"flush",wcslen(L"flush")) == 0)
+			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"flush", wcslen(L"flush")) == 0)
 			{
 				if (BOITFlushMaxUse-- > 0)
 				{
@@ -327,7 +327,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				{
 					if (_wcsnicmp(BOITCodeInfo->Key[i], L"qq", wcslen(L"qq")) == 0)
 					{
-						
+
 						bBOITCodeRecognize = TRUE;
 
 						WCHAR BufferStr[32] = { 0 };
@@ -358,13 +358,13 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 						//³¢ÊÔÅÀÈ¡Í¼Æ¬
 						WCHAR DownloadFileName[MAX_PATH];
 						WCHAR DownloadFilePath[MAX_PATH];
-						
+
 						CoolQAllocPicFileName(&DownloadFileName);
 
 						wcscpy_s(DownloadFilePath, MAX_PATH, GetCQImageDir());
 						PathAppendW(DownloadFilePath, DownloadFileName);
 
-						int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], DownloadFilePath, 4*1024*1024);
+						int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], DownloadFilePath, 512 * 1024);
 
 
 						WCHAR BufferStr[64] = { 0 };
@@ -380,7 +380,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 
 						VBufferAppendStringW(SendTextBuffer, BufferStr);
 						j += wcslen(BufferStr);
-						
+
 					}
 					else if (_wcsnicmp(BOITCodeInfo->Key[0], L"file", wcslen(L"file")) == 0)
 					{
@@ -399,7 +399,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				continue;
 			}
 		}
-		
+
 		{
 			AdjustVBuf(SendTextBuffer, sizeof(WCHAR) * (j + 1));
 			((WCHAR*)(SendTextBuffer->Data))[j] = Msg[i];
@@ -409,7 +409,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 
 		/*if (_wcsnicmp(Msg + i, L"[BOIT:flush]", wcslen(L"[BOIT:flush]")) == 0)
 		{
-			
+
 
 			i += wcslen(L"[BOIT:flush]");
 		}
