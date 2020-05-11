@@ -6,6 +6,8 @@
 #include"EncodeConvert.h"
 #include<string.h>
 #include<wchar.h>
+#include"VBuffer.h"
+
 
 WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
 {
@@ -15,7 +17,13 @@ WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQ
 	WCHAR* pwData = 0;
 	BOOL bMatch = FALSE;
 
-	WCHAR*  Reply = 0;
+	int ReplyNum = 0;
+	pVBUF ReplyList = AllocVBuf();
+	WCHAR* Reply = 0;
+
+	BOOL ContentFound = 0,
+		AllowUser = TRUE; //没写就是都允许
+
 	__try
 	{
 		DWORD FileSize = GetFileSize(hCfgFile, 0);
@@ -39,8 +47,7 @@ WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQ
 		//解析文件
 		WCHAR* pwParse = pwData;
 
-		BOOL ContentFound = 0, bMatch = FALSE,
-			AllowUser = TRUE; //没写就是都允许
+		
 
 		while (wLen > 0)
 		{
@@ -75,10 +82,13 @@ WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQ
 								//解析Content
 							{
 								int LineLen = GetLineLen(LineParse);
-								Reply = malloc(sizeof(WCHAR) * (LineLen + 1));
-								wcsncpy_s(Reply, LineLen + 1, LineParse, LineLen);
-								Reply[LineLen] = 0;
 
+								AddSizeVBuf(ReplyList, sizeof(WCHAR*));
+								((WCHAR **)(ReplyList->Data))[ReplyNum] = malloc(sizeof(WCHAR) * (LineLen + 1));
+								
+								wcsncpy_s(((WCHAR**)(ReplyList->Data))[ReplyNum], LineLen + 1, LineParse, LineLen);
+								((WCHAR**)(ReplyList->Data))[ReplyNum][LineLen] = 0;
+								ReplyNum++;
 								
 							}
 							break;
@@ -129,12 +139,6 @@ WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQ
 		}
 
 
-		if (Reply && (AllowUser == FALSE || bMatch ==FALSE))
-		{
-			free(Reply);
-			Reply = 0;
-		}
-
 	}
 	__finally
 	{
@@ -149,6 +153,31 @@ WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQ
 		if (pwData)
 		{
 			free(pwData);
+		}
+		if (ReplyList)
+		{
+			int iSel;
+			if (AllowUser == FALSE || bMatch == FALSE || ReplyNum == 0)
+			{
+				iSel = -1; //哪个都匹配不上就全释放了
+			}
+			else
+			{
+				iSel = rand() % ReplyNum;
+			}
+			
+			for (int i = 0; i < ReplyNum; i++)
+			{
+				if (i != iSel)
+				{
+					free(((WCHAR**)(ReplyList->Data))[i]);
+				}
+				else
+				{
+					Reply = ((WCHAR**)(ReplyList->Data))[i];
+				}
+			}
+			FreeVBuf(ReplyList);
 		}
 	}
 	return Reply;

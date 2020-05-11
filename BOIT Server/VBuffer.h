@@ -3,9 +3,9 @@
 
 typedef struct __tagVBuffer
 {
+	PBYTE Data;
 	DWORD Length;
 	DWORD Capibility;
-	PBYTE Data;
 }VBUF, *pVBUF;
 
 pVBUF AllocVBuf();
