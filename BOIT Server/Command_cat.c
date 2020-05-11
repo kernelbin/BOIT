@@ -4,6 +4,8 @@
 #include"InlineCommand.h"
 #include"SharedMemStruct.h"
 #include<wchar.h>
+#include"HandleBOITCode.h"
+
 
 int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 {
@@ -53,7 +55,7 @@ int CmdMsg_cat_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		}
 		
 	}
-	SendBackMessage(boitSession, CatMessage);
+	SendTextWithBOITCode(boitSession, CatMessage, SWBC_PARSE_AT | SWBC_PARSE_AT_ALL | SWBC_PARSE_IMG_URL);
 	return 0;
 }
 
@@ -117,6 +119,6 @@ int CmdMsg_meow_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg)
 		}
 
 	}
-	SendBackMessage(boitSession, CatMessage);
+	SendTextWithBOITCode(boitSession, CatMessage, SWBC_PARSE_AT | SWBC_PARSE_AT_ALL | SWBC_PARSE_IMG_URL);
 	return 0;
 }

@@ -703,7 +703,9 @@ int RunSandboxCallback(pSANDBOX Sandbox, PBYTE pData, UINT Event, PBYTE StdOutDa
 					{
 						wcStdout[BOIT_RUN_MAX_OUTPUT] = 0;
 					}
-					SendTextWithBOITCode(Session->boitSession, wcStdout);
+					SendTextWithBOITCode(Session->boitSession, wcStdout, 
+						SWBC_PARSE_AT | SWBC_PARSE_FLUSH(3) | SWBC_PARSE_IMG_URL);
+
 					free(wcStdout);
 				}
 
