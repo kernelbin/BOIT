@@ -7,6 +7,7 @@
 #include<string.h>
 #include<wchar.h>
 #include"VBuffer.h"
+#include"HandleBOITCode.h"
 
 
 WCHAR * MatchReplyConfig(WCHAR ConfigFileName[], long long GroupID, long long QQID, int SubType, WCHAR* AnonymousName, WCHAR* Msg)
@@ -235,14 +236,12 @@ int MessageReplyWatch(long long MsgWatchID, PBYTE pData, UINT Event,
 
 	if (wcReply)
 	{
-		if (GroupID)
-		{
-			SendGroupMessage(GroupID, wcReply);
-		}
-		else if (QQID)
-		{
-			SendPrivateMessage(QQID, wcReply);
-		}
+		pBOIT_SESSION boitSession = InitBOITSession(GroupID, QQID, AnonymousName, SubType);
+
+		SendTextWithBOITCode(boitSession, wcReply,
+			SWBC_PARSE_AT | SWBC_PARSE_AT_ALL | SWBC_PARSE_FLUSH(3) | SWBC_PARSE_IMG_FILE | SWBC_PARSE_IMG_URL);
+		
+		FreeBOITSession(boitSession);
 		free(wcReply);
 		return BOIT_MSGWATCH_BLOCK;
 	}

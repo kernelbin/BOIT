@@ -289,7 +289,7 @@ int DownloadUrlAsFile(WCHAR URL[], WCHAR FilePath[], DWORD MaxSize)
 	return bSuccess;
 }
 
-BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
+BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 {
 	//简单Handle一下
 	pVBUF SendTextBuffer;
@@ -298,7 +298,8 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 	int i = 0, j = 0;
 	int OrgLen = wcslen(Msg);
 
-	int BOITFlushMaxUse = 2;
+	int BOITFlushMaxUse = flags >> SWBCFLAG_MAX_FLUSH_OFFSET;
+
 	for (i = 0; i < OrgLen;)
 	{
 		int BOITCodeLen = 0;
@@ -327,19 +328,24 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				{
 					if (_wcsnicmp(BOITCodeInfo->Key[i], L"qq", wcslen(L"qq")) == 0)
 					{
-
-						bBOITCodeRecognize = TRUE;
-
 						WCHAR BufferStr[32] = { 0 };
 
-						if (_wcsnicmp(BOITCodeInfo->Value[i], L"all", wcslen("all")) == 0)
+						if (_wcsnicmp(BOITCodeInfo->Value[i], L"all", wcslen(L"all")) == 0)
 						{
-							wcscpy_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=all]");
+							if (flags & SWBC_PARSE_AT_ALL)
+							{
+								bBOITCodeRecognize = TRUE;
+								wcscpy_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=all]");
+							}
 						}
 						else
 						{
-							long long x = _wcstoi64(BOITCodeInfo->Value[i], 0, 0);
-							swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=%lld]", x);
+							if (flags & SWBC_PARSE_AT)
+							{
+								bBOITCodeRecognize = TRUE;
+								long long x = _wcstoi64(BOITCodeInfo->Value[i], 0, 0);
+								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=%lld]", x);
+							}
 						}
 						VBufferAppendStringW(SendTextBuffer, BufferStr);
 						j += wcslen(BufferStr);
@@ -352,42 +358,68 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg)
 				if (BOITCodeInfo->ParamNum == 1)
 				{
 					//目前只接收一个参数
+
+					WCHAR PicFileName[MAX_PATH];
+					WCHAR PicFilePath[MAX_PATH];
+
+
 					if (_wcsnicmp(BOITCodeInfo->Key[0], L"url", wcslen(L"url")) == 0)
 					{
-						bBOITCodeRecognize = TRUE;
-						//尝试爬取图片
-						WCHAR DownloadFileName[MAX_PATH];
-						WCHAR DownloadFilePath[MAX_PATH];
-
-						CoolQAllocPicFileName(&DownloadFileName);
-
-						wcscpy_s(DownloadFilePath, MAX_PATH, GetCQImageDir());
-						PathAppendW(DownloadFilePath, DownloadFileName);
-
-						int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], DownloadFilePath, 512 * 1024);
-
-
-						WCHAR BufferStr[64] = { 0 };
-
-						if (!bPicDownloadSuccess)
+						if (flags & SWBC_PARSE_IMG_URL)
 						{
-							wcscpy_s(BufferStr, _countof(BufferStr), L"[图片抓取失败]");
-						}
-						else
-						{
-							swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", DownloadFileName);
-						}
+							bBOITCodeRecognize = TRUE;
+							//尝试爬取图片
+							
+							CoolQAllocPicFileName(&PicFileName);
 
-						VBufferAppendStringW(SendTextBuffer, BufferStr);
-						j += wcslen(BufferStr);
+							wcscpy_s(PicFilePath, MAX_PATH, GetCQImageDir());
+							PathAppendW(PicFilePath, PicFileName);
 
+							int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], PicFilePath, 512 * 1024);
+
+
+							WCHAR BufferStr[64] = { 0 };
+
+							if (!bPicDownloadSuccess)
+							{
+								wcscpy_s(BufferStr, _countof(BufferStr), L"[图片抓取失败]");
+							}
+							else
+							{
+								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", PicFileName);
+							}
+
+							VBufferAppendStringW(SendTextBuffer, BufferStr);
+							j += wcslen(BufferStr);
+						}
 					}
 					else if (_wcsnicmp(BOITCodeInfo->Key[0], L"file", wcslen(L"file")) == 0)
 					{
-						bBOITCodeRecognize = TRUE;
-						//TODO: 尝试寻找本地文件。考虑权限问题
-						VBufferAppendStringW(SendTextBuffer, L"[暂不支持file参数]");
-						j += wcslen(L"[暂不支持file参数]");
+						if (flags & SWBC_PARSE_IMG_FILE)
+						{
+							bBOITCodeRecognize = TRUE;
+
+							CoolQAllocPicFileName(&PicFileName);
+
+							wcscpy_s(PicFilePath, MAX_PATH, GetCQImageDir());
+							PathAppendW(PicFilePath, PicFileName);
+							//copy this file
+							BOOL bCopyFileSuccess = CopyFileW(BOITCodeInfo->Value[0], PicFilePath, FALSE);
+
+							WCHAR BufferStr[64] = { 0 };
+
+							if (!bCopyFileSuccess)
+							{
+								wcscpy_s(BufferStr, _countof(BufferStr), L"[访问图片文件出错]");
+							}
+							else
+							{
+								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", PicFileName);
+							}
+
+							VBufferAppendStringW(SendTextBuffer, BufferStr);
+							j += wcslen(BufferStr);
+						}
 					}
 				}
 			}
