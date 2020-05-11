@@ -27,10 +27,10 @@ int CmdMsg_donate_Proc(pBOIT_COMMAND pCmd, pBOIT_SESSION boitSession, WCHAR* Msg
 		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=赞助bot开发，拥有属于你自己的指令,content=qwq,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
 		break;
 	case 4:
-		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=SteveBot的服务器开销并不小,content=kernel.bin需要像您这样的人提供资助。,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
+		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=SteveBot的服务器开销并不小。,content=kernel.bin需要像您这样的人提供资助。,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
 		break;
 	case 5:
-		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=BOIT is made by kernel.bin with love。,content=赞助他继续开发下去！,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
+		SendBackMessage(boitSession, L"[CQ:share,url=https://afdian.net/@kernelbin,title=BOIT is made by kernel.bin with love。,content=赞助他继续开发下去！。,image=https://q1.qlogo.cn/g?b=qq&nk=1160386205&s=640]");
 		break;
 	}
 	return 0;
