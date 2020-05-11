@@ -347,8 +347,12 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:at,qq=%lld]", x);
 							}
 						}
-						VBufferAppendStringW(SendTextBuffer, BufferStr);
-						j += wcslen(BufferStr);
+						
+						if (bBOITCodeRecognize)
+						{
+							VBufferAppendStringW(SendTextBuffer, BufferStr);
+							j += wcslen(BufferStr);
+						}
 					}
 				}
 			}
