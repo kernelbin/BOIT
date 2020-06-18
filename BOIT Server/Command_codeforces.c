@@ -14,7 +14,7 @@
 #include<process.h>
 
 
-#define QUERY_CF_CONTEST_TIME_INTERVAL (10  * 1000) // 10∑÷÷”
+#define QUERY_CF_CONTEST_TIME_INTERVAL (10 * 60 * 1000) // 10∑÷÷”
 
 typedef struct __tagCFUserInfo
 {
