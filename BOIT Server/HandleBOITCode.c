@@ -359,27 +359,62 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 
 			if (_wcsnicmp(BOITCodeInfo->TypeStr, L"img", wcslen(L"img")) == 0)
 			{
-				if (BOITCodeInfo->ParamNum == 1)
+				int RecognizedImgFieldID = -1; // -1 for not found. -2 for error.
+				BOOL bFlash = FALSE; // 是否是闪照
+				WCHAR PicFileName[MAX_PATH];
+				WCHAR PicFilePath[MAX_PATH];
+				for (int i = 0; i < BOITCodeInfo->ParamNum; i++)
 				{
-					//目前只接收一个参数
+					if (_wcsnicmp(BOITCodeInfo->Key[i], L"url", wcslen(L"url")) == 0 ||
+						_wcsnicmp(BOITCodeInfo->Key[i], L"file", wcslen(L"file")) == 0)
+					{
+						if (RecognizedImgFieldID == -1)
+						{
+							RecognizedImgFieldID = i;
+						}
+						else
+						{
+							RecognizedImgFieldID = -2;
+						}
+					}
+					else if(_wcsnicmp(BOITCodeInfo->Key[i], L"flash", wcslen(L"flash")) == 0)
+					{
+						if (_wcsnicmp(BOITCodeInfo->Value[i], L"0", wcslen(L"0")) == 0 ||
+							_wcsnicmp(BOITCodeInfo->Value[i], L"FALSE", wcslen(L"FALSE")) == 0)
+						{
+							bFlash = FALSE;
+						}
+						else
+						{
+							bFlash = TRUE;
+						}
+					}
+					// otherwise, this parameter is not recoginzed. ignore it.
+				}
 
-					WCHAR PicFileName[MAX_PATH];
-					WCHAR PicFilePath[MAX_PATH];
-
-
-					if (_wcsnicmp(BOITCodeInfo->Key[0], L"url", wcslen(L"url")) == 0)
+				switch (RecognizedImgFieldID)
+				{
+				case -1:
+					// field not found
+					break;
+				case -2:
+					// error
+					break;
+				default:
+					// found.
+					if (_wcsnicmp(BOITCodeInfo->Key[RecognizedImgFieldID], L"url", wcslen(L"url")) == 0)
 					{
 						if (flags & SWBC_PARSE_IMG_URL)
 						{
 							bBOITCodeRecognize = TRUE;
 							//尝试爬取图片
-							
+
 							CoolQAllocPicFileName(&PicFileName);
 
 							wcscpy_s(PicFilePath, MAX_PATH, GetCQImageDir());
 							PathAppendW(PicFilePath, PicFileName);
 
-							int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[0], PicFilePath, 512 * 1024);
+							int bPicDownloadSuccess = DownloadUrlAsFile(BOITCodeInfo->Value[RecognizedImgFieldID], PicFilePath, 512 * 1024);
 
 
 							WCHAR BufferStr[64] = { 0 };
@@ -390,14 +425,14 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 							}
 							else
 							{
-								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", PicFileName);
+								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls%ls]", PicFileName, bFlash ? L",destruct=1" : L"");
 							}
 
 							VBufferAppendStringW(SendTextBuffer, BufferStr);
 							j += wcslen(BufferStr);
 						}
 					}
-					else if (_wcsnicmp(BOITCodeInfo->Key[0], L"file", wcslen(L"file")) == 0)
+					else if (_wcsnicmp(BOITCodeInfo->Key[RecognizedImgFieldID], L"file", wcslen(L"file")) == 0)
 					{
 						if (flags & SWBC_PARSE_IMG_FILE)
 						{
@@ -408,7 +443,7 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 							wcscpy_s(PicFilePath, MAX_PATH, GetCQImageDir());
 							PathAppendW(PicFilePath, PicFileName);
 							//copy this file
-							BOOL bCopyFileSuccess = CopyFileW(BOITCodeInfo->Value[0], PicFilePath, FALSE);
+							BOOL bCopyFileSuccess = CopyFileW(BOITCodeInfo->Value[RecognizedImgFieldID], PicFilePath, FALSE);
 
 							WCHAR BufferStr[64] = { 0 };
 
@@ -418,14 +453,16 @@ BOOL SendTextWithBOITCode(pBOIT_SESSION boitSession, WCHAR* Msg, DWORD flags)
 							}
 							else
 							{
-								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls]", PicFileName);
+								swprintf_s(BufferStr, _countof(BufferStr), L"[CQ:image,file=%ls%ls]", PicFileName, bFlash ? L",destruct=1" : L"");
 							}
 
 							VBufferAppendStringW(SendTextBuffer, BufferStr);
 							j += wcslen(BufferStr);
 						}
 					}
+					break;
 				}
+				
 			}
 			FreeBOITCode(BOITCodeInfo);
 
