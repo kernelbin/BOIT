@@ -3,6 +3,10 @@ yh蒟蒻写的给OIers用的一个bot，OI Bot的第二版。
 
 A bot running on QQ (IM software, popular in China) written by YH for OIers (Who learn Olympiad in Informatics)
 
+# Attention
+
+RIP CoolQ. 近期我不会继续开发这个 bot（避避风头）. 如果 TX 一段时间内没有继续打压各类第三方 bot 平台，我会开始着手开发第三版的bot，并迁移至基于 HTTP API 的 mirai，并为 bot 添加更多新功能。希望那时能继续得到大家的支持！
+
 
 # features
 **小!!!**  目前可执行文件和dll打包大小不到400KB
@@ -17,7 +21,7 @@ A bot running on QQ (IM software, popular in China) written by YH for OIers (Who
 目前该bot部署在 QQ号 2068736261 上。可以加好友执行指令。（目前加好友审核是人工的，可能不会第一时间通过申请）
 指令前缀是 '#' 用 "#help"指令查看帮助
 
-# 部署
+# 部署（CoolQ 他 SPFA 了）
 从 [Release](https://github.com/kernelbin/BOIT/releases) 页面下载最新的Release，包括.cpk文件（CoolQ插件）和与您计算机位数相匹配的可执行文件（x86或x64）
 
 在CoolQ官网注册账号，并下载 CoolQ Pro/Air (CoolQ Pro为收费版本，支持发送图片，语音等功能) 详见 [CoolQ社区](https://cqp.cc/)
@@ -29,6 +33,9 @@ A bot running on QQ (IM software, popular in China) written by YH for OIers (Who
 启动从Release中下载的可执行文件（BOIT.Server.xxxx.exe）。第一次使用会需要输入 BOIT目录，（用于存储权限信息，配置信息，缓存编译文件等）
 
 如果控制台显示 “连接成功！”，说明正常工作了。
+
+## 替代解决方案
+基于 [mirai](https://github.com/mamoe/mirai/tree/master) 的 [mirai native](https://github.com/iTXTech/mirai-native) 理论上来说暂时作为 CoolQ 的替代品。但我早期迁移 mirai 的工作并没有完全完成，是否能在最新版的 mirai native 上运行并没有测试过。你可以亲自去试试。
 
 # 注意！！！！
 - 目前由于技术问题，同时运行多个CoolQ，或者同时运行多个可执行文件（BOIT.Server.xxxx.exe）可能会导致不正常工作。在一台计算机上只能打开一个CoolQ和一个可执行文件。
