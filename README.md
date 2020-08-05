@@ -20,7 +20,7 @@ A bot running on QQ (IM software, popular in China) written by YH for OIers (Who
 # 部署
 从 [Release](https://github.com/kernelbin/BOIT/releases) 页面下载最新的Release，包括.cpk文件（CoolQ插件）和与您计算机位数相匹配的可执行文件（x86或x64）
 
-在CoolQ官网注册账号，并下载 CoolQ Pro/Air (CoolQ Pro为收费版本，不支持发送图片，语音等功能) 详见 [CoolQ社区](https://cqp.cc/)
+在CoolQ官网注册账号，并下载 CoolQ Pro/Air (CoolQ Pro为收费版本，支持发送图片，语音等功能) 详见 [CoolQ社区](https://cqp.cc/)
 
 将.cpk文件放入CoolQ插件目录 （位于Path_To_CoolQ\app\）
 
